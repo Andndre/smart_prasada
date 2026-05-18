@@ -73,6 +73,22 @@ class SitusPeninggalan extends Model
     }
 
     /**
+     * Get the scenes for virtual tour.
+     */
+    public function scenes(): HasMany
+    {
+        return $this->hasMany(Scene::class, 'situs_id', 'situs_id')->orderBy('order');
+    }
+
+    /**
+     * Get panorama scenes only.
+     */
+    public function panoramaScenes(): HasMany
+    {
+        return $this->scenes()->where('scene_type', Scene::TYPE_PANORAMA);
+    }
+
+    /**
      * Get the URL for the thumbnail image
      */
     public function getThumbnailUrlAttribute(): string
@@ -82,5 +98,22 @@ class SitusPeninggalan extends Model
         }
 
         return asset('images/placeholder/default-situs.png');
+    }
+
+    /**
+     * Convert to viewer JSON format for 360 panorama consumption.
+     */
+    public function toViewerJson(): array
+    {
+        $this->load('panoramaScenes.hotspots');
+
+        return [
+            'id' => $this->situs_id,
+            'name' => $this->nama,
+            'description' => $this->deskripsi,
+            'location' => $this->alamat,
+            'coverImage' => $this->thumbnail_url,
+            'scenes' => $this->panoramaScenes->map(fn (Scene $scene) => $scene->toViewerJson())->toArray(),
+        ];
     }
 }

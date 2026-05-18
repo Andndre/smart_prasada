@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\AdminController;
+use App\Http\Controllers\Admin\PanoramaController;
 use App\Http\Controllers\Admin\AnnotationController;
 use App\Http\Controllers\Admin\ChunkUploadController;
 use App\Http\Controllers\Admin\KatalogController;
@@ -81,6 +82,10 @@ Route::group(['middleware' => ['auth', 'user']], function () {
 
 // AR routes - Using token-based authentication
 Route::middleware('ar.token')->get('/situs/{situs_id}/ar/{museum_id}', [HomeController::class, 'arMuseum'])->name('ar.museum');
+
+// Public 360 Panorama Viewer routes (no auth required)
+Route::get('/panorama/{situsId}', [HomeController::class, 'panoramaViewer'])->name('panorama.viewer');
+Route::get('/api/panorama/{situsId}', [PanoramaController::class, 'viewer'])->name('api.panorama.viewer');
 
 Route::group(['middleware' => ['auth', 'admin']], function () {
     Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
@@ -197,6 +202,30 @@ Route::group(['middleware' => ['auth', 'admin']], function () {
     Route::get('admin/annotations/{annotation}/edit', [AnnotationController::class, 'edit'])->name('admin.annotations.edit');
     Route::put('admin/annotations/{annotation}', [AnnotationController::class, 'update'])->name('admin.annotations.update');
     Route::delete('admin/annotations/{annotation}', [AnnotationController::class, 'destroy'])->name('admin.annotations.destroy');
+
+    // Panorama / 360 VR Tour routes
+    Route::prefix('admin/panorama')->name('admin.panorama.')->group(function () {
+        // Scene CRUD
+        Route::get('scenes/{situsId}', [PanoramaController::class, 'index'])->name('scenes.index');
+        Route::post('scenes', [PanoramaController::class, 'storeScene'])->name('scenes.store');
+        Route::put('scenes/{id}', [PanoramaController::class, 'updateScene'])->name('scenes.update');
+        Route::delete('scenes/{id}', [PanoramaController::class, 'destroyScene'])->name('scenes.destroy');
+        Route::post('scenes/reorder', [PanoramaController::class, 'reorderScenes'])->name('scenes.reorder');
+
+        // Hotspot CRUD
+        Route::post('hotspots', [PanoramaController::class, 'storeHotspot'])->name('hotspots.store');
+        Route::put('hotspots/{id}', [PanoramaController::class, 'updateHotspot'])->name('hotspots.update');
+        Route::delete('hotspots/{id}', [PanoramaController::class, 'destroyHotspot'])->name('hotspots.destroy');
+
+        // Hotspot Templates CRUD
+        Route::get('templates', [PanoramaController::class, 'indexTemplates'])->name('templates.index');
+        Route::post('templates', [PanoramaController::class, 'storeTemplate'])->name('templates.store');
+        Route::put('templates/{id}', [PanoramaController::class, 'updateTemplate'])->name('templates.update');
+        Route::delete('templates/{id}', [PanoramaController::class, 'destroyTemplate'])->name('templates.destroy');
+
+        // Image Upload
+        Route::post('upload', [PanoramaController::class, 'uploadImage'])->name('upload');
+    });
 });
 
 Route::middleware('auth')->group(function () {
