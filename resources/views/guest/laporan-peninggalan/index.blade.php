@@ -5,12 +5,12 @@
                 <button class="back-button mr-4">
                     <i class="fas fa-arrow-left text-xl"></i>
                 </button>
-                <h1 class="text-xl font-bold">{{ __('app.report_heritage') }}</h1>
+                <h1 class="text-xl font-bold">{{ __('laporan-peninggalan.report_heritage') }}</h1>
             </div>
             <a href="{{ route('guest.laporan-peninggalan.create') }}"
                class="bg-white text-primary px-4 py-2 rounded-lg font-medium text-sm flex items-center">
                 <i class="fas fa-plus mr-2"></i>
-                {{ __('app.report') }}
+                {{ __('laporan-peninggalan.report') }}
             </a>
         </div>
     </div>
@@ -67,7 +67,7 @@
                         {{ \Illuminate\Support\Str::limit($item->deskripsi, 150) }}
                         @if(strlen($item->deskripsi) > 150)
                             <a href="{{ route('guest.laporan-peninggalan.show', $item->laporan_id) }}"
-                               class="text-primary hover:underline">{{ __('app.read_more') }}</a>
+                               class="text-primary hover:underline">{{ __('laporan-peninggalan.read_more') }}</a>
                         @endif
                     </p>
 
@@ -105,7 +105,7 @@
                         </div>
                         <a href="{{ route('guest.laporan-peninggalan.show', $item->laporan_id) }}"
                            class="px-3 py-1 bg-gray-100 hover:bg-gray-200 text-sm text-gray-700 rounded-md transition-colors">
-                            {{ __('app.show_detail') }}
+                            {{ __('laporan-peninggalan.show_detail') }}
                         </a>
                     </div>
                 </div>
@@ -114,11 +114,11 @@
                     <div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gray-100">
                         <i class="fas fa-info-circle text-2xl text-gray-400"></i>
                     </div>
-                    <h3 class="mb-2 text-lg font-medium text-gray-900">{{ __('app.no_heritage_yet') }}</h3>
+                    <h3 class="mb-2 text-lg font-medium text-gray-900">{{ __('laporan-peninggalan.no_heritage_yet') }}</h3>
                     <p class="text-gray-600 mb-4"> Jadilah yang pertama melaporkan peninggalan.</p>
                     <a href="{{ route('guest.laporan-peninggalan.create') }}"
                        class="inline-block px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium">
-                        {{ __('app.be_the_first_to_report') }}
+                        {{ __('laporan-peninggalan.be_the_first_to_report') }}
                     </a>
                 </div>
             @endforelse

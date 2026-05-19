@@ -8,7 +8,8 @@
 			],
 			"alwaysAllow": [
 				"get_missing_translations",
-				"find_empty_translations"
+				"find_empty_translations",
+				"list_locale_dirs"
 			]
 		}
 	}

@@ -4,7 +4,7 @@
             <button class="back-button mr-4">
                 <i class="fas fa-arrow-left text-xl"></i>
             </button>
-            <h1 class="text-xl font-bold">{{ __('app.add_report') }}</h1>
+            <h1 class="text-xl font-bold">{{ __('laporan-peninggalan.add_report') }}</h1>
         </div>
     </div>
 
@@ -17,7 +17,7 @@
                     {{-- Nama Peninggalan --}}
                     <div>
                         <label for="nama_peninggalan"
-                               class="block text-sm font-medium text-gray-700 mb-1">{{ __('app.heritage_name') }} <span
+                               class="block text-sm font-medium text-gray-700 mb-1">{{ __('laporan-peninggalan.heritage_name') }} <span
                                 class="text-red-500">*</span></label>
                         <input type="text" id="nama_peninggalan" name="nama_peninggalan" required
                                value="{{ old('nama_peninggalan') }}"
@@ -31,7 +31,7 @@
                     {{-- Alamat --}}
                     <div>
                         <label for="alamat"
-                               class="block text-sm font-medium text-gray-700 mb-1"> {{ __('app.address') }}
+                               class="block text-sm font-medium text-gray-700 mb-1"> {{ __('laporan-peninggalan.address') }}
                             <span
                                 class="text-red-500">*</span></label>
                         <textarea id="alamat" name="alamat" rows="2" required
@@ -44,14 +44,14 @@
 
                     {{-- Map --}}
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">{{ __('app.location_on_the_map') }}
+                        <label class="block text-sm font-medium text-gray-700 mb-1">{{ __('laporan-peninggalan.location_on_the_map') }}
                             <span
                                 class="text-red-500">*</span></label>
                         <div id="map" class="h-64 w-full bg-gray-100 rounded-lg mb-2 z-10"></div>
                         <div class="grid grid-cols-2 gap-4">
                             <div>
                                 <label for="lat"
-                                       class="block text-xs font-medium text-gray-600 mb-1">{{ __('app.latitude') }}</label>
+                                       class="block text-xs font-medium text-gray-600 mb-1">{{ __('laporan-peninggalan.latitude') }}</label>
                                 <input type="text" id="lat" name="lat" required readonly
                                        value="{{ old('lat') }}"
                                        class="w-full px-3 py-2 border {{ $errors->has('lat') ? 'border-red-500' : 'border-gray-300' }} rounded-md focus:outline-none bg-gray-50">
@@ -61,7 +61,7 @@
                             </div>
                             <div>
                                 <label for="lng"
-                                       class="block text-xs font-medium text-gray-600 mb-1">{{ __('app.longitude') }}</label>
+                                       class="block text-xs font-medium text-gray-600 mb-1">{{ __('laporan-peninggalan.longitude') }}</label>
                                 <input type="text" id="lng" name="lng" required readonly
                                        value="{{ old('lng') }}"
                                        class="w-full px-3 py-2 border {{ $errors->has('lng') ? 'border-red-500' : 'border-gray-300' }} rounded-md focus:outline-none bg-gray-50">
@@ -70,13 +70,13 @@
                                 @enderror
                             </div>
                         </div>
-                        <p class="text-xs text-gray-500 mt-1">{{ __('app.click_on_the_map_heritage_location') }}</p>
+                        <p class="text-xs text-gray-500 mt-1">{{ __('laporan-peninggalan.click_on_the_map_heritage_location') }}</p>
                     </div>
 
                     {{-- Deskripsi --}}
                     <div>
                         <label for="deskripsi"
-                               class="block text-sm font-medium text-gray-700 mb-1">{{ __('app.description') }} <span
+                               class="block text-sm font-medium text-gray-700 mb-1">{{ __('laporan-peninggalan.description') }} <span
                                 class="text-red-500">*</span></label>
                         <textarea id="deskripsi" name="deskripsi" rows="4" required
                                   class="w-full px-3 py-2 border {{ $errors->has('deskripsi') ? 'border-red-500' : 'border-gray-300' }} rounded-md focus:outline-none focus:ring-primary focus:border-primary"
@@ -88,7 +88,7 @@
 
                     {{-- Gambar --}}
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">{{ __('app.images') }}</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">{{ __('laporan-peninggalan.images') }}</label>
                         <div class="flex items-center justify-center w-full">
                             <label for="gambar"
                                    class="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100">
@@ -111,7 +111,7 @@
 
             <button type="submit"
                     class="w-full bg-primary hover:bg-primary-dark text-white font-medium py-3 rounded-lg transition-colors mb-5">
-                {{ __('app.save_report') }}
+                {{ __('laporan-peninggalan.save_report') }}
             </button>
         </form>
     </div>

@@ -4,7 +4,7 @@
             <button class="back-button mr-4">
                 <i class="fas fa-arrow-left text-xl"></i>
             </button>
-            <h1 class="text-xl font-bold">{{ __('app.heritage_detail') }}</h1>
+            <h1 class="text-xl font-bold">{{ __('laporan-peninggalan.heritage_detail') }}</h1>
         </div>
     </div>
 
@@ -39,7 +39,7 @@
 
                 <div class="flex-1">
                     <h2 class="text-xl font-bold text-gray-900">{{ $laporan->nama_peninggalan }}</h2>
-                    <p class="text-gray-600">{{ __('app.reported_by') }} {{ $laporan->user->name }}</p>
+                    <p class="text-gray-600">{{ __('laporan-peninggalan.reported_by') }} {{ $laporan->user->name }}</p>
                     <p class="text-sm text-gray-500">{{ $laporan->created_at->format('d M Y, H:i') }}
                         ({{ $laporan->created_at->diffForHumans() }})</p>
                 </div>
@@ -93,7 +93,7 @@
 
             {{-- Description --}}
             <div class="mb-6">
-                <h3 class="text-gray-700 font-medium mb-2">{{ __('app.description') }}</h3>
+                <h3 class="text-gray-700 font-medium mb-2">{{ __('laporan-peninggalan.description') }}</h3>
                 <div class="bg-gray-50 p-3 rounded-lg">
                     <p class="text-gray-600 whitespace-pre-line">{{ $laporan->deskripsi }}</p>
                 </div>
@@ -122,7 +122,7 @@
 
         {{-- Comments Section --}}
         <div id="comments" class="bg-white rounded-lg shadow-sm p-6 mb-6">
-            <h3 class="text-lg font-medium text-gray-900 mb-4">{{ __('app.comments') }}</h3>
+            <h3 class="text-lg font-medium text-gray-900 mb-4">{{ __('laporan-peninggalan.comments') }}</h3>
 
             {{-- Comment Form --}}
             <form action="{{ route('guest.laporan-peninggalan.comment', $laporan->laporan_id) }}" method="POST"
@@ -142,13 +142,13 @@
                     <div class="flex-1">
                         <textarea id="komentar" name="komentar" rows="2"
                                   class="w-full px-3 py-2 border {{ $errors->has('komentar') ? 'border-red-500' : 'border-gray-300' }} rounded-md focus:outline-none focus:ring-primary focus:border-primary"
-                                  placeholder="{{ __('app.write_comment') }}..."></textarea>
+                                  placeholder="{{ __('laporan-peninggalan.write_comment') }}..."></textarea>
                         @error('komentar')
                         <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
                         @enderror
                         <button type="submit"
                                 class="mt-2 px-4 py-1 bg-primary text-white rounded-md hover:bg-primary-dark transition-colors text-sm">
-                            {{ __('app.send') }}
+                            {{ __('laporan-peninggalan.send') }}
                         </button>
                     </div>
                 </div>
@@ -178,8 +178,8 @@
                     </div>
                 @empty
                     <div class="text-center py-6 text-gray-500">
-                        <p>{{ __('app.no_comments_yet') }}.</p>
-                        <p class="text-sm">{{ __('app.be_the_first_to_comment') }}!</p>
+                        <p>{{ __('laporan-peninggalan.no_comments_yet') }}.</p>
+                        <p class="text-sm">{{ __('laporan-peninggalan.be_the_first_to_comment') }}!</p>
                     </div>
                 @endforelse
             </div>
