@@ -1,7 +1,7 @@
 ---
 name: laravel-i18n
 description: |
-    Manage Laravel internationalization (i18n) translations for pages or features. Creates new translation files in `resources/lang/{locale}/`, updates blade views to use the new namespace, and removes duplicate keys from `app.php`. Use when asked to add translations for a page, create language files, or manage i18n for a specific feature. Keywords: i18n, translations, lang, locale, language, bilingual, Indonesian, English.
+    Manage Laravel internationalization (i18n) translations for pages or features. Creates new translation files in `resources/lang/{locale}/`, updates blade views to use the new namespace, and removes duplicate keys from `app.php`. Use when asked to add translations for a page, create language files, or manage i18n for a specific feature. Keywords: i18n, translations, lang, locale, language, bilingual, Indonesian, English, the-i18n-mcp, MCP server.
 ---
 
 # When to use
@@ -44,7 +44,7 @@ Use this skill when:
 
 4. **Update blade views**
     - Replace `__("app.key")` with `__("{page-name}.key")` in all blade files
-    - Use sed or direct file editing for reliability
+    - Use sed via CLI for reliability
 
 5. **Remove duplicates from app.php**
     - If keys were moved from `app.php`, remove them from both locale files
@@ -61,19 +61,92 @@ Use this skill when:
 - Blade views: `resources/views/{category}/{page}/**/*.blade.php`
 - Main translations: `resources/lang/{locale}/app.php`
 
-# MCP i18n Tool Notes
+# The i18n MCP Server Tools
 
-The `the-i18n-mcp` server may report errors if:
+This project uses `the-i18n-mcp` server for translation management.
 
-- Locale directories don't exist yet (use `list_locale_dirs` to check)
-- Keys already exist (use `add_translations` instead of creating new files)
-- Translations are in the wrong location
+## Available Tools
 
-**Workaround**: When MCP tools fail or behave unexpectedly:
+| Tool                | Purpose                            | Notes                         |
+| ------------------- | ---------------------------------- | ----------------------------- |
+| `list_locale_dirs`  | Lists available locale directories | May fail if directories empty |
+| `get_translations`  | Retrieves translations by keys     | Needs existing PHP files      |
+| `add_translations`  | Adds translations to files         | May skip keys if existing     |
+| `sync_translations` | Syncs translations between locales | Useful for bulk updates       |
 
-1. Use `mcp--filesystem` tools directly for file operations
-2. Create translation files manually via `write_file`
-3. Use CLI commands (`sed`) for bulk replacements in blade files
+## Common Issues & Solutions
+
+### Issue: "No locale subdirectories found"
+
+**Cause**: Tool expects `lang/{locale}/` structure, but Laravel uses `resources/lang/{locale}/`
+**Solution**: Use `mcp--filesystem` tools directly instead of i18n MCP
+
+### Issue: `add_translations` skips all keys
+
+**Cause**: Tool may treat keys as existing even in new files
+**Solution**: Create files manually with `mcp--filesystem--write_file`, then use `add_translations` only for incremental additions
+
+### Issue: `get_translations` fails on empty directories
+
+**Cause**: Directory exists but has no PHP files
+**Solution**: Check with `directory_tree` first, then create files before attempting get
+
+### Issue: `list_locale_dirs` returns empty despite files existing
+
+**Cause**: MCP server has caching issues or path resolution problems
+**Solution**: Use `mcp--filesystem--directory_tree` for reliable structure checking
+
+## Workaround Strategy (Primary Method)
+
+When MCP i18n tools fail (which is common), use this reliable approach:
+
+1. **Check structure**:
+
+    ```
+    mcp--filesystem--directory_tree path=resources/lang
+    ```
+
+2. **Create translation files**:
+
+    ```
+    mcp--filesystem--write_file path=resources/lang/{locale}/{file}.php content=<?php return [...]; ?>
+    ```
+
+3. **Read translation files**:
+
+    ```
+    mcp--filesystem--read_text_file path=resources/lang/{locale}/{file}.php
+    ```
+
+4. **Bulk update blade files** (use CLI `sed`):
+
+    ```bash
+    sed -i 's/__("app\./__("page-name./g' resources/views/**/*.blade.php
+    ```
+
+5. **Verify changes**:
+    ```bash
+    grep -r '__("app\.' resources/views/{category}/{page}/
+    ```
+
+## MCP Tools Quick Reference
+
+```bash
+# Check locale structure (filesystem MCP)
+mcp--filesystem--directory_tree path=resources/lang
+
+# Create translation file
+mcp--filesystem--write_file path=resources/lang/{locale}/{file}.php content="<?php\n\nreturn [\n    // keys here\n];"
+
+# Read translation file
+mcp--filesystem--read_text_file path=resources/lang/{locale}/{file}.php
+
+# Bulk update blade files (CLI - most reliable)
+sed -i 's/__("app\./__("namespace./g' resources/views/**/*.blade.php
+
+# Verify no old references remain
+grep -r '__("app\.' resources/views/{category}/{page}/
+```
 
 # Example
 
@@ -86,4 +159,12 @@ The `the-i18n-mcp` server may report errors if:
 3. Create `resources/lang/en/laporan-peninggalan.php` and `resources/lang/id/laporan-peninggalan.php`
 4. Update blade files: `sed -i "s/__(\"app\./__(\"laporan-peninggalan./g" *.blade.php`
 5. Remove duplicate keys from `app.php`
-6. Verify with grep that no `__("app.` calls remain in the page folder
+6. Verify with `grep` that no `__("app.` calls remain in the page folder
+
+# Key Lessons Learned
+
+1. **`the-i18n-mcp` is unreliable** - Always have `mcp--filesystem` as fallback
+2. **Laravel uses `resources/lang/`** - Not `lang/` at project root
+3. **`sed` CLI is most reliable** for bulk blade file replacements
+4. **Create files before using `add_translations`** to avoid skip behavior
+5. **Verify after every change** - use grep to confirm replacements
