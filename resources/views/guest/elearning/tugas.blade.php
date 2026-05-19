@@ -17,7 +17,7 @@
         <div class="mb-8">
             <div class="flex items-center space-x-2 mb-2">
                 <i class="fas fa-tasks text-yellow-400"></i>
-                <span class="text-sm opacity-90">Tugas</span>
+                <span class="text-sm opacity-90">{{ __('elearning.tugas.tugas') }}</span>
             </div>
             <h1 class="text-2xl font-bold">{{ $materi->judul }}</h1>
         </div>
@@ -26,7 +26,7 @@
     {{-- Content Section --}}
     <div class="bg-white rounded-t-3xl -mt-6 relative min-h-screen">
         <div class="px-6 py-8">
-            <h2 class="text-xl font-bold text-center text-gray-900 mb-6">Daftar Tugas</h2>
+            <h2 class="text-xl font-bold text-center text-gray-900 mb-6">{{ __('elearning.tugas.daftar_tugas') }}</h2>
 
             @if($materi->tugas->count() > 0)
                 <div class="space-y-4">
@@ -52,8 +52,8 @@
                     <div class="w-16 h-16 mx-auto mb-4 bg-gray-200 rounded-full flex items-center justify-center">
                         <i class="fas fa-tasks text-gray-400 text-2xl"></i>
                     </div>
-                    <h3 class="text-lg font-medium text-gray-900 mb-2">Tidak Ada Tugas</h3>
-                    <p class="text-gray-600">Materi ini tidak memiliki tugas untuk dikerjakan</p>
+                    <h3 class="text-lg font-medium text-gray-900 mb-2">{{ __('elearning.tugas.tidak_ada_tugas') }}</h3>
+                    <p class="text-gray-600">{{ __('elearning.tugas.materi_tidak_memiliki_tugas') }}</p>
                 </div>
             @endif
 
@@ -61,7 +61,7 @@
                 <a href="{{ route('guest.elearning.materi', $materi->materi_id) }}"
                    class="inline-flex items-center px-6 py-3 bg-primary text-white font-medium rounded-xl hover:bg-primary-dark transition-colors">
                     <i class="fas fa-arrow-left mr-2"></i>
-                    Kembali ke Materi
+                    {{ __('elearning.tugas.kembali_ke_materi') }}
                 </a>
             </div>
         </div>

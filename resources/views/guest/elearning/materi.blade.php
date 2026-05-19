@@ -23,10 +23,10 @@
                 @if ($materi->era)
                     <span class="text-sm opacity-90">{{ $materi->era->kode }}. {{ $materi->era->nama }}</span>
                     @if ($materi->bab)
-                        <span class="text-sm opacity-70">— Bab {{ $materi->bab }}</span>
+                        <span class="text-sm opacity-70">— {{ __('elearning.bab') }} {{ $materi->bab }}</span>
                     @endif
                 @else
-                    <span class="text-sm opacity-90">Materi</span>
+                    <span class="text-sm opacity-90">{{ __('elearning.materi') }}</span>
                 @endif
             </div>
             <h1 class="text-2xl font-bold">{{ $materi->judul }}</h1>
@@ -46,7 +46,7 @@
                         <i class="fas fa-file-alt text-white"></i>
                     @endif
                 </div>
-                <span class="text-center text-xs text-white">Pre test</span>
+                <span class="text-center text-xs text-white">{{ __('elearning.materi.pre_test') }}</span>
             </button>
 
             {{-- E-Book Tab --}}
@@ -62,7 +62,7 @@
                         <i class="fas fa-book text-white"></i>
                     @endif
                 </div>
-                <span class="text-center text-xs text-white">E-Book</span>
+                <span class="text-center text-xs text-white">{{ __('elearning.materi.e_book') }}</span>
             </button>
 
             {{-- Virtual Living Museum Tab --}}
@@ -78,7 +78,7 @@
                         <i class="fas fa-map-marker-alt text-white"></i>
                     @endif
                 </div>
-                <span class="text-center text-xs text-white">Virtual Living Museum</span>
+                <span class="text-center text-xs text-white">{{ __('elearning.materi.virtual_living_museum') }}</span>
             </button>
 
             {{-- Post-test Tab --}}
@@ -94,7 +94,7 @@
                         <i class="fas fa-clipboard-check text-white"></i>
                     @endif
                 </div>
-                <span class="text-center text-xs text-white">Post test</span>
+                <span class="text-center text-xs text-white">{{ __('elearning.materi.post_test') }}</span>
             </button>
         </div>
     </div>
@@ -106,12 +106,12 @@
             <div id="pretest-content" class="tab-content">
                 @if ($materi->pretest->count() > 0)
                     <div class="mb-8 rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
-                        <h2 class="mb-6 text-center text-xl font-bold text-gray-900">Pre Test</h2>
+                        <h2 class="mb-6 text-center text-xl font-bold text-gray-900">
+                            {{ __('elearning.materi.pre_test') }}</h2>
 
                         <div class="mb-6 rounded-2xl bg-gray-50 p-6">
                             <p class="text-center leading-relaxed text-gray-700">
-                                Anda akan mengerjakan Pre Test materi <strong>{{ $materi->judul }}</strong>. Siap
-                                mulai?
+                                {{ __('elearning.materi.akan_mengerjakan_pretest', ['materi' => $materi->judul]) }}
                             </p>
                         </div>
 
@@ -120,12 +120,12 @@
                                 <a href="{{ route('guest.elearning.pretest', $materi->materi_id) }}"
                                     class="inline-flex items-center rounded-xl bg-green-600 px-8 py-3 font-medium text-white transition-colors hover:bg-green-700">
                                     <i class="fas fa-eye mr-2"></i>
-                                    Lihat Hasil
+                                    {{ __('elearning.lihat_hasil') }}
                                 </a>
                             @else
                                 <a href="{{ route('guest.elearning.pretest', $materi->materi_id) }}"
                                     class="inline-flex items-center rounded-xl bg-blue-600 px-8 py-3 font-medium text-white transition-colors hover:bg-blue-700">
-                                    Mulai
+                                    {{ __('elearning.mulai') }}
                                 </a>
                             @endif
                         </div>
@@ -134,7 +134,8 @@
                     {{-- Panduan Mengisi Pre Test --}}
                     @if (!$pretest_completed)
                         <div class="mb-8">
-                            <h3 class="mb-4 text-lg font-bold text-gray-900">Panduan Mengisi Pre Test</h3>
+                            <h3 class="mb-4 text-lg font-bold text-gray-900">
+                                {{ __('elearning.materi.panduan_mengisi_pretest') }}</h3>
 
                             <div class="rounded-2xl border border-yellow-200 bg-yellow-50 p-4 sm:p-6">
                                 {{-- Mobile Layout (Vertical Stack) --}}
@@ -203,8 +204,8 @@
                         <div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gray-200">
                             <i class="fas fa-file-alt text-2xl text-gray-400"></i>
                         </div>
-                        <h3 class="mb-2 text-lg font-medium text-gray-900">Pre Test Tidak Tersedia</h3>
-                        <p class="text-gray-600">Materi ini tidak memiliki pre test</p>
+                        <h3 class="mb-2 text-lg font-medium text-gray-900">{{ __('elearning.materi.pretest_tidak_tersedia') }}</h3>
+                        <p class="text-gray-600">{{ __('elearning.materi.materi_tidak_memiliki_pretst') }}</p>
                     </div>
                 @endif
             </div>
@@ -212,13 +213,12 @@
             {{-- E-Book Tab Content --}}
             <div id="ebook-content" class="tab-content hidden">
                 @if ($materi->ebook->count() > 0)
-                    <h2 class="mb-6 text-center text-xl font-bold text-gray-900">E-Book</h2>
+                    <h2 class="mb-6 text-center text-xl font-bold text-gray-900">{{ __('elearning.materi.e_book') }}</h2>
                     <div class="mb-6">
                         <div
                             class="rounded-xl border border-blue-200 bg-blue-50 p-4 text-center text-sm text-blue-900">
                             <i class="fas fa-info-circle mr-2"></i>
-                            <span>Anda harus membaca <span class="font-semibold">seluruh halaman pada e-book</span>
-                                untuk menyelesaikan e-book ini dan dapat melanjutkan ke tingkatan selanjutnya.</span>
+                            <span>{{ __('elearning.materi.harus_baca_seluruh_halaman') }}</span>
                         </div>
                     </div>
                     @if (!$ebook_available)
@@ -227,8 +227,8 @@
                                 class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gray-200">
                                 <i class="fas fa-lock text-2xl text-gray-400"></i>
                             </div>
-                            <h3 class="mb-2 text-lg font-medium text-gray-900">E-Book Terkunci</h3>
-                            <p class="text-gray-600">Selesaikan pre-test terlebih dahulu untuk mengakses e-book</p>
+                            <h3 class="mb-2 text-lg font-medium text-gray-900">{{ __('elearning.materi.ebook_terkunci') }}</h3>
+                            <p class="text-gray-600">{{ __('elearning.materi.selesaikan_pretese_terlebih_dulu') }}</p>
                         </div>
                     @else
                         <div class="space-y-4">
@@ -251,7 +251,7 @@
                                                     class="mx-auto mb-4 flex h-24 w-20 items-center justify-center rounded-lg bg-gray-200">
                                                     <i class="fas fa-exclamation-triangle text-2xl text-gray-400"></i>
                                                 </div>
-                                                <p class="text-gray-500">File tidak ditemukan</p>
+                                                <p class="text-gray-500">{{ __('elearning.materi.file_tidak_ditemukan') }}</p>
                                             </div>
                                         @endif
                                     </div>
@@ -262,13 +262,13 @@
                                             <a href="{{ route('guest.elearning.ebook', $ebook->ebook_id) }}"
                                                 class="inline-flex w-full items-center justify-center rounded-xl bg-blue-600 px-4 py-3 font-medium text-white transition-colors hover:bg-blue-700">
                                                 <i class="fas fa-book-open mr-2"></i>
-                                                Baca E-Book
+                                                {{ __('elearning.materi.baca_ebook') }}
                                             </a>
                                         @else
                                             <div
                                                 class="inline-flex w-full items-center justify-center rounded-xl bg-gray-400 px-4 py-3 font-medium text-white">
                                                 <i class="fas fa-exclamation-triangle mr-2"></i>
-                                                File Error
+                                                {{ __('elearning.materi.file_error') }}
                                             </div>
                                         @endif
                                     </div>
@@ -281,8 +281,8 @@
                         <div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gray-200">
                             <i class="fas fa-book text-2xl text-gray-400"></i>
                         </div>
-                        <h3 class="mb-2 text-lg font-medium text-gray-900">E-Book Tidak Tersedia</h3>
-                        <p class="text-gray-600">Materi ini tidak memiliki e-book</p>
+                        <h3 class="mb-2 text-lg font-medium text-gray-900">{{ __('elearning.materi.ebook_tidak_tersedia') }}</h3>
+                        <p class="text-gray-600">{{ __('elearning.materi.materi_tidak_memiliki_ebook') }}</p>
                     </div>
                 @endif
             </div>
@@ -298,9 +298,8 @@
                                 class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gray-200">
                                 <i class="fas fa-lock text-2xl text-gray-400"></i>
                             </div>
-                            <h3 class="mb-2 text-lg font-medium text-gray-900">{{ config('app.name') }} Terkunci</h3>
-                            <p class="text-gray-600">Baca semua e-book terlebih dahulu untuk mengakses
-                                {{ config('app.name') }}</p>
+                            <h3 class="mb-2 text-lg font-medium text-gray-900">{{ __('elearning.materi.museum_terkunci', ['appName' => config('app.name')]) }}</h3>
+                            <p class="text-gray-600">{{ __('elearning.materi.baca_semua_ebook_terlebih_dulu', ['appName' => config('app.name')]) }}</p>
                         </div>
                     @else
                         <div class="space-y-4">
@@ -321,7 +320,7 @@
                                             <a href="{{ route('guest.situs.detail', $situs->situs_id) }}"
                                                 class="inline-flex items-center rounded-lg bg-orange-600 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-orange-700">
                                                 <i class="fas fa-eye mr-1"></i>
-                                                Kunjungi
+                                                {{ __('elearning.materi.kunjungi') }}
                                             </a>
                                         </div>
                                     </div>
@@ -334,9 +333,9 @@
                         <div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gray-200">
                             <i class="fas fa-map-marker-alt text-2xl text-gray-400"></i>
                         </div>
-                        <h3 class="mb-2 text-lg font-medium text-gray-900">{{ config('app.name') }} Tidak Tersedia
+                        <h3 class="mb-2 text-lg font-medium text-gray-900">{{ __('elearning.materi.museum_tidak_tersedia', ['appName' => config('app.name')]) }}
                         </h3>
-                        <p class="text-gray-600">Materi ini tidak memiliki {{ config('app.name') }}</p>
+                        <p class="text-gray-600">{{ __('elearning.materi.materi_tidak_memiliki_museum', ['appName' => config('app.name')]) }}</p>
                     </div>
                 @endif
             </div>
@@ -344,7 +343,7 @@
             {{-- Post Test Tab Content --}}
             <div id="posttest-content" class="tab-content hidden">
                 @if ($materi->posttest->count() > 0)
-                    <h2 class="mb-6 text-center text-xl font-bold text-gray-900">Post Test</h2>
+                    <h2 class="mb-6 text-center text-xl font-bold text-gray-900">{{ __('elearning.materi.post_test') }}</h2>
 
                     @if (!$posttest_available)
                         <div class="rounded-2xl bg-gray-100 p-8 text-center">
@@ -352,16 +351,14 @@
                                 class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gray-200">
                                 <i class="fas fa-lock text-2xl text-gray-400"></i>
                             </div>
-                            <h3 class="mb-2 text-lg font-medium text-gray-900">Post Test Terkunci</h3>
-                            <p class="text-gray-600">Kunjungi semua {{ config('app.name') }} terlebih dahulu untuk
-                                mengakses post-test</p>
+                            <h3 class="mb-2 text-lg font-medium text-gray-900">{{ __('elearning.materi.posttest_terkunci') }}</h3>
+                            <p class="text-gray-600">{{ __('elearning.materi.kunjungi_semua_museum', ['appName' => config('app.name')]) }}</p>
                         </div>
                     @else
                         <div class="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
                             <div class="mb-6 rounded-2xl bg-gray-50 p-6">
                                 <p class="text-center leading-relaxed text-gray-700">
-                                    Anda akan mengerjakan Post Test materi <strong>{{ $materi->judul }}</strong>. Siap
-                                    mulai?
+                                    {{ __('elearning.materi.akan_mengerjakan_pretest', ['materi' => $materi->judul]) }}
                                 </p>
                             </div>
 
@@ -370,17 +367,17 @@
                                     <a href="{{ route('guest.elearning.posttest', $materi->materi_id) }}"
                                         class="inline-flex items-center rounded-xl bg-green-600 px-8 py-3 font-medium text-white transition-colors hover:bg-green-700">
                                         <i class="fas fa-eye mr-2"></i>
-                                        Lihat Hasil
+                                        {{ __('elearning.lihat_hasil') }}
                                     </a>
 
                                     <!-- Rekap Section -->
                                     <div class="mt-8">
-                                        <h3 class="mb-4 text-lg font-bold text-gray-900">Rekap</h3>
+                                        <h3 class="mb-4 text-lg font-bold text-gray-900">{{ __('elearning.materi.rekap') }}</h3>
 
                                         <div class="mb-6 grid grid-cols-2 gap-4">
                                             <!-- Pre-test Score -->
                                             <div class="rounded-lg bg-gray-100 p-4">
-                                                <div class="mb-1 text-sm text-gray-600">Nilai Pre test</div>
+                                                <div class="mb-1 text-sm text-gray-600">{{ __('elearning.materi.nilai_pretest') }}</div>
                                                 <div class="text-2xl font-bold">
                                                     @php
                                                         $pretestAnswers = \App\Models\JawabanUser::where(
@@ -410,7 +407,7 @@
 
                                             <!-- Post-test Score -->
                                             <div class="rounded-lg bg-gray-100 p-4">
-                                                <div class="mb-1 text-sm text-gray-600">Nilai Post test</div>
+                                                <div class="mb-1 text-sm text-gray-600">{{ __('elearning.materi.nilai_posttest') }}</div>
                                                 <div class="flex items-center justify-center text-2xl font-bold">
                                                     @php
                                                         $posttestAnswers = \App\Models\JawabanUser::where(
@@ -445,14 +442,13 @@
                                         <!-- Tugas Section -->
                                         @if ($materi->tugas->count() > 0)
                                             <div class="mb-6">
-                                                <h4 class="mb-2 text-center font-medium">Tugas</h4>
+                                                <h4 class="mb-2 text-center font-medium">{{ __('elearning.materi.tugas') }}</h4>
                                                 <div class="rounded-lg bg-gray-100 p-4">
-                                                    <p class="mb-3">Berikut adalah beberapa tugas yang harus Anda
-                                                        selesaikan.</p>
+                                                    <p class="mb-3">{{ __('elearning.materi.beberapa_tugas_harus_diselesaikan') }}</p>
                                                     <div class="text-center">
                                                         <a href="{{ route('guest.elearning.tugas', $materi->materi_id) }}"
                                                             class="inline-flex items-center rounded-lg bg-blue-500 px-6 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-600">
-                                                            Lihat
+                                                            {{ __('elearning.lihat') }}
                                                         </a>
                                                     </div>
                                                 </div>
@@ -461,7 +457,7 @@
 
                                         <!-- Progress Chart -->
                                         <div class="mb-6">
-                                            <h4 class="mb-2 text-center font-medium">Perkembangan Anda</h4>
+                                            <h4 class="mb-2 text-center font-medium">{{ __('elearning.materi.perkembangan_anda') }}</h4>
                                             <div
                                                 class="flex h-24 items-center justify-center rounded-lg bg-gray-100 p-4">
                                                 <div class="relative w-full">
@@ -488,8 +484,7 @@
                                             @endphp
                                             @if ($nextMateri)
                                                 <div>
-                                                    <h4 class="mb-2 text-center font-medium">Siap Ke-Materi Berikutnya?
-                                                    </h4>
+                                                    <h4 class="mb-2 text-center font-medium">{{ __('elearning.materi.siap_ke_materi_berikutnya') }}</h4>
                                                     <a href="{{ route('guest.elearning.materi', $nextMateri->materi_id) }}"
                                                         class="block overflow-hidden rounded-lg bg-gray-100">
                                                         <div class="flex items-center">
@@ -516,7 +511,7 @@
                                 @else
                                     <a href="{{ route('guest.elearning.posttest', $materi->materi_id) }}"
                                         class="inline-flex items-center rounded-xl bg-blue-600 px-8 py-3 font-medium text-white transition-colors hover:bg-blue-700">
-                                        Mulai
+                                        {{ __('elearning.mulai') }}
                                     </a>
                                 @endif
                             </div>
@@ -527,8 +522,8 @@
                         <div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gray-200">
                             <i class="fas fa-clipboard-check text-2xl text-gray-400"></i>
                         </div>
-                        <h3 class="mb-2 text-lg font-medium text-gray-900">Post Test Tidak Tersedia</h3>
-                        <p class="text-gray-600">Materi ini tidak memiliki post test</p>
+                        <h3 class="mb-2 text-lg font-medium text-gray-900">{{ __('elearning.materi.post_test_tidak_tersedia') }}</h3>
+                        <p class="text-gray-600">{{ __('elearning.materi.materi_tidak_memiliki_posttest') }}</p>
                     </div>
                 @endif
             </div>

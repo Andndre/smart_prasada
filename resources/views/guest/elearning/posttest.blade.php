@@ -7,7 +7,7 @@
                     <i class="fas fa-arrow-left text-xl"></i>
                 </button>
                 <div class="flex-1">
-                    <h1 class="text-lg font-bold">Post-test</h1>
+                    <h1 class="text-lg font-bold">{{ __('elearning.posttest.posttest_selesai') }}</h1>
                     <p class="text-sm opacity-90">{{ $materi->judul }}</p>
                 </div>
             </div>
@@ -23,23 +23,23 @@
                     <div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-100">
                         <i class="fas fa-check text-2xl text-green-600"></i>
                     </div>
-                    <h3 class="mb-2 text-xl font-bold text-gray-900">Post-test Selesai!</h3>
-                    <p class="mb-6 text-gray-600">Selamat! Anda telah menyelesaikan seluruh materi pembelajaran ini.</p>
+                    <h3 class="mb-2 text-xl font-bold text-gray-900">{{ __('elearning.posttest.posttest_selesai') }}</h3>
+                    <p class="mb-6 text-gray-600">{{ __('elearning.posttest.telah_menyelesaikan_seluruh_materi') }}</p>
                     <div class="mb-6 grid grid-cols-2 gap-4">
                         <div class="rounded-lg bg-blue-50 p-4">
                             <div class="text-2xl font-bold text-blue-600">{{ $score }}%</div>
-                            <div class="text-sm text-blue-600">Nilai</div>
+                            <div class="text-sm text-blue-600">{{ __('elearning.posttest.nilai') }}</div>
                         </div>
                         <div class="rounded-lg bg-green-50 p-4">
                             <div class="text-2xl font-bold text-green-600">{{ $correctAnswers }}/{{ $totalQuestions }}
                             </div>
-                            <div class="text-sm text-green-600">Benar</div>
+                            <div class="text-sm text-green-600">{{ __('elearning.posttest.jawaban_benar') }}</div>
                         </div>
                     </div>
                 </div>
                 {{-- Evaluasi Soal --}}
                 <div class="mt-8">
-                    <h4 class="mb-4 text-lg font-semibold text-gray-800">Evaluasi Jawaban Anda</h4>
+                    <h4 class="mb-4 text-lg font-semibold text-gray-800">{{ __('elearning.posttest.evaluasi_jawaban_anda') }}</h4>
                     <div class="space-y-6">
                         @php
                             $userAnswers = \App\Models\JawabanUser::where('user_id', Auth::id())
@@ -57,14 +57,14 @@
                             <div
                                 class="@if ($isCorrect) border-green-300 bg-green-50 @else border-red-300 bg-red-50 @endif rounded-xl border p-4">
                                 <div class="mb-2 flex items-center">
-                                    <span class="mr-2 font-bold">Soal {{ $idx + 1 }}:</span>
+                                    <span class="mr-2 font-bold">{{ __('elearning.posttest.soal') }} {{ $idx + 1 }}:</span>
                                     <span class="flex-1 text-gray-800">{{ $question->pertanyaan }}</span>
                                     @if ($isCorrect)
                                         <span
-                                            class="ml-2 rounded bg-green-500 px-2 py-1 text-xs font-semibold text-white">Benar</span>
+                                            class="ml-2 rounded bg-green-500 px-2 py-1 text-xs font-semibold text-white">{{ __('elearning.posttest.jawaban_benar') }}</span>
                                     @else
                                         <span
-                                            class="ml-2 rounded bg-red-500 px-2 py-1 text-xs font-semibold text-white">Salah</span>
+                                            class="ml-2 rounded bg-red-500 px-2 py-1 text-xs font-semibold text-white">{{ __('elearning.posttest.jawaban_salah') }}</span>
                                     @endif
                                 </div>
                                 <div class="mt-2 space-y-2">
@@ -136,47 +136,47 @@
                     <a href="{{ route('guest.elearning') }}"
                         class="inline-flex items-center justify-center rounded-lg bg-blue-600 px-6 py-3 font-medium text-white transition-colors hover:bg-blue-700">
                         <i class="fas fa-list mr-2"></i>
-                        Kembali ke Daftar Materi
+                        {{ __('elearning.posttest.kembali_ke_daftar_materi') }}
                     </a>
                     <a href="{{ route('guest.elearning.materi', $materi->materi_id) }}"
                         class="ml-2 inline-flex items-center justify-center rounded-lg bg-gray-100 px-6 py-3 font-medium text-gray-700 transition-colors hover:bg-gray-200">
                         <i class="fas fa-eye mr-2"></i>
-                        Lihat Materi
+                        {{ __('elearning.posttest.lihat_materi') }}
                     </a>
                 </div>
             </div>
         @else
             {{-- Quiz Instructions --}}
             <div class="mb-6 rounded-2xl bg-white p-6 shadow-sm">
-                <h3 class="mb-4 text-xl font-bold text-gray-900">Instruksi Post-test</h3>
+                <h3 class="mb-4 text-xl font-bold text-gray-900">{{ __('elearning.posttest.instruksi_posttest') }}</h3>
                 <div class="space-y-3 text-gray-700">
                     <div class="flex items-start space-x-3">
                         <div
                             class="mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-green-100">
                             <span class="text-xs font-medium text-green-600">1</span>
                         </div>
-                        <p>Post-test terdiri dari {{ $totalQuestions }} soal pilihan ganda</p>
+                        <p>{{ __('elearning.posttest.posttest_terdiri_dari', ['count' => $totalQuestions]) }}</p>
                     </div>
                     <div class="flex items-start space-x-3">
                         <div
                             class="mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-green-100">
                             <span class="text-xs font-medium text-green-600">2</span>
                         </div>
-                        <p>Soal ini menguji pemahaman Anda setelah mempelajari materi</p>
+                        <p>{{ __('elearning.posttest.soal_menguji_pemahaman') }}</p>
                     </div>
                     <div class="flex items-start space-x-3">
                         <div
                             class="mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-green-100">
                             <span class="text-xs font-medium text-green-600">3</span>
                         </div>
-                        <p>Setelah selesai, materi ini akan dianggap completed</p>
+                        <p>{{ __('elearning.posttest.setelah_selesai_materi_completed') }}</p>
                     </div>
                 </div>
                 <div class="mt-6 border-t border-gray-200 pt-6">
                     <button onclick="startQuiz()"
                         class="w-full rounded-lg bg-green-600 py-3 font-medium text-white transition-colors hover:bg-green-700">
                         <i class="fas fa-play mr-2"></i>
-                        Mulai Post-test
+                        {{ __('elearning.posttest.mulai_posttest') }}
                     </button>
                 </div>
             </div>
@@ -188,8 +188,8 @@
                     {{-- Progress Bar --}}
                     <div class="mb-6 rounded-2xl bg-white p-6 shadow-sm">
                         <div class="mb-2 flex items-center justify-between">
-                            <span class="text-sm font-medium text-gray-600">Progres</span>
-                            <span class="text-sm font-medium text-green-600" id="progress-text">1 dari
+                            <span class="text-sm font-medium text-gray-600">{{ __('elearning.posttest.progres') }}</span>
+                            <span class="text-sm font-medium text-green-600" id="progress-text">1 {{ __('elearning.posttest.dari') }}
                                 {{ $totalQuestions }}</span>
                         </div>
                         <div class="h-2 w-full rounded-full bg-gray-200">
@@ -253,18 +253,18 @@
                             <button type="button" id="prev-btn" onclick="previousQuestion()"
                                 class="hidden rounded-lg bg-gray-100 px-6 py-3 font-medium text-gray-600 transition-colors hover:bg-gray-200">
                                 <i class="fas fa-arrow-left mr-2"></i>
-                                Sebelumnya
+                                {{ __('elearning.posttest.sebelumnya') }}
                             </button>
                             <div class="flex space-x-3">
                                 @if ($totalQuestions > 1)
                                     <button type="button" id="next-btn" onclick="nextQuestion()"
                                         class="rounded-lg bg-green-600 px-6 py-3 font-medium text-white transition-colors hover:bg-green-700">
-                                        Selanjutnya <i class="fas fa-arrow-right ml-2"></i>
+                                        {{ __('elearning.posttest.selainnya') }} <i class="fas fa-arrow-right ml-2"></i>
                                     </button>
                                 @endif
                                 <button type="button" id="submit-btn" onclick="submitQuiz()"
                                     class="@if ($totalQuestions > 1) hidden @endif rounded-lg bg-green-600 px-6 py-3 font-medium text-white transition-colors hover:bg-green-700">
-                                    Selesai <i class="fas fa-check ml-2"></i>
+                                    {{ __('elearning.posttest.selesai') }} <i class="fas fa-check ml-2"></i>
                                 </button>
                             </div>
                         </div>
@@ -291,7 +291,7 @@
                     </div>
                     <button onclick="continueToNext()" id="continue-btn"
                         class="rounded-lg bg-white/20 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-white/30">
-                        Selanjutnya
+                        {{ __('elearning.posttest.selainnya') }}
                     </button>
                 </div>
             </div>
@@ -330,7 +330,7 @@
                 // Update progress
                 const progress = ((index + 1) / totalQuestions) * 100;
                 document.getElementById('progress-bar').style.width = progress + '%';
-                document.getElementById('progress-text').textContent = `${index + 1} dari ${totalQuestions}`;
+                document.getElementById('progress-text').textContent = `${index + 1} ${__('elearning.posttest.dari')} ${totalQuestions}`;
                 // Update navigation buttons
                 const prevBtn = document.getElementById('prev-btn');
                 const nextBtn = document.getElementById('next-btn');
@@ -370,7 +370,7 @@
                 // Check if all questions are answered
                 const answeredQuestions = document.querySelectorAll('input[type="radio"]:checked').length;
                 if (answeredQuestions < totalQuestions) {
-                    alert(`Mohon jawab semua pertanyaan. Anda baru menjawab ${answeredQuestions} dari ${totalQuestions} soal.`);
+                    alert(`{{ __('elearning.posttest.mohon_jawab_semua') }}`.replace(':answered', answeredQuestions).replace(':total', totalQuestions));
                     return;
                 }
                 // Submit the form

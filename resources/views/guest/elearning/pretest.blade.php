@@ -7,7 +7,7 @@
                     <i class="fas fa-arrow-left text-xl"></i>
                 </button>
                 <div class="flex-1">
-                    <h1 class="text-lg font-bold">Pre-test</h1>
+                    <h1 class="text-lg font-bold">{{ __('elearning.pretest.pretest_selesai') }}</h1>
                     <p class="text-sm opacity-90">{{ $materi->judul }}</p>
                 </div>
             </div>
@@ -23,23 +23,23 @@
                     <div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-100">
                         <i class="fas fa-check text-2xl text-green-600"></i>
                     </div>
-                    <h3 class="mb-2 text-xl font-bold text-gray-900">Pre-test Selesai!</h3>
-                    <p class="mb-6 text-gray-600">Anda telah menyelesaikan pre-test untuk materi ini.</p>
+                    <h3 class="mb-2 text-xl font-bold text-gray-900">{{ __('elearning.pretest.pretest_selesai') }}</h3>
+                    <p class="mb-6 text-gray-600">{{ __('elearning.pretest.telah_menyelesaikan_pretest') }}</p>
                     <div class="mb-6 grid grid-cols-2 gap-4">
                         <div class="rounded-lg bg-blue-50 p-4">
                             <div class="text-2xl font-bold text-blue-600">{{ $score }}%</div>
-                            <div class="text-sm text-blue-600">Nilai</div>
+                            <div class="text-sm text-blue-600">{{ __('elearning.pretest.nilai') }}</div>
                         </div>
                         <div class="rounded-lg bg-green-50 p-4">
                             <div class="text-2xl font-bold text-green-600">{{ $correctAnswers }}/{{ $totalQuestions }}
                             </div>
-                            <div class="text-sm text-green-600">Benar</div>
+                            <div class="text-sm text-green-600">{{ __('elearning.pretest.benar') }}</div>
                         </div>
                     </div>
                 </div>
                 {{-- Evaluasi Soal --}}
                 <div class="mt-8">
-                    <h4 class="mb-4 text-lg font-semibold text-gray-800">Evaluasi Jawaban Anda</h4>
+                    <h4 class="mb-4 text-lg font-semibold text-gray-800">{{ __('elearning.pretest.evaluasi_jawaban_anda') }}</h4>
                     <div class="space-y-6">
                         @php
                             $userAnswers = \App\Models\JawabanUser::where('user_id', Auth::id())
@@ -57,13 +57,13 @@
                             <div
                                 class="@if ($isCorrect) border-green-300 bg-green-50 @else border-red-300 bg-red-50 @endif rounded-xl border p-4">
                                 <div class="mb-2 flex items-center justify-between">
-                                    <span class="mr-2 font-bold">Soal {{ $idx + 1 }}:</span>
+                                    <span class="mr-2 font-bold">{{ __('elearning.pretest.soal') }} {{ $idx + 1 }}:</span>
                                     @if ($isCorrect)
                                         <span
-                                            class="ml-2 rounded bg-green-500 px-2 py-1 text-xs font-semibold text-white">Benar</span>
+                                            class="ml-2 rounded bg-green-500 px-2 py-1 text-xs font-semibold text-white">{{ __('elearning.pretest.benar') }}</span>
                                     @else
                                         <span
-                                            class="ml-2 rounded bg-red-500 px-2 py-1 text-xs font-semibold text-white">Salah</span>
+                                            class="ml-2 rounded bg-red-500 px-2 py-1 text-xs font-semibold text-white">{{ __('elearning.pretest.salah') }}</span>
                                     @endif
                                 </div>
                                 <div class="mb-3 text-gray-800">{!! nl2br(e($question->pertanyaan)) !!}</div>
@@ -136,7 +136,7 @@
                     <a href="{{ route('guest.elearning.materi', $materi->materi_id) }}"
                         class="inline-flex items-center rounded-lg bg-blue-600 px-6 py-3 font-medium text-white transition-colors hover:bg-blue-700">
                         <i class="fas fa-arrow-right mr-2"></i>
-                        Lanjut ke Materi
+                        {{ __('elearning.pretest.lanjutkan_ke_materi') }}
                     </a>
                 </div>
             </div>
@@ -148,7 +148,7 @@
                     <div class="mb-4 rounded-lg border border-red-200 bg-red-50 p-4">
                         <div class="mb-2 flex items-center space-x-2">
                             <i class="fas fa-exclamation-triangle text-red-600"></i>
-                            <h4 class="font-medium text-red-800">Terjadi kesalahan:</h4>
+                            <h4 class="font-medium text-red-800">{{ __('elearning.pretest.terjadi_kesalahan') }}</h4>
                         </div>
                         <ul class="list-inside list-disc space-y-1 text-sm text-red-700">
                             @foreach ($errors->all() as $error)
@@ -158,28 +158,28 @@
                     </div>
                 @endif
 
-                <h3 class="mb-4 text-xl font-bold text-gray-900">Instruksi Pre-test</h3>
+                <h3 class="mb-4 text-xl font-bold text-gray-900">{{ __('elearning.pretest.instruksi_pretest') }}</h3>
                 <div class="space-y-3 text-gray-700">
                     <div class="flex items-start space-x-3">
                         <div
                             class="mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-blue-100">
                             <span class="text-xs font-medium text-blue-600">1</span>
                         </div>
-                        <p>Pre-test terdiri dari {{ $totalQuestions }} soal pilihan ganda</p>
+                        <p>{{ __('elearning.pretest.pretest_terdiri_dari', ['count' => $totalQuestions]) }}</p>
                     </div>
                     <div class="flex items-start space-x-3">
                         <div
                             class="mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-blue-100">
                             <span class="text-xs font-medium text-blue-600">2</span>
                         </div>
-                        <p>Pilih satu jawaban yang paling tepat untuk setiap soal</p>
+                        <p>{{ __('elearning.pretest.pilih_satu_jawaban') }}</p>
                     </div>
                     <div class="flex items-start space-x-3">
                         <div
                             class="mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-blue-100">
                             <span class="text-xs font-medium text-blue-600">3</span>
                         </div>
-                        <p>Setelah selesai, Anda dapat melanjutkan ke materi pembelajaran</p>
+                        <p>{{ __('elearning.pretest.setelah_selesai_anjutkan_materi') }}</p>
                     </div>
                 </div>
 
@@ -187,7 +187,7 @@
                     <button onclick="startQuiz()"
                         class="w-full rounded-lg bg-blue-600 py-3 font-medium text-white transition-colors hover:bg-blue-700">
                         <i class="fas fa-play mr-2"></i>
-                        Mulai Pre-test
+                        {{ __('elearning.pretest.mulai_pretest') }}
                     </button>
                 </div>
             </div>
@@ -201,8 +201,8 @@
                     {{-- Progress Bar --}}
                     <div class="mb-6 rounded-2xl bg-white p-6 shadow-sm">
                         <div class="mb-2 flex items-center justify-between">
-                            <span class="text-sm font-medium text-gray-600">Progres</span>
-                            <span class="text-sm font-medium text-blue-600" id="progress-text">1 dari
+                            <span class="text-sm font-medium text-gray-600">{{ __('elearning.pretest.progres') }}</span>
+                            <span class="text-sm font-medium text-blue-600" id="progress-text">1 {{ __('elearning.pretest.dari') }}
                                 {{ $totalQuestions }}</span>
                         </div>
                         <div class="h-2 w-full rounded-full bg-gray-200">
@@ -220,7 +220,7 @@
                                     <div class="flex h-8 w-8 items-center justify-center rounded-full bg-blue-100">
                                         <span class="text-sm font-medium text-blue-600">{{ $index + 1 }}</span>
                                     </div>
-                                    <h3 class="text-lg font-semibold text-gray-900">Soal {{ $index + 1 }}</h3>
+                                    <h3 class="text-lg font-semibold text-gray-900">{{ __('elearning.pretest.soal') }} {{ $index + 1 }}</h3>
                                 </div>
                                 <p class="leading-relaxed text-gray-800">{{ $question->pertanyaan }}</p>
                             </div>
@@ -274,21 +274,21 @@
                             <button type="button" id="prev-btn" onclick="previousQuestion()"
                                 class="hidden rounded-lg bg-gray-100 px-6 py-3 font-medium text-gray-600 transition-colors hover:bg-gray-200">
                                 <i class="fas fa-arrow-left mr-2"></i>
-                                Sebelumnya
+                                {{ __('elearning.pretest.sebelumnya') }}
                             </button>
 
                             <div class="flex space-x-3">
                                 @if ($totalQuestions > 1)
                                     <button type="button" id="next-btn" onclick="nextQuestion()"
                                         class="rounded-lg bg-blue-600 px-6 py-3 font-medium text-white transition-colors hover:bg-blue-700">
-                                        Selanjutnya
+                                        {{ __('elearning.pretest.selainnya') }}
                                         <i class="fas fa-arrow-right ml-2"></i>
                                     </button>
                                 @endif
                                 <button type="button" id="submit-btn" onclick="submitQuiz()"
                                     class="@if ($totalQuestions > 1) hidden @endif rounded-lg bg-green-600 px-6 py-3 font-medium text-white transition-colors hover:bg-green-700">
                                     <i class="fas fa-check mr-2"></i>
-                                    Selesai
+                                    {{ __('elearning.pretest.selesai') }}
                                 </button>
                             </div>
                         </div>
@@ -315,7 +315,7 @@
                     </div>
                     <button onclick="continueToNext()" id="continue-btn"
                         class="rounded-lg bg-white/20 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-white/30">
-                        Selanjutnya
+                        {{ __('elearning.pretest.selainnya') }}
                     </button>
                 </div>
             </div>
@@ -356,7 +356,7 @@
                 // Update progress
                 const progress = ((index + 1) / totalQuestions) * 100;
                 document.getElementById('progress-bar').style.width = progress + '%';
-                document.getElementById('progress-text').textContent = `${index + 1} dari ${totalQuestions}`;
+                document.getElementById('progress-text').textContent = `${index + 1} ${__('elearning.pretest.dari')} ${totalQuestions}`;
 
                 // Update navigation buttons
                 const prevBtn = document.getElementById('prev-btn');
@@ -404,7 +404,7 @@
                 const answeredQuestions = document.querySelectorAll('input[type="radio"]:checked').length;
 
                 if (answeredQuestions < totalQuestions) {
-                    alert(`Mohon jawab semua pertanyaan. Anda baru menjawab ${answeredQuestions} dari ${totalQuestions} soal.`);
+                    alert(`{{ __('elearning.pretest.mohon_jawab_semua') }}`.replace(':answered', answeredQuestions).replace(':total', totalQuestions));
                     return;
                 }
 
