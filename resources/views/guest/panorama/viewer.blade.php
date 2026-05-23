@@ -357,6 +357,27 @@
             if (!('ontouchstart' in window)) {
                 document.getElementById('cursor').setAttribute('visible', 'true');
             }
+            
+            // Scroll to zoom
+            window.addEventListener('wheel', (e) => {
+                const camera = document.getElementById('camera');
+                if(!camera) return;
+                
+                let fov = parseFloat(camera.getAttribute('fov')) || 80;
+                
+                // Zoom speed
+                const zoomSpeed = 3;
+                if(e.deltaY > 0) {
+                    fov += zoomSpeed; // Zoom out
+                } else if(e.deltaY < 0) {
+                    fov -= zoomSpeed; // Zoom in
+                }
+                
+                // Clamp zoom level
+                fov = Math.max(30, Math.min(110, fov));
+                
+                camera.setAttribute('fov', fov);
+            }, { passive: true });
         }
 
         // Boot
