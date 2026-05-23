@@ -1,10 +1,9 @@
 <?php
 
 use App\Http\Controllers\Admin\AdminController;
-use App\Http\Controllers\Admin\PanoramaController;
-use App\Http\Controllers\Admin\AnnotationController;
 use App\Http\Controllers\Admin\ChunkUploadController;
 use App\Http\Controllers\Admin\KatalogController;
+use App\Http\Controllers\Admin\PanoramaController;
 use App\Http\Controllers\Admin\VideoPeninggalanController;
 use App\Http\Controllers\ArMarkerCameraController;
 use App\Http\Controllers\HomeController;
@@ -194,14 +193,6 @@ Route::group(['middleware' => ['auth', 'admin']], function () {
     Route::get('admin/video-peninggalan/{id}/edit', [VideoPeninggalanController::class, 'edit'])->name('admin.video-peninggalan.edit');
     Route::put('admin/video-peninggalan/{id}', [VideoPeninggalanController::class, 'update'])->name('admin.video-peninggalan.update');
     Route::delete('admin/video-peninggalan/{id}', [VideoPeninggalanController::class, 'destroy'])->name('admin.video-peninggalan.destroy');
-
-    // Annotations
-    Route::get('admin/annotations', [AnnotationController::class, 'index'])->name('admin.annotations.index');
-    Route::get('admin/annotations/create', [AnnotationController::class, 'create'])->name('admin.annotations.create');
-    Route::post('admin/annotations', [AnnotationController::class, 'store'])->name('admin.annotations.store');
-    Route::get('admin/annotations/{annotation}/edit', [AnnotationController::class, 'edit'])->name('admin.annotations.edit');
-    Route::put('admin/annotations/{annotation}', [AnnotationController::class, 'update'])->name('admin.annotations.update');
-    Route::delete('admin/annotations/{annotation}', [AnnotationController::class, 'destroy'])->name('admin.annotations.destroy');
 
     // Panorama / 360 VR Tour routes
     Route::prefix('admin/panorama')->name('admin.panorama.')->group(function () {

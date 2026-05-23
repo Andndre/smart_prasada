@@ -2,7 +2,6 @@ import * as THREE from "three";
 import { GLTFLoader } from "three/jsm/loaders/GLTFLoader.js";
 import { DRACOLoader } from "three/jsm/loaders/DRACOLoader.js";
 import { ARButton } from "three/jsm/webxr/ARButton.js";
-import { CSS2DRenderer, CSS2DObject } from "three/jsm/renderers/CSS2DRenderer.js";
 
 let initialized = false;
 
@@ -209,108 +208,7 @@ function showToaster(message) {
     //     }
     // }, 5000);
 }
-class AnnotationManager {
-    /**
-     * @param {THREE.Scene} scene
-     * @param {THREE.Camera} camera
-     * @param {HTMLElement} container - parent element to append CSS2D overlay
-     */
-    constructor(scene, camera, container) {
-        this.scene = scene;
-        this.camera = camera;
-        this.labels = [];
-        this.MAX_DISTANCE = 8; // meter — adjust to scene scale
 
-        this.css2dRenderer = new CSS2DRenderer();
-        this.css2dRenderer.setSize(window.innerWidth, window.innerHeight);
-        this.css2dRenderer.domElement.style.position = "absolute";
-        this.css2dRenderer.domElement.style.top = "0";
-        this.css2dRenderer.domElement.style.pointerEvents = "none";
-        container.appendChild(this.css2dRenderer.domElement);
-
-        window.addEventListener("resize", this._onResize.bind(this));
-    }
-
-    _onResize() {
-        this.css2dRenderer.setSize(window.innerWidth, window.innerHeight);
-    }
-
-    /**
-     * Load annotations into the scene.
-     * @param {Array<{annotation_id: number, label: string, position_x: string, position_y: string, position_z: string, is_visible: number|boolean}>} annotationsData
-     */
-    loadAnnotations(annotationsData) {
-        annotationsData.forEach((data) => {
-            const el = document.createElement("div");
-            el.className = "museum-label";
-            el.textContent = data.label; // plain text, XSS safe
-
-            const label = new CSS2DObject(el);
-            label.position.set(
-                parseFloat(data.position_x),
-                parseFloat(data.position_y),
-                parseFloat(data.position_z),
-            );
-            label.userData = {
-                annotationId: data.annotation_id,
-                isVisible: !!data.is_visible,
-            };
-            this.labels.push(label);
-            this.scene.add(label);
-        });
-    }
-
-    /**
-     * Called every frame. Updates label visibility and font size based on distance to camera.
-     * Frustum culling: hides labels outside the camera's field of view.
-     * @param {THREE.Camera} camera
-     */
-    update(camera) {
-        const cam = camera || this.camera;
-
-        // Build frustum from camera's projection matrix
-        const frustum = new THREE.Frustum();
-        const matrix = new THREE.Matrix4();
-        matrix.multiplyMatrices(cam.projectionMatrix, cam.matrixWorldInverse);
-        frustum.setFromProjectionMatrix(matrix);
-
-        const MIN_FONT = 10;
-        const MAX_FONT = 16;
-        const REF_DISTANCE = 2;
-        const FAR_DISTANCE = 10;
-
-        this.labels.forEach((label) => {
-            if (!label.userData.isVisible) {
-                label.visible = false;
-                return;
-            }
-            const dist = cam.position.distanceTo(label.position);
-            const inRange = dist < this.MAX_DISTANCE;
-            const inFrustum = frustum.containsPoint(label.position);
-            label.visible = inRange && inFrustum;
-
-            if (label.visible && label.element) {
-                const t = Math.max(0, Math.min(1, (FAR_DISTANCE - dist) / (FAR_DISTANCE - REF_DISTANCE)));
-                const fontSize = MIN_FONT + (MAX_FONT - MIN_FONT) * t;
-                label.element.style.fontSize = `${fontSize}px`;
-            }
-        });
-    }
-
-    /**
-     * Render CSS2D layer on top of the Three.js scene.
-     */
-    render() {
-        this.css2dRenderer.render(this.scene, this.camera);
-    }
-
-    dispose() {
-        window.removeEventListener("resize", this._onResize.bind(this));
-        this.labels.forEach((l) => this.scene.remove(l));
-        this.labels = [];
-        this.css2dRenderer.domElement.remove();
-    }
-}
 
 /**
  * Manages the rendering process and XR session for the application.
@@ -702,35 +600,6 @@ async function main() {
     });
 
     showToaster("Starting animation loop");
-
-    // Wire up AnnotationManager after model is placed
-    const annotationManager = new AnnotationManager(
-        sceneManager.scene,
-        sceneManager.camera,
-        document.body,
-    );
-
-    // Patch RendererManager.render to also call annotationManager
-    const originalRender = rendererManager.render.bind(rendererManager);
-    rendererManager.render = function (timestamp, frame, sm) {
-        originalRender(timestamp, frame, sm);
-        if (sm.placed) {
-            const activeCamera = getActiveCamera(this.renderer, sm.camera);
-            annotationManager.update(activeCamera);
-            annotationManager.render();
-        }
-    };
-
-    // Fetch annotations from API
-    fetch(`/api/museums/${museum.museum_id}/annotations`)
-        .then((r) => r.json())
-        .then((r) => {
-            if (r.success && r.data.length > 0) {
-                annotationManager.loadAnnotations(r.data);
-                showToaster(`${r.data.length} label dimuat`);
-            }
-        })
-        .catch((err) => console.warn("Failed to load annotations:", err));
 
     rendererManager.animate(sceneManager);
 }

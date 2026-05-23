@@ -290,97 +290,7 @@
                     </div>
                 </div>
 
-                <!-- Model Annotations -->
-                <div class="rounded-lg border border-gray-200 bg-white shadow-sm">
-                    <div class="flex items-center justify-between border-b border-gray-200 px-6 py-4">
-                        <div class="flex items-center space-x-3">
-                            <h2 class="text-lg font-medium text-gray-900">Label Annotations</h2>
-                            <span
-                                class="inline-flex items-center rounded-full bg-purple-100 px-2.5 py-0.5 text-xs font-medium text-purple-800">
-                                {{ $museum->annotations->count() }} Label
-                            </span>
-                        </div>
-                        <a href="{{ route('admin.annotations.create', ['museum_id' => $museum->museum_id]) }}"
-                            class="inline-flex items-center rounded-md border border-transparent bg-purple-600 px-3 py-2 text-sm font-medium leading-4 text-white transition-colors hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2">
-                            <svg class="mr-1 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                            </svg>
-                            Tambah Label
-                        </a>
-                    </div>
-                    <div class="px-6 py-6">
-                        @if ($museum->annotations->count() > 0)
-                            <div class="overflow-x-auto">
-                                <table class="min-w-full divide-y divide-gray-200">
-                                    <thead>
-                                        <tr>
-                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Label</th>
-                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Position</th>
-                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Visible</th>
-                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Order</th>
-                                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Aksi</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody class="divide-y divide-gray-200">
-                                        @foreach($museum->annotations->sortBy('display_order') as $annotation)
-                                            <tr class="hover:bg-gray-50">
-                                                <td class="whitespace-nowrap px-4 py-3 text-sm font-medium text-gray-900">{{ $annotation->label }}</td>
-                                                <td class="whitespace-nowrap px-4 py-3 text-sm text-gray-500">
-                                                    {{ $annotation->position_x }}, {{ $annotation->position_y }}, {{ $annotation->position_z }}
-                                                </td>
-                                                <td class="whitespace-nowrap px-4 py-3 text-sm">
-                                                    @if($annotation->is_visible)
-                                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">Ya</span>
-                                                    @else
-                                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">Tidak</span>
-                                                    @endif
-                                                </td>
-                                                <td class="whitespace-nowrap px-4 py-3 text-sm text-gray-500">{{ $annotation->display_order }}</td>
-                                                <td class="whitespace-nowrap px-4 py-3 text-right text-sm font-medium">
-                                                    <div class="flex items-center justify-end space-x-1">
-                                                        <a href="{{ route('admin.annotations.edit', $annotation->annotation_id) }}"
-                                                            class="p-1 text-gray-400 transition-colors hover:text-yellow-500" title="Edit">
-                                                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                                            </svg>
-                                                        </a>
-                                                        <form method="POST"
-                                                            action="{{ route('admin.annotations.destroy', $annotation->annotation_id) }}"
-                                                            class="inline"
-                                                            onsubmit="return confirm('Yakin ingin menghapus label ini?')">
-                                                            @csrf
-                                                            @method('DELETE')
-                                                            <button type="submit"
-                                                                class="p-1 text-gray-400 transition-colors hover:text-red-500" title="Hapus">
-                                                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                                                </svg>
-                                                            </button>
-                                                        </form>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        @endforeach
-                                    </tbody>
-                                </table>
-                            </div>
-                        @else
-                            <div class="py-8 text-center">
-                                <div class="mx-auto h-12 w-12 text-gray-400">
-                                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1"
-                                            d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14" />
-                                    </svg>
-                                </div>
-                                <h3 class="mt-2 text-sm font-medium text-gray-900">Belum ada Label</h3>
-                                <p class="mt-1 text-sm text-gray-500">Tambahkan label annotation untuk memberikan informasi pada model 3D.</p>
-                            </div>
-                        @endif
-                    </div>
-                </div>
+
 
             </div>
 
@@ -408,10 +318,7 @@
                             <span
                                 class="text-sm font-semibold text-gray-900">{{ $museum->virtualMuseumObjects->whereNotNull('gambar_real')->count() }}</span>
                         </div>
-                        <div class="flex items-center justify-between">
-                            <span class="text-sm text-gray-600">Label Annotations</span>
-                            <span class="text-sm font-semibold text-gray-900">{{ $museum->annotations->count() }}</span>
-                        </div>
+
                     </div>
                 </div>
 
@@ -451,14 +358,7 @@
                             </svg>
                             Edit Museum
                         </a>
-                        <a href="{{ route('admin.annotations.index', ['museum_id' => $museum->museum_id]) }}"
-                            class="inline-flex w-full items-center justify-center rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium leading-4 text-gray-700 shadow-sm transition-colors hover:bg-gray-50">
-                            <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14" />
-                            </svg>
-                            Kelola Labels
-                        </a>
+
                         <form action="{{ route('admin.virtual-museum.destroy', $museum->museum_id) }}" method="POST"
                             class="w-full"
                             onsubmit="return confirm('Apakah Anda yakin ingin menghapus Virtual Living Museum ini? Tindakan ini tidak dapat dibatalkan.')">
