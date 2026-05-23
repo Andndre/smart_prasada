@@ -25,3 +25,8 @@ dokumen_pendukung/
 template_prompt_issue.md
 template_prompt_analisis_fitur_issue.md
 .playwright-mcp/
+
+# Laravel IDE Helper
+_ide_helper.php
+_ide_helper_models.php
+.phpstorm.meta.php
