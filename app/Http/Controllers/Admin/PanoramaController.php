@@ -9,7 +9,6 @@ use App\Models\Scene;
 use App\Models\SitusPeninggalan;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
@@ -113,11 +112,11 @@ class PanoramaController extends Controller
 
         $data = $request->validate([
             'order' => 'required|array',
-            'order.*' => 'exists:scenes,id',
+            'order.*' => 'exists:adegan,adegan_id',
         ]);
 
         foreach ($data['order'] as $index => $sceneId) {
-            Scene::where('id', $sceneId)->update(['order' => $index]);
+            Scene::where('adegan_id', $sceneId)->update(['order' => $index]);
         }
 
         return response()->json(['ok' => true]);
@@ -135,7 +134,7 @@ class PanoramaController extends Controller
         }
 
         $data = $request->validate([
-            'scene_id' => 'required|exists:scenes,id',
+            'scene_id' => 'required|exists:adegan,adegan_id',
             'label' => 'required|string|max:255',
             'position_x' => 'nullable|numeric',
             'position_y' => 'nullable|numeric',
@@ -143,23 +142,37 @@ class PanoramaController extends Controller
             'rotation_x' => 'nullable|numeric',
             'rotation_y' => 'nullable|numeric',
             'rotation_z' => 'nullable|numeric',
-            'target_scene_id' => 'nullable|exists:scenes,id',
+            'target_scene_id' => 'nullable|exists:adegan,adegan_id',
             'color' => 'nullable|string',
             'type' => ['nullable', Rule::in(['navigation', 'info', 'text', 'compass'])],
             'modal_title' => 'nullable|string|max:255',
             'modal_content' => 'nullable|string',
             'modal_image' => 'nullable|string',
-            'template_id' => 'nullable|exists:hotspot_templates,id',
+            'template_id' => 'nullable|exists:templat_hotspot,templat_hotspot_id',
             'animation_config' => 'nullable|array',
         ]);
 
         // Set defaults
         $data['color'] = $data['color'] ?? '#00bcd4';
         $data['type'] = $data['type'] ?? Hotspot::TYPE_NAVIGATION;
-        $data['order'] = Hotspot::where('scene_id', $data['scene_id'])->max('order') + 1;
+
+        // Map request inputs to database columns
+        $data['adegan_id'] = $data['scene_id'];
+        unset($data['scene_id']);
+
+        if (array_key_exists('target_scene_id', $data)) {
+            $data['target_adegan_id'] = $data['target_scene_id'];
+            unset($data['target_scene_id']);
+        }
+        if (array_key_exists('template_id', $data)) {
+            $data['templat_hotspot_id'] = $data['template_id'];
+            unset($data['template_id']);
+        }
+
+        $data['order'] = Hotspot::where('adegan_id', $data['adegan_id'])->max('order') + 1;
 
         // Apply hotspot defaults from scene if not provided
-        $scene = Scene::find($data['scene_id']);
+        $scene = Scene::find($data['adegan_id']);
         if ($scene && $scene->hotspot_defaults) {
             $defaults = $scene->hotspot_defaults;
             $data['position_x'] = $data['position_x'] ?? ($defaults['position_x'] ?? 0);
@@ -192,16 +205,25 @@ class PanoramaController extends Controller
             'rotation_x' => 'nullable|numeric',
             'rotation_y' => 'nullable|numeric',
             'rotation_z' => 'nullable|numeric',
-            'target_scene_id' => 'nullable|exists:scenes,id',
+            'target_scene_id' => 'nullable|exists:adegan,adegan_id',
             'color' => 'nullable|string',
             'order' => 'nullable|integer',
             'type' => ['nullable', Rule::in(['navigation', 'info', 'text', 'compass'])],
             'modal_title' => 'nullable|string|max:255',
             'modal_content' => 'nullable|string',
             'modal_image' => 'nullable|string',
-            'template_id' => 'nullable|exists:hotspot_templates,id',
+            'template_id' => 'nullable|exists:templat_hotspot,templat_hotspot_id',
             'animation_config' => 'nullable|array',
         ]);
+
+        if (array_key_exists('target_scene_id', $data)) {
+            $data['target_adegan_id'] = $data['target_scene_id'];
+            unset($data['target_scene_id']);
+        }
+        if (array_key_exists('template_id', $data)) {
+            $data['templat_hotspot_id'] = $data['template_id'];
+            unset($data['template_id']);
+        }
 
         $hotspot->update($data);
 
@@ -316,10 +338,10 @@ class PanoramaController extends Controller
 
         // Generate UUID filename
         $extension = $request->file('file')->getClientOriginalExtension();
-        $filename = Str::uuid() . '.' . $extension;
+        $filename = Str::uuid().'.'.$extension;
 
         $path = $request->file('file')->storeAs($directory, $filename, 'public');
-        $url = '/storage/' . $path;
+        $url = '/storage/'.$path;
 
         return response()->json([
             'url' => $url,

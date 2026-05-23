@@ -11,8 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('hotspot_templates', function (Blueprint $table) {
-            $table->id();
+        Schema::create('templat_hotspot', function (Blueprint $table) {
+            $table->id('templat_hotspot_id');
             $table->string('name');
             $table->enum('type', ['navigation', 'info', 'text', 'compass']);
             $table->string('file_path'); // SVG file path
@@ -31,6 +31,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('hotspot_templates');
+        Schema::dropIfExists('templat_hotspot');
     }
 };

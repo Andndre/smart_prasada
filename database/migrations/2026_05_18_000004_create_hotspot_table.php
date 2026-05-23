@@ -11,12 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('hotspots', function (Blueprint $table) {
-            $table->id();
-            $table->unsignedBigInteger('scene_id');
-            $table->foreign('scene_id')
-                ->references('id')
-                ->on('scenes')
+        Schema::create('hotspot', function (Blueprint $table) {
+            $table->id('hotspot_id');
+            $table->unsignedBigInteger('adegan_id');
+            $table->foreign('adegan_id')
+                ->references('adegan_id')
+                ->on('adegan')
                 ->onDelete('cascade');
             $table->string('label');
 
@@ -31,10 +31,10 @@ return new class extends Migration
             $table->double('rotation_z')->default(0);
 
             // Navigation target (nullable for info/text type hotspots)
-            $table->unsignedBigInteger('target_scene_id')->nullable();
-            $table->foreign('target_scene_id')
-                ->references('id')
-                ->on('scenes')
+            $table->unsignedBigInteger('target_adegan_id')->nullable();
+            $table->foreign('target_adegan_id')
+                ->references('adegan_id')
+                ->on('adegan')
                 ->onDelete('set null');
 
             $table->string('color')->default('#00bcd4');
@@ -50,10 +50,10 @@ return new class extends Migration
             $table->string('modal_image')->nullable();
 
             // Template reference
-            $table->unsignedBigInteger('template_id')->nullable();
-            $table->foreign('template_id')
-                ->references('id')
-                ->on('hotspot_templates')
+            $table->unsignedBigInteger('templat_hotspot_id')->nullable();
+            $table->foreign('templat_hotspot_id')
+                ->references('templat_hotspot_id')
+                ->on('templat_hotspot')
                 ->onDelete('set null');
 
             // Animation configuration
@@ -62,8 +62,8 @@ return new class extends Migration
             $table->timestamps();
 
             // Indexes
-            $table->index(['scene_id', 'order']);
-            $table->index('target_scene_id');
+            $table->index(['adegan_id', 'order']);
+            $table->index('target_adegan_id');
         });
     }
 
@@ -72,6 +72,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('hotspots');
+        Schema::dropIfExists('hotspot');
     }
 };

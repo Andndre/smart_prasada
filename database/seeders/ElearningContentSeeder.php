@@ -20,7 +20,7 @@ class ElearningContentSeeder extends Seeder
      */
     public function run(): void
     {
-        $admin = User::where('role', '=', 'admin', true)->first();
+        $admin = User::where('role', 'admin')->first();
 
         if (! $admin) {
             $this->command->warn('No admin user found. Skipping situs/virtual museum creation that requires user_id.');

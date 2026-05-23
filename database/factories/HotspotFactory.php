@@ -3,12 +3,11 @@
 namespace Database\Factories;
 
 use App\Models\Hotspot;
-use App\Models\HotspotTemplate;
 use App\Models\Scene;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Hotspot>
+ * @extends Factory<Hotspot>
  */
 class HotspotFactory extends Factory
 {
@@ -22,7 +21,7 @@ class HotspotFactory extends Factory
     public function definition(): array
     {
         return [
-            'scene_id' => Scene::factory(),
+            'adegan_id' => Scene::factory(),
             'label' => fake()->words(2, true),
             'position_x' => fake()->randomFloat(2, -10, 10),
             'position_y' => fake()->randomFloat(2, -5, 5),
@@ -30,14 +29,14 @@ class HotspotFactory extends Factory
             'rotation_x' => 0,
             'rotation_y' => 0,
             'rotation_z' => 0,
-            'target_scene_id' => null,
+            'target_adegan_id' => null,
             'color' => fake()->hexColor(),
             'order' => fake()->numberBetween(0, 10),
             'type' => Hotspot::TYPE_NAVIGATION,
             'modal_title' => null,
             'modal_content' => null,
             'modal_image' => null,
-            'template_id' => null,
+            'templat_hotspot_id' => null,
         ];
     }
 
@@ -90,7 +89,7 @@ class HotspotFactory extends Factory
     public function withTarget(Scene $scene): static
     {
         return $this->state(fn (array $attributes) => [
-            'target_scene_id' => $scene->id,
+            'target_adegan_id' => $scene->adegan_id,
         ]);
     }
 }

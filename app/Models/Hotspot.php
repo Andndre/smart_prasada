@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -12,12 +13,19 @@ class Hotspot extends Model
 
     // Type constants
     const TYPE_NAVIGATION = 'navigation';
+
     const TYPE_INFO = 'info';
+
     const TYPE_TEXT = 'text';
+
     const TYPE_COMPASS = 'compass';
 
+    protected $table = 'hotspot';
+
+    protected $primaryKey = 'hotspot_id';
+
     protected $fillable = [
-        'scene_id',
+        'adegan_id',
         'label',
         'position_x',
         'position_y',
@@ -25,14 +33,14 @@ class Hotspot extends Model
         'rotation_x',
         'rotation_y',
         'rotation_z',
-        'target_scene_id',
+        'target_adegan_id',
         'color',
         'order',
         'type',
         'modal_title',
         'modal_content',
         'modal_image',
-        'template_id',
+        'templat_hotspot_id',
         'animation_config',
     ];
 
@@ -47,12 +55,60 @@ class Hotspot extends Model
         'animation_config' => 'array',
     ];
 
+    protected $appends = ['id', 'scene_id', 'target_scene_id', 'template_id'];
+
+    protected $hidden = ['hotspot_id', 'adegan_id', 'target_adegan_id', 'templat_hotspot_id'];
+
+    /**
+     * Accessor for 'id' to maintain frontend compatibility.
+     */
+    protected function id(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->hotspot_id,
+            set: fn ($value) => $this->hotspot_id = $value,
+        );
+    }
+
+    /**
+     * Accessor for 'scene_id' to maintain frontend compatibility.
+     */
+    protected function sceneId(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->adegan_id,
+            set: fn ($value) => $this->adegan_id = $value,
+        );
+    }
+
+    /**
+     * Accessor for 'target_scene_id' to maintain frontend compatibility.
+     */
+    protected function targetSceneId(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->target_adegan_id,
+            set: fn ($value) => $this->target_adegan_id = $value,
+        );
+    }
+
+    /**
+     * Accessor for 'template_id' to maintain frontend compatibility.
+     */
+    protected function templateId(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->templat_hotspot_id,
+            set: fn ($value) => $this->templat_hotspot_id = $value,
+        );
+    }
+
     /**
      * Get the scene that owns this hotspot.
      */
     public function scene(): BelongsTo
     {
-        return $this->belongsTo(Scene::class);
+        return $this->belongsTo(Scene::class, 'adegan_id', 'adegan_id');
     }
 
     /**
@@ -60,7 +116,7 @@ class Hotspot extends Model
      */
     public function targetScene(): BelongsTo
     {
-        return $this->belongsTo(Scene::class, 'target_scene_id');
+        return $this->belongsTo(Scene::class, 'target_adegan_id', 'adegan_id');
     }
 
     /**
@@ -68,7 +124,7 @@ class Hotspot extends Model
      */
     public function template(): BelongsTo
     {
-        return $this->belongsTo(HotspotTemplate::class);
+        return $this->belongsTo(HotspotTemplate::class, 'templat_hotspot_id', 'templat_hotspot_id');
     }
 
     /**

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -13,7 +14,12 @@ class Scene extends Model
 
     // Scene type constants
     const TYPE_PANORAMA = 'panorama';
+
     const TYPE_VIRTUAL_MUSEUM = 'virtual_museum';
+
+    protected $table = 'adegan';
+
+    protected $primaryKey = 'adegan_id';
 
     protected $fillable = [
         'situs_id',
@@ -35,6 +41,21 @@ class Scene extends Model
         'hotspot_defaults' => 'array',
     ];
 
+    protected $appends = ['id'];
+
+    protected $hidden = ['adegan_id'];
+
+    /**
+     * Accessor for 'id' to maintain frontend compatibility.
+     */
+    protected function id(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->adegan_id,
+            set: fn ($value) => $this->adegan_id = $value,
+        );
+    }
+
     /**
      * Get the situs that owns this scene.
      */
@@ -48,7 +69,7 @@ class Scene extends Model
      */
     public function hotspots(): HasMany
     {
-        return $this->hasMany(Hotspot::class)->orderBy('order');
+        return $this->hasMany(Hotspot::class, 'adegan_id', 'adegan_id')->orderBy('order');
     }
 
     /**
@@ -56,7 +77,7 @@ class Scene extends Model
      */
     public function targetScene(): BelongsTo
     {
-        return $this->belongsTo(Scene::class, 'target_scene_id');
+        return $this->belongsTo(Scene::class, 'target_adegan_id', 'adegan_id');
     }
 
     /**

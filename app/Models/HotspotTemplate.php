@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class HotspotTemplate extends Model
 {
@@ -12,9 +12,16 @@ class HotspotTemplate extends Model
 
     // Type constants
     const TYPE_NAVIGATION = 'navigation';
+
     const TYPE_INFO = 'info';
+
     const TYPE_TEXT = 'text';
+
     const TYPE_COMPASS = 'compass';
+
+    protected $table = 'templat_hotspot';
+
+    protected $primaryKey = 'templat_hotspot_id';
 
     protected $fillable = [
         'name',
@@ -28,6 +35,21 @@ class HotspotTemplate extends Model
     protected $casts = [
         'is_animated' => 'boolean',
     ];
+
+    protected $appends = ['id'];
+
+    protected $hidden = ['templat_hotspot_id'];
+
+    /**
+     * Accessor for 'id' to maintain frontend compatibility.
+     */
+    protected function id(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->templat_hotspot_id,
+            set: fn ($value) => $this->templat_hotspot_id = $value,
+        );
+    }
 
     /**
      * Check if this is a navigation template.
