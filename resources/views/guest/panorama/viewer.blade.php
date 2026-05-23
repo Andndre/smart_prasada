@@ -214,29 +214,42 @@
             State.currentSceneId = sceneId;
             DOM.currentSceneName.textContent = scene.name;
             
-            // Transition effect
+            // Zoom In & Blur effect
+            DOM.camera.setAttribute('animation__zoom', 'property: fov; to: 20; dur: 400; easing: easeInQuad');
+            DOM.scene.style.transition = 'filter 0.4s ease';
+            DOM.scene.style.filter = 'blur(8px)';
+            DOM.transitionOverlay.style.transition = 'opacity 0.4s ease';
             DOM.transitionOverlay.style.opacity = '1';
             
             setTimeout(() => {
                 // Update Sky Image
                 DOM.sky.setAttribute('src', scene.image);
                 
-                // Optional: Update Camera Rotation if defined in scene
-                // if(scene.cameraPosition) {
-                //    DOM.camera.setAttribute('rotation', scene.cameraPosition);
-                // }
-                
                 // Render Hotspots
                 renderHotspots(scene.hotspots);
                 
+                // Prepare for zoom out
+                DOM.camera.removeAttribute('animation__zoom');
+                DOM.camera.setAttribute('fov', 120);
+                
+                let isLoaded = false;
+                const finishTransition = () => {
+                    if(isLoaded) return;
+                    isLoaded = true;
+                    
+                    DOM.transitionOverlay.style.opacity = '0';
+                    DOM.scene.style.filter = 'blur(0px)';
+                    DOM.camera.setAttribute('animation__zoom', 'property: fov; to: 80; dur: 600; easing: easeOutQuad');
+                };
+                
                 // Wait for image to load before fading back in
                 DOM.sky.addEventListener('materialtextureloaded', function onTextureLoaded() {
-                    DOM.transitionOverlay.style.opacity = '0';
+                    finishTransition();
                     DOM.sky.removeEventListener('materialtextureloaded', onTextureLoaded);
                 });
                 
-                // Fallback fade in if texture event fails
-                setTimeout(() => DOM.transitionOverlay.style.opacity = '0', 1000);
+                // Fallback fade in if texture event fails or takes too long
+                setTimeout(finishTransition, 1500);
             }, 400); // Wait for fade to black
         }
 
