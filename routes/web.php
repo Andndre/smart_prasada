@@ -57,6 +57,7 @@ Route::group(['middleware' => ['auth', 'user']], function () {
 
     // Situs detail route
     Route::get('/situs/{situs_id}', [HomeController::class, 'situsDetail'])->name('guest.situs.detail');
+    Route::get('/situs/{situs_id}/panorama', [HomeController::class, 'situsPanorama'])->name('guest.situs.panorama');
 
     // Kritik dan Saran routes
     Route::get('/kritik-saran', [KritikSaranController::class, 'index'])->name('guest.kritik-saran');
@@ -197,6 +198,7 @@ Route::group(['middleware' => ['auth', 'admin']], function () {
     // Panorama / 360 VR Tour routes
     Route::prefix('admin/panorama')->name('admin.panorama.')->group(function () {
         // Scene CRUD
+        Route::get('editor/{situsId}', [PanoramaController::class, 'editor'])->name('editor');
         Route::get('scenes/{situsId}', [PanoramaController::class, 'index'])->name('scenes.index');
         Route::post('scenes', [PanoramaController::class, 'storeScene'])->name('scenes.store');
         Route::put('scenes/{id}', [PanoramaController::class, 'updateScene'])->name('scenes.update');

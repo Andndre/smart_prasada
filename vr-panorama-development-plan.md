@@ -1,9 +1,9 @@
 # VR 360 Panorama Tour Editor — Development Plan
 
 **Project:** Smart Prasada VR 360 Panorama Tour Editor  
-**Version:** 1.0.0  
-**Last Updated:** 2026-05-18  
-**Status:** Planning
+**Version:** 1.1.0  
+**Last Updated:** 2026-05-23  
+**Status:** In Progress (Phase 1 Completed)
 
 ---
 
@@ -11,7 +11,7 @@
 
 ### 1.1 Project Overview
 
-Smart Prasada is a Laravel 13 + A-Frame powered 360° panorama tour editor that enables administrators to create, manage, and publish immersive VR experiences. The system follows a hierarchical data model: **Tour → Scene → Hotspot**, where users navigate between panoramic scenes via clickable hotspots.
+Smart Prasada is a Laravel 13 + A-Frame powered 360° panorama tour editor that enables administrators to create, manage, and publish immersive VR experiences. The system follows a hierarchical data model: **Situs Peninggalan → Adegan (Scene) → Hotspot**, where users navigate between panoramic scenes via clickable hotspots.
 
 ### 1.2 Current System Capabilities
 
@@ -621,9 +621,9 @@ smart_prasada/
 
 | Phase                                   | Duration | Description                                                             |
 | --------------------------------------- | -------- | ----------------------------------------------------------------------- |
-| **Phase 1: Core Setup & Migrations**    | 1–2 days | Review existing schema; add recommended columns; verify relationships   |
+| **Phase 1: Core Setup & Migrations**    | (Done)   | Review existing schema; verify relationships and base models            |
 | **Phase 2: Admin Editor Enhancements**  | 3–5 days | Implement transform controls refinement, multi-select, batch operations |
-| **Phase 3: Public Viewer Improvements** | 2–4 days | Performance optimization, accessibility, mobile refinements             |
+| **Phase 3: Public Viewer Improvements** | 2–4 days | Performance optimization, accessibility, 360 viewer in situs detail     |
 | **Phase 4: Testing & Optimization**     | 2–3 days | Browser testing, E2E tests, performance profiling                       |
 | **Phase 5: Documentation & Deployment** | 1–2 days | Documentation finalization, deployment procedures                       |
 

@@ -257,6 +257,35 @@
                             @endif
                         </div>
                     </div>
+
+                    <!-- Virtual 360 Panorama Card -->
+                    <div class="bg-white shadow-lg rounded-lg border border-gray-200">
+                        <div class="px-4 py-5 sm:p-6">
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="text-lg font-medium text-gray-900">
+                                    <i class="fas fa-street-view text-cyan-600 mr-2"></i>
+                                    Tur Virtual 360° Panorama
+                                </h3>
+                                <div class="flex items-center space-x-3">
+                                    <span class="inline-flex px-3 py-1 text-sm font-medium rounded-full {{ $situs->scenes->count() > 0 ? 'bg-cyan-100 text-cyan-800' : 'bg-gray-100 text-gray-800' }}">
+                                        {{ $situs->scenes->where('scene_type', 'panorama')->count() }} adegan
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div class="text-center py-8 border-2 border-dashed border-gray-300 rounded-lg">
+                                <div class="mx-auto h-16 w-16 text-gray-400 mb-4">
+                                    <i class="fas fa-street-view text-5xl"></i>
+                                </div>
+                                <h3 class="text-lg font-medium text-gray-900 mb-2">Kelola Tur 360° Panorama</h3>
+                                <p class="text-sm text-gray-500 mb-4">Akses editor VR Panorama untuk menambahkan adegan 360° dan memasang hotspot interaktif.</p>
+                                <a href="{{ url('admin/panorama/editor/' . $situs->situs_id) }}" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-cyan-600 hover:bg-cyan-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-cyan-500 transition-colors">
+                                    <i class="fas fa-edit mr-2"></i>
+                                    Buka Editor Panorama
+                                </a>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Side Information -->

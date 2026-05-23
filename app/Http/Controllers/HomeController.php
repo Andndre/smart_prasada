@@ -686,6 +686,22 @@ class HomeController extends Controller
         ]);
     }
 
+    /**
+     * VR 360 Panorama Viewer
+     */
+    public function situsPanorama(Request $request, $situs_id)
+    {
+        $user = Auth::user();
+        $situs = SitusPeninggalan::findOrFail($situs_id);
+
+        // Log activity
+        if ($user) {
+            $this->logActivity($user->id, 'Memulai pengalaman VR 360 Panorama untuk situs: ' . $situs->nama);
+        }
+
+        return view('guest.panorama.viewer', compact('situs'));
+    }
+
     public function arMuseum(Request $request, $situs_id, $museum_id)
     {
         $userAuth = Auth::user();

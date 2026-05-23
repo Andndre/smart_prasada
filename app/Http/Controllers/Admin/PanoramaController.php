@@ -15,6 +15,15 @@ use Illuminate\Validation\Rule;
 class PanoramaController extends Controller
 {
     /**
+     * Display the VR Panorama Editor view.
+     */
+    public function editor(Request $request, int $situsId)
+    {
+        $situs = SitusPeninggalan::findOrFail($situsId);
+        return view('admin.panorama.editor', compact('situs'));
+    }
+
+    /**
      * Display a listing of scenes for a specific situs.
      */
     public function index(int $situsId): JsonResponse
