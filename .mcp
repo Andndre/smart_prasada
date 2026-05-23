@@ -7,6 +7,18 @@
                 "/home/andndre/Code/prototype_smart_prasada/artisan",
                 "boost:mcp"
             ]
+        },
+        "the-i18n-mcp": {
+            "command": "npx",
+            "args": [
+                "-y",
+                "the-i18n-mcp@latest"
+            ],
+            "alwaysAllow": [
+                "get_missing_translations",
+                "find_empty_translations",
+                "list_locale_dirs"
+            ]
         }
     }
 }

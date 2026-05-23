@@ -35,7 +35,7 @@ return new class extends Migration
             $table->foreign('target_scene_id')
                 ->references('id')
                 ->on('scenes')
-                ->onDelete('null');
+                ->onDelete('set null');
 
             $table->string('color')->default('#00bcd4');
             $table->integer('order')->default(0);
