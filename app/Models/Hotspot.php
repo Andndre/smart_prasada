@@ -34,7 +34,6 @@ class Hotspot extends Model
         'rotation_y',
         'rotation_z',
         'target_adegan_id',
-        'color',
         'order',
         'type',
         'modal_title',
@@ -171,10 +170,10 @@ class Hotspot extends Model
             'position' => $this->position,
             'rotation' => $this->rotation,
             'targetScene' => $this->target_scene_id,
-            'color' => $this->color,
             'modalTitle' => $this->modal_title,
             'modalContent' => $this->modal_content,
             'modalImage' => $this->modal_image,
+            'animation_config' => $this->animation_config,
             'template' => $this->relationLoaded('template')
                 ? $this->template?->toViewerJson()
                 : null,

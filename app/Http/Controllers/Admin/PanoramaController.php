@@ -144,7 +144,7 @@ class PanoramaController extends Controller
 
         $data = $request->validate([
             'scene_id' => 'required|exists:adegan,adegan_id',
-            'label' => 'required|string|max:255',
+            'label' => 'nullable|string|max:255',
             'position_x' => 'nullable|numeric',
             'position_y' => 'nullable|numeric',
             'position_z' => 'nullable|numeric',
@@ -152,7 +152,6 @@ class PanoramaController extends Controller
             'rotation_y' => 'nullable|numeric',
             'rotation_z' => 'nullable|numeric',
             'target_scene_id' => 'nullable|exists:adegan,adegan_id',
-            'color' => 'nullable|string',
             'type' => ['nullable', Rule::in(['navigation', 'info', 'text', 'compass'])],
             'modal_title' => 'nullable|string|max:255',
             'modal_content' => 'nullable|string',
@@ -162,7 +161,6 @@ class PanoramaController extends Controller
         ]);
 
         // Set defaults
-        $data['color'] = $data['color'] ?? '#00bcd4';
         $data['type'] = $data['type'] ?? Hotspot::TYPE_NAVIGATION;
 
         // Map request inputs to database columns
@@ -187,7 +185,6 @@ class PanoramaController extends Controller
             $data['position_x'] = $data['position_x'] ?? ($defaults['position_x'] ?? 0);
             $data['position_y'] = $data['position_y'] ?? ($defaults['position_y'] ?? -0.5);
             $data['position_z'] = $data['position_z'] ?? ($defaults['position_z'] ?? -4);
-            $data['color'] = $data['color'] ?? ($defaults['color'] ?? '#00bcd4');
         }
 
         $hotspot = Hotspot::create($data);
@@ -215,7 +212,6 @@ class PanoramaController extends Controller
             'rotation_y' => 'nullable|numeric',
             'rotation_z' => 'nullable|numeric',
             'target_scene_id' => 'nullable|exists:adegan,adegan_id',
-            'color' => 'nullable|string',
             'order' => 'nullable|integer',
             'type' => ['nullable', Rule::in(['navigation', 'info', 'text', 'compass'])],
             'modal_title' => 'nullable|string|max:255',

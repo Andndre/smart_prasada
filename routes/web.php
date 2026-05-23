@@ -216,6 +216,11 @@ Route::group(['middleware' => ['auth', 'admin']], function () {
         Route::put('templates/{id}', [PanoramaController::class, 'updateTemplate'])->name('templates.update');
         Route::delete('templates/{id}', [PanoramaController::class, 'destroyTemplate'])->name('templates.destroy');
 
+        // Assets Library
+        Route::get('assets', [\App\Http\Controllers\AsetHotspotController::class, 'index'])->name('assets.index');
+        Route::post('assets', [\App\Http\Controllers\AsetHotspotController::class, 'store'])->name('assets.store');
+        Route::delete('assets/{id}', [\App\Http\Controllers\AsetHotspotController::class, 'destroy'])->name('assets.destroy');
+
         // Image Upload
         Route::post('upload', [PanoramaController::class, 'uploadImage'])->name('upload');
     });
