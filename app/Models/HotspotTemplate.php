@@ -17,8 +17,6 @@ class HotspotTemplate extends Model
 
     const TYPE_TEXT = 'text';
 
-    const TYPE_COMPASS = 'compass';
-
     protected $table = 'templat_hotspot';
 
     protected $primaryKey = 'templat_hotspot_id';
@@ -76,7 +74,6 @@ class HotspotTemplate extends Model
             self::TYPE_NAVIGATION,
             self::TYPE_INFO,
             self::TYPE_TEXT,
-            self::TYPE_COMPASS,
         ];
     }
 

@@ -18,8 +18,6 @@ class Hotspot extends Model
 
     const TYPE_TEXT = 'text';
 
-    const TYPE_COMPASS = 'compass';
-
     protected $table = 'hotspot';
 
     protected $primaryKey = 'hotspot_id';

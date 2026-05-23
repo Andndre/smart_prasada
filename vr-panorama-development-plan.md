@@ -187,7 +187,7 @@ Schema::create('hotspots', function (Blueprint $table) {
     $table->foreignId('target_scene_id')->nullable()->constrained('scenes')->nullOnDelete();
     $table->string('color')->default('#00bcd4');    // Hotspot color (hex)
     $table->integer('order')->default(0);           // Display order
-    $table->enum('type', ['navigation', 'info', 'text', 'compass'])->default('navigation');
+    $table->enum('type', ['navigation', 'info', 'text'])->default('navigation');
     $table->string('modal_title')->nullable();       // Info modal title
     $table->text('modal_content')->nullable();      // Info modal content (HTML)
     $table->string('modal_image')->nullable();      // Info modal image URL
@@ -207,7 +207,7 @@ Schema::create('hotspots', function (Blueprint $table) {
 Schema::create('hotspot_templates', function (Blueprint $table) {
     $table->id();
     $table->string('name');                          // Template name
-    $table->enum('type', ['navigation', 'info', 'text', 'compass']);
+    $table->enum('type', ['navigation', 'info', 'text']);
     $table->string('file_path');                     // Template file URL
     $table->string('thumbnail_path')->nullable();    // Preview thumbnail URL
     $table->boolean('is_animated')->default(false); // Animation flag
@@ -338,7 +338,7 @@ The admin editor uses a 3-panel layout:
 | Field           | Type     | Validation                            | Notes                             |
 | --------------- | -------- | ------------------------------------- | --------------------------------- |
 | label           | text     | required, max:255                     | Hotspot label                     |
-| type            | select   | in:navigation,info,text,compass       | Hotspot type                      |
+| type            | select   | in:navigation,info,text               | Hotspot type                      |
 | position_x      | number   | nullable, numeric                     | X coordinate                      |
 | position_y      | number   | nullable, numeric                     | Y coordinate                      |
 | position_z      | number   | nullable, numeric                     | Z coordinate                      |
@@ -723,7 +723,7 @@ class Hotspot extends Model
     const TYPE_NAVIGATION = 'navigation';
     const TYPE_INFO = 'info';
     const TYPE_TEXT = 'text';
-    const TYPE_COMPASS = 'compass';
+
 
     protected $fillable = [
         'scene_id', 'label', 'position_x', 'position_y', 'position_z',
@@ -861,7 +861,7 @@ class PanoramaController extends Controller
             'rotation_z' => 'nullable|numeric',
             'target_scene_id' => 'nullable|exists:scenes,id',
             'color' => 'nullable|string',
-            'type' => 'nullable|in:navigation,info,text,compass',
+            'type' => 'nullable|in:navigation,info,text',
             'modal_title' => 'nullable|string|max:255',
             'modal_content' => 'nullable|string',
             'modal_image' => 'nullable|string',
@@ -1340,7 +1340,7 @@ test("scene navigation works", async ({ page }) => {
 // Controller validation example
 $data = $request->validate([
     'name' => 'required|string|max:255',
-    'type' => 'nullable|in:navigation,info,text,compass',
+    'type' => 'nullable|in:navigation,info,text',
     'position_x' => 'nullable|numeric',
     // ... other fields
 ]);
@@ -1503,7 +1503,7 @@ fetch("/admin/scenes", {
 | `navigation` | Arrow (nav.svg) | Navigate to target_scene | target_scene_id                         |
 | `info`       | Info (info.svg) | Open modal               | modal_title, modal_content, modal_image |
 | `text`       | Label only      | Display text label       | —                                       |
-| `compass`    | Compass         | Points to direction      | rotation_x/y/z                          |
+
 
 ---
 

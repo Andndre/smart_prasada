@@ -40,8 +40,8 @@ return new class extends Migration
             $table->string('color')->default('#00bcd4');
             $table->integer('order')->default(0);
 
-            // Type enum: navigation, info, text, compass
-            $table->enum('type', ['navigation', 'info', 'text', 'compass'])
+            // Type enum: navigation, info, text
+            $table->enum('type', ['navigation', 'info', 'text'])
                 ->default('navigation');
 
             // Info modal content (HTML allowed - admin input only)

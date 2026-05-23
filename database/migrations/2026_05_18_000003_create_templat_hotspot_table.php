@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('templat_hotspot', function (Blueprint $table) {
             $table->id('templat_hotspot_id');
             $table->string('name');
-            $table->enum('type', ['navigation', 'info', 'text', 'compass']);
+            $table->enum('type', ['navigation', 'info', 'text']);
             $table->string('file_path'); // SVG file path
             $table->string('thumbnail_path')->nullable();
             $table->boolean('is_animated')->default(false);

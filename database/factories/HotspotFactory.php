@@ -73,17 +73,6 @@ class HotspotFactory extends Factory
     }
 
     /**
-     * Indicate that this is a compass hotspot.
-     */
-    public function compass(): static
-    {
-        return $this->state(fn (array $attributes) => [
-            'type' => Hotspot::TYPE_COMPASS,
-            'rotation_y' => fake()->numberBetween(0, 360),
-        ]);
-    }
-
-    /**
      * Set the target scene for navigation hotspots.
      */
     public function withTarget(Scene $scene): static

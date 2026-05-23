@@ -127,7 +127,7 @@ smart_prasada/
 │   │   ├── nav.svg
 │   │   ├── info.svg
 │   │   ├── text.svg
-│   │   └── compass.svg
+
 │   └── js/
 │       └── viewer/                           # ES module scripts
 │           ├── viewer.js
@@ -346,8 +346,8 @@ Schema::create('hotspots', function (Blueprint $table) {
     $table->string('color')->default('#00bcd4');
     $table->integer('order')->default(0);
 
-    // Type enum: navigation, info, text, compass
-    $table->enum('type', ['navigation', 'info', 'text', 'compass'])
+    // Type enum: navigation, info, text
+    $table->enum('type', ['navigation', 'info', 'text'])
         ->default('navigation');
 
     // Info modal content (HTML allowed - admin input only)
@@ -377,7 +377,7 @@ Schema::create('hotspots', function (Blueprint $table) {
 Schema::create('hotspot_templates', function (Blueprint $table) {
     $table->id();
     $table->string('name');
-    $table->enum('type', ['navigation', 'info', 'text', 'compass']);
+    $table->enum('type', ['navigation', 'info', 'text']);
     $table->string('file_path'); // SVG file path
     $table->string('thumbnail_path')->nullable();
     $table->boolean('is_animated')->default(false);

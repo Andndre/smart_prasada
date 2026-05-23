@@ -152,7 +152,7 @@ class PanoramaController extends Controller
             'rotation_y' => 'nullable|numeric',
             'rotation_z' => 'nullable|numeric',
             'target_scene_id' => 'nullable|exists:adegan,adegan_id',
-            'type' => ['nullable', Rule::in(['navigation', 'info', 'text', 'compass'])],
+            'type' => ['nullable', Rule::in(['navigation', 'info', 'text'])],
             'modal_title' => 'nullable|string|max:255',
             'modal_content' => 'nullable|string',
             'modal_image' => 'nullable|string',
@@ -213,7 +213,7 @@ class PanoramaController extends Controller
             'rotation_z' => 'nullable|numeric',
             'target_scene_id' => 'nullable|exists:adegan,adegan_id',
             'order' => 'nullable|integer',
-            'type' => ['nullable', Rule::in(['navigation', 'info', 'text', 'compass'])],
+            'type' => ['nullable', Rule::in(['navigation', 'info', 'text'])],
             'modal_title' => 'nullable|string|max:255',
             'modal_content' => 'nullable|string',
             'modal_image' => 'nullable|string',
@@ -273,7 +273,7 @@ class PanoramaController extends Controller
 
         $data = $request->validate([
             'name' => 'required|string|max:255',
-            'type' => ['required', Rule::in(['navigation', 'info', 'text', 'compass'])],
+            'type' => ['required', Rule::in(['navigation', 'info', 'text'])],
             'file_path' => 'required|string',
             'thumbnail_path' => 'nullable|string',
             'is_animated' => 'nullable|boolean',
@@ -299,7 +299,7 @@ class PanoramaController extends Controller
         $template = HotspotTemplate::findOrFail($id);
         $data = $request->validate([
             'name' => 'nullable|string|max:255',
-            'type' => ['nullable', Rule::in(['navigation', 'info', 'text', 'compass'])],
+            'type' => ['nullable', Rule::in(['navigation', 'info', 'text'])],
             'file_path' => 'nullable|string',
             'thumbnail_path' => 'nullable|string',
             'is_animated' => 'nullable|boolean',
