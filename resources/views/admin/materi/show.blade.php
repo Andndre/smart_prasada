@@ -108,16 +108,17 @@
                                 </div>
 
                                 <!-- Situs Peninggalan -->
-                                <div class="rounded-lg border p-4">
+                                <a href="{{ route('admin.situs', ['materi_id' => $materi->materi_id]) }}"
+                                    class="block rounded-lg border border-gray-200 p-4 hover:border-blue-500 hover:bg-blue-50/30 transition-all duration-200 group">
                                     <div class="flex items-center justify-between">
                                         <div>
-                                            <h4 class="font-medium text-gray-900">Situs Peninggalan</h4>
+                                            <h4 class="font-medium text-gray-900 group-hover:text-blue-600 transition-colors duration-200">Situs Peninggalan</h4>
                                             <p class="text-sm text-gray-500">{{ $materi->situsPeninggalan()->count() }}
                                                 situs</p>
                                         </div>
-                                        <i class="fas fa-monument text-xl text-yellow-600"></i>
+                                        <i class="fas fa-monument text-xl text-yellow-600 group-hover:scale-110 transition-transform duration-200"></i>
                                     </div>
-                                </div>
+                                </a>
                             </div>
                         </div>
                     </div>

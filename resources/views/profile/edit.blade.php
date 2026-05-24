@@ -63,10 +63,10 @@
                     <div class="max-w-xl">
                         <header>
                             <h2 class="text-lg font-medium text-gray-900">
-                                {{ __('Keluar Akun') }}
+                                {{ __('app.logout_account') }}
                             </h2>
                             <p class="mt-1 text-sm text-gray-600">
-                                {{ __('Keluar dari akun aplikasi ini.') }}
+                                {{ __('app.logout_description') }}
                             </p>
                         </header>
 
@@ -77,7 +77,7 @@
                                     <button type="submit"
                                             class="flex items-center justify-center gap-2 rounded-lg bg-red-50 px-4 py-3 text-red-600 shadow-sm hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-colors">
                                         <i class="fas fa-sign-out-alt"></i>
-                                        <span>{{ __('Keluar dari Akun') }}</span>
+                                        <span>{{ __('app.logout_button') }}</span>
                                     </button>
                                 </div>
                             </form>

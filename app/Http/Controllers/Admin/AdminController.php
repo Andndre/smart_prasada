@@ -192,10 +192,17 @@ class AdminController extends Controller
     /**
      * Display situs management
      */
-    public function situs()
+    public function situs(Request $request)
     {
-        $situs = SitusPeninggalan::with(['user', 'materi', 'virtualMuseum', 'virtualMuseumObject', 'aksesSitusUser'])
-            ->orderBy('situs_id', 'desc')
+        $query = SitusPeninggalan::with(['user', 'materi', 'virtualMuseum', 'virtualMuseumObject', 'aksesSitusUser']);
+
+        $selectedMateri = null;
+        if ($request->filled('materi_id')) {
+            $query->where('materi_id', $request->materi_id);
+            $selectedMateri = Materi::find($request->materi_id);
+        }
+
+        $situs = $query->orderBy('situs_id', 'desc')
             ->paginate(20);
 
         // Calculate statistics
@@ -205,7 +212,7 @@ class AdminController extends Controller
             'total_user_accesses' => AksesSitusUser::count(),
         ];
 
-        return view('admin.situs.index', compact('situs', 'stats'));
+        return view('admin.situs.index', compact('situs', 'stats', 'selectedMateri'));
     }
 
     /**
@@ -1358,7 +1365,7 @@ class AdminController extends Controller
         if (! $posttest) {
             return back()->with('error', 'Soal posttest tidak ditemukan.');
         }
-        
+
         $posttest->delete();
 
         return redirect()->route('admin.posttest', $materi_id)
@@ -1374,7 +1381,7 @@ class AdminController extends Controller
         if (! $materi) {
             return back()->with('error', 'Materi tidak ditemukan.');
         }
-        
+
         $ebooks = Ebook::where('materi_id', $materi_id)->paginate(10);
 
         return view('admin.ebook.index', compact('materi', 'ebooks'));

@@ -105,6 +105,27 @@
                 </div>
             </div>
 
+            <!-- Filter Active Alert -->
+            @if(isset($selectedMateri))
+                <div class="mb-6 bg-blue-50 border border-blue-200 text-blue-800 px-4 py-4 rounded-xl shadow-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0 h-10 w-10 bg-blue-100 rounded-lg flex items-center justify-center text-blue-600 mr-3">
+                            <i class="fas fa-filter text-lg"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-blue-900">Menampilkan Filtered Situs</p>
+                            <p class="text-xs text-blue-700">Hanya menampilkan situs untuk materi: <strong class="text-blue-900">"{{ $selectedMateri->judul }}"</strong></p>
+                        </div>
+                    </div>
+                    <div>
+                        <a href="{{ route('admin.situs') }}" class="inline-flex items-center justify-center px-4 py-2 border border-blue-300 rounded-lg shadow-sm text-sm font-medium text-blue-700 bg-white hover:bg-blue-50 transition-colors">
+                            <i class="fas fa-times mr-2"></i>
+                            <span>Hapus Filter</span>
+                        </a>
+                    </div>
+                </div>
+            @endif
+
             <!-- Content -->
             @if($situs->count() > 0)
                 <div class="bg-white shadow-lg overflow-hidden sm:rounded-lg border border-gray-200">
@@ -355,23 +376,38 @@
                     <!-- Pagination -->
                     @if($situs->hasPages())
                         <div class="bg-gray-50 px-4 py-4 sm:px-6 border-t border-gray-200">
-                            {{ $situs->links() }}
+                            {{ $situs->appends(request()->query())->links() }}
                         </div>
                     @endif
                 </div>
             @else
                 <!-- Empty State -->
-                <div class="rounded-2xl bg-white p-12 text-center shadow-sm">
+                <div class="rounded-2xl bg-white p-12 text-center shadow-sm border border-gray-200">
                     <div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gray-100">
                         <i class="fas fa-map-marker-alt text-2xl text-gray-400"></i>
                     </div>
-                    <h3 class="mb-2 text-lg font-medium text-gray-900">Belum Ada Situs Peninggalan</h3>
-                    <p class="text-gray-600 mb-4">Mulai menambahkan situs peninggalan untuk memperkaya konten virtual living museum.</p>
-                    <a href="{{ route('admin.situs.create') }}" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 transition-colors">
-                        <i class="fas fa-plus mr-2"></i>
-                        <span class="hidden sm:inline">Tambah Situs Pertama</span>
-                        <span class="sm:hidden">Tambah Situs</span>
-                    </a>
+                    @if(isset($selectedMateri))
+                        <h3 class="mb-2 text-lg font-medium text-gray-900">Tidak Ada Situs Ditemukan</h3>
+                        <p class="text-gray-600 mb-4">Tidak ada situs peninggalan yang terikat dengan materi <strong>"{{ $selectedMateri->judul }}"</strong>.</p>
+                        <div class="flex justify-center space-x-3">
+                            <a href="{{ route('admin.situs.create', ['materi_id' => $selectedMateri->materi_id]) }}" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 transition-colors">
+                                <i class="fas fa-plus mr-2"></i>
+                                <span>Tambah Situs ke Materi Ini</span>
+                            </a>
+                            <a href="{{ route('admin.situs') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors">
+                                <i class="fas fa-times mr-2"></i>
+                                <span>Hapus Filter</span>
+                            </a>
+                        </div>
+                    @else
+                        <h3 class="mb-2 text-lg font-medium text-gray-900">Belum Ada Situs Peninggalan</h3>
+                        <p class="text-gray-600 mb-4">Mulai menambahkan situs peninggalan untuk memperkaya konten virtual living museum.</p>
+                        <a href="{{ route('admin.situs.create') }}" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 transition-colors">
+                            <i class="fas fa-plus mr-2"></i>
+                            <span class="hidden sm:inline">Tambah Situs Pertama</span>
+                            <span class="sm:hidden">Tambah Situs</span>
+                        </a>
+                    @endif
                 </div>
             @endif
         </div>

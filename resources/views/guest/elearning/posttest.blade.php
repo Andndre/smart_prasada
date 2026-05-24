@@ -330,7 +330,7 @@
                 // Update progress
                 const progress = ((index + 1) / totalQuestions) * 100;
                 document.getElementById('progress-bar').style.width = progress + '%';
-                document.getElementById('progress-text').textContent = `${index + 1} ${__('elearning.posttest.dari')} ${totalQuestions}`;
+                document.getElementById('progress-text').textContent = `${index + 1} {{ __('elearning.posttest.dari') }} ${totalQuestions}`;
                 // Update navigation buttons
                 const prevBtn = document.getElementById('prev-btn');
                 const nextBtn = document.getElementById('next-btn');

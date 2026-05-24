@@ -114,6 +114,11 @@ return [
         'toggle_title' => 'Click to toggle',
     ],
 
+    // Logout Section
+    'logout_account' => 'Logout Account',
+    'logout_description' => 'Logout from this application account.',
+    'logout_button' => 'Logout from Account',
+
     // Delete Account
     'delete_account' => 'Delete Account',
     'delete_account_desc' => 'Once your account is deleted, all of its resources and data will be permanently deleted. Before deleting your account, please download any data or information that you wish to retain.',

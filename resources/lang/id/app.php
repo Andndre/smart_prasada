@@ -114,6 +114,11 @@ return [
         'toggle_title' => 'Klik untuk mengubah',
     ],
 
+    // Logout Section
+    'logout_account' => 'Keluar Akun',
+    'logout_description' => 'Keluar dari akun aplikasi ini.',
+    'logout_button' => 'Keluar dari Akun',
+
     // Delete Account
     'delete_account' => 'Hapus Akun',
     'delete_account_desc' => 'Setelah akun Anda dihapus, semua sumber daya dan data akan dihapus secara permanen. Sebelum menghapus akun, harap unduh data atau informasi apa pun yang ingin Anda pertahankan.',
