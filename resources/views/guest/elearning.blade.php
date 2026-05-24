@@ -1,77 +1,80 @@
 <x-elearning-layout>
     {{-- Header Section --}}
     <div class="bg-primary px-6 py-6 text-white">
-        <div class="mb-6 flex items-center justify-between">
-            <button class="back-button rounded-full p-2 transition-colors hover:bg-white/10"
-                data-fallback-url="{{ route('guest.home') }}">
-                <i class="fas fa-arrow-left text-xl"></i>
-            </button>
-            <x-user-profile-navbar class="h-12 w-12"/>
-        </div>
+        <div class="max-w-7xl mx-auto">
+            <div class="mb-6 flex items-center justify-between">
+                <button class="back-button rounded-full p-2 transition-colors hover:bg-white/10"
+                    data-fallback-url="{{ route('guest.home') }}">
+                    <i class="fas fa-arrow-left text-xl"></i>
+                </button>
+                <x-user-profile-navbar class="h-12 w-12"/>
+            </div>
 
-        <h1 class="mb-8 text-2xl font-bold">{{ __('app.elearning') }}</h1>
+            <h1 class="mb-8 text-2xl font-bold">{{ __('app.elearning') }}</h1>
 
-        {{-- Continuing Card --}}
-        @if ($nextMateri)
-            <div class="relative mb-6 overflow-hidden rounded-2xl bg-blue-500 p-6">
-                <div class="flex items-center space-x-4">
-                    <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-yellow-400">
-                        <i class="fas fa-lightbulb text-xl text-gray-800"></i>
-                    </div>
-                    <div class="flex-1">
-                        <p class="text-sm text-blue-100">Lanjutkan dari tempat Anda tinggalkan</p>
+            {{-- Continuing Card --}}
+            @if ($nextMateri)
+                <div class="relative mb-6 overflow-hidden rounded-2xl bg-blue-500 p-6">
+                    <div class="flex items-center space-x-4">
+                        <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-yellow-400">
+                            <i class="fas fa-lightbulb text-xl text-gray-800"></i>
+                        </div>
+                        <div class="flex-1">
+                            <p class="text-sm text-blue-100">Lanjutkan dari tempat Anda tinggalkan</p>
+                            @php
+                                $stepLabel = 'Pre-test';
+                                if (auth()->user()->progress_level_sekarang == 1) {
+                                    $stepLabel = 'E-Book';
+                                } elseif (auth()->user()->progress_level_sekarang == 2) {
+                                    $stepLabel = config('app.name');
+                                } elseif (auth()->user()->progress_level_sekarang == 3) {
+                                    $stepLabel = 'Post-test';
+                                }
+                            @endphp
+                            <h3 class="font-semibold text-white">{{ $stepLabel }}</h3>
+                            <h3 class="font-bold text-white">{{ $nextMateri->judul }}</h3>
+                        </div>
                         @php
-                            $stepLabel = 'Pre-test';
+                            $tabParam = 'pretest';
                             if (auth()->user()->progress_level_sekarang == 1) {
-                                $stepLabel = 'E-Book';
+                                $tabParam = 'ebook';
                             } elseif (auth()->user()->progress_level_sekarang == 2) {
-                                $stepLabel = config('app.name');
+                                $tabParam = 'museum';
                             } elseif (auth()->user()->progress_level_sekarang == 3) {
-                                $stepLabel = 'Post-test';
+                                $tabParam = 'posttest';
                             }
                         @endphp
-                        <h3 class="font-semibold text-white">{{ $stepLabel }}</h3>
-                        <h3 class="font-bold text-white">{{ $nextMateri->judul }}</h3>
+                        <a href="{{ route('guest.elearning.materi', $nextMateri->materi_id) }}?tab={{ $tabParam }}"
+                            class="rounded-full p-2 transition-colors hover:bg-white/10">
+                            <i class="fas fa-arrow-right text-xl text-white"></i>
+                        </a>
                     </div>
-                    @php
-                        $tabParam = 'pretest';
-                        if (auth()->user()->progress_level_sekarang == 1) {
-                            $tabParam = 'ebook';
-                        } elseif (auth()->user()->progress_level_sekarang == 2) {
-                            $tabParam = 'museum';
-                        } elseif (auth()->user()->progress_level_sekarang == 3) {
-                            $tabParam = 'posttest';
-                        }
-                    @endphp
-                    <a href="{{ route('guest.elearning.materi', $nextMateri->materi_id) }}?tab={{ $tabParam }}"
-                        class="rounded-full p-2 transition-colors hover:bg-white/10">
-                        <i class="fas fa-arrow-right text-xl text-white"></i>
-                    </a>
                 </div>
-            </div>
-        @endif
+            @endif
+        </div>
     </div>
 
     {{-- Content Section --}}
     <div class="relative -mt-6 min-h-screen rounded-t-3xl bg-white">
-        {{-- Tab Navigation --}}
-        <div class="px-6 pt-6">
-            <div class="flex rounded-2xl bg-gray-100 p-1">
-                <button id="tab-materi"
-                    class="tab-button active flex-1 rounded-xl px-4 py-3 text-sm font-medium transition-all duration-200">
-                    Materi
-                </button>
-                <button id="tab-riwayat"
-                    class="tab-button flex-1 rounded-xl px-4 py-3 text-sm font-medium transition-all duration-200">
-                    Riwayat
-                </button>
+        <div class="max-w-7xl mx-auto">
+            {{-- Tab Navigation --}}
+            <div class="px-6 pt-6">
+                <div class="flex rounded-2xl bg-gray-100 p-1">
+                    <button id="tab-materi"
+                        class="tab-button active flex-1 rounded-xl px-4 py-3 text-sm font-medium transition-all duration-200">
+                        Materi
+                    </button>
+                    <button id="tab-riwayat"
+                        class="tab-button flex-1 rounded-xl px-4 py-3 text-sm font-medium transition-all duration-200">
+                        Riwayat
+                    </button>
+                </div>
             </div>
-        </div>
 
-        {{-- Tab Content --}}
-        <div class="px-6 py-6">
-            {{-- Materi Tab Content --}}
-            <div id="content-materi" class="tab-content">
+            {{-- Tab Content --}}
+            <div class="px-6 py-6">
+                {{-- Materi Tab Content --}}
+                <div id="content-materi" class="tab-content">
                 @if ($eraCards->isEmpty())
                     <div class="rounded-2xl bg-white p-12 text-center shadow-sm">
                         <div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gray-100">

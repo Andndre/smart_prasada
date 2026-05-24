@@ -1,21 +1,24 @@
 <x-elearning-layout>
     {{-- Header Section --}}
     <div class="bg-primary px-6 py-6 text-white">
-        <div class="flex items-center justify-between">
-            <div class="flex items-center space-x-4">
-                <button class="back-button rounded-full p-2 transition-colors hover:bg-white/10">
-                    <i class="fas fa-arrow-left text-xl"></i>
-                </button>
-                <div class="flex-1">
-                    <h1 class="text-lg font-bold">Virtual Living Museum</h1>
-                    <p class="text-sm opacity-90">{{ $situs->nama }}</p>
+        <div class="max-w-7xl mx-auto">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <button class="back-button rounded-full p-2 transition-colors hover:bg-white/10">
+                        <i class="fas fa-arrow-left text-xl"></i>
+                    </button>
+                    <div class="flex-1">
+                        <h1 class="text-lg font-bold">Virtual Living Museum</h1>
+                        <p class="text-sm opacity-90">{{ $situs->nama }}</p>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
     {{-- Content Section --}}
-    <div class="min-h-screen bg-gray-50 px-6 py-6">
+    <div class="min-h-screen bg-gray-50">
+        <div class="max-w-7xl mx-auto px-6 py-6">
         {{-- Hero Image Section --}}
         <div class="mb-6 overflow-hidden rounded-2xl bg-white shadow-sm">
             <div class="relative aspect-[16/9] bg-gradient-to-br from-orange-400 to-orange-600">
@@ -277,6 +280,7 @@
                     </a>
                 @endif
             </div>
+        </div>
         </div>
     </div>
 

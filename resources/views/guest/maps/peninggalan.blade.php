@@ -41,9 +41,11 @@
         <!-- Search Results Header -->
         @if (isset($searchQuery) && !empty($searchQuery))
             <div class="mb-6">
-                <h2 class="text-xl font-semibold text-gray-800">@lang('maps.search_results_for', ['query' => $searchQuery])</h2>
+                <h2 class="text-xl font-semibold text-gray-800">@lang('maps.search_results_for', ['query' => $searchQuery])
+                </h2>
                 <p class="text-sm text-gray-500">{{ $situs->count() }}
-                    {{ $situs->count() == 1 ? __('maps.result_found') : __('maps.results_found') }}</p>
+                    {{ $situs->count() == 1 ? __('maps.result_found') : __('maps.results_found') }}
+                </p>
             </div>
         @endif
 
@@ -144,10 +146,9 @@
                 @if (isset($searchQuery) && !empty($searchQuery))
                     <a href="{{ route('guest.maps.peninggalan') }}"
                         class="mt-6 inline-flex items-center rounded-xl border border-gray-200 bg-white px-5 py-3 text-sm font-medium text-gray-700 shadow-sm transition-colors hover:bg-gray-50">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="mr-2 h-4 w-4" fill="none"
-                            viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M6 18L18 6M6 6l12 12" />
+                        <svg xmlns="http://www.w3.org/2000/svg" class="mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                         </svg>
                         {{ __('maps.clear_search') }}
                     </a>

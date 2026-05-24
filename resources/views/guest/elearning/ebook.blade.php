@@ -1,29 +1,31 @@
 <x-elearning-layout>
     {{-- Header Section --}}
     <div class="bg-primary px-6 py-6 text-white">
-        <div class="flex items-center justify-between">
-            <button class="back-button rounded-full p-2 transition-colors hover:bg-white/10">
-                <i class="fas fa-arrow-left text-xl"></i>
-            </button>
-            <div class="mx-4 flex-1 text-center">
-                <h1 class="text-lg font-bold">{{ $ebook->judul }}</h1>
-                <p class="text-sm opacity-90">
-                    {{ $ebook->materi->judul }}
-                    @if ($ebook->materi->bab)
-                        &mdash; Bab {{ $ebook->materi->bab }}
+        <div class="max-w-7xl mx-auto">
+            <div class="flex items-center justify-between">
+                <button class="back-button rounded-full p-2 transition-colors hover:bg-white/10">
+                    <i class="fas fa-arrow-left text-xl"></i>
+                </button>
+                <div class="mx-4 flex-1 text-center">
+                    <h1 class="text-lg font-bold">{{ $ebook->judul }}</h1>
+                    <p class="text-sm opacity-90">
+                        {{ $ebook->materi->judul }}
+                        @if ($ebook->materi->bab)
+                            &mdash; Bab {{ $ebook->materi->bab }}
+                        @endif
+                    </p>
+                </div>
+                <a href="{{ route('profile.edit') }}"
+                    class="h-12 w-12 overflow-hidden rounded-full border-2 border-white/30 transition-colors hover:border-white/50">
+                    @if (auth()->user()->profile_photo)
+                        <img src="{{ asset('storage/' . auth()->user()->profile_photo) }}" alt="Profile Picture"
+                            class="h-full w-full object-cover" />
+                    @else
+                        <img src="{{ asset('images/placeholder/profile-picture.png') }}" alt="Profile Picture"
+                            class="h-full w-full object-cover" />
                     @endif
-                </p>
+                </a>
             </div>
-            <a href="{{ route('profile.edit') }}"
-                class="h-12 w-12 overflow-hidden rounded-full border-2 border-white/30 transition-colors hover:border-white/50">
-                @if (auth()->user()->profile_photo)
-                    <img src="{{ asset('storage/' . auth()->user()->profile_photo) }}" alt="Profile Picture"
-                        class="h-full w-full object-cover" />
-                @else
-                    <img src="{{ asset('images/placeholder/profile-picture.png') }}" alt="Profile Picture"
-                        class="h-full w-full object-cover" />
-                @endif
-            </a>
         </div>
     </div>
 
@@ -111,7 +113,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js"></script>
     @vite(['resources/js/ebook.js'])
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             window.initEbookPageFlip({
                 pdfUrl: @json(asset('storage/' . $ebook->path_file)),
                 totalPages: {{ $ebook->jumlah_halaman ?? 'null' }},

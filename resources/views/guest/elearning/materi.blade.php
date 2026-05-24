@@ -1,107 +1,109 @@
 <x-elearning-layout>
     {{-- Header Section --}}
     <div class="bg-primary px-6 py-6 text-white">
-        <div class="mb-6 flex items-center justify-between">
-            <button class="back-button rounded-full p-2 transition-colors hover:bg-white/10">
-                <i class="fas fa-arrow-left text-xl"></i>
-            </button>
-            <a href="{{ route('profile.edit') }}"
-                class="h-12 w-12 overflow-hidden rounded-full border-2 border-white/30 transition-colors hover:border-white/50">
-                @if (auth()->user()->profile_photo)
-                    <img src="{{ asset('storage/' . auth()->user()->profile_photo) }}" alt="Profile Picture"
-                        class="h-full w-full object-cover" />
-                @else
-                    <img src="{{ asset('images/placeholder/profile-picture.png') }}" alt="Profile Picture"
-                        class="h-full w-full object-cover" />
-                @endif
-            </a>
-        </div>
-
-        <div class="mb-8">
-            <div class="mb-2 flex items-center space-x-2">
-                <i class="fas fa-book text-yellow-400"></i>
-                @if ($materi->era)
-                    <span class="text-sm opacity-90">{{ $materi->era->kode }}. {{ $materi->era->nama }}</span>
-                    @if ($materi->bab)
-                        <span class="text-sm opacity-70">— {{ __('elearning.bab') }} {{ $materi->bab }}</span>
+        <div class="max-w-7xl mx-auto">
+            <div class="mb-6 flex items-center justify-between">
+                <button class="back-button rounded-full p-2 transition-colors hover:bg-white/10">
+                    <i class="fas fa-arrow-left text-xl"></i>
+                </button>
+                <a href="{{ route('profile.edit') }}"
+                    class="h-12 w-12 overflow-hidden rounded-full border-2 border-white/30 transition-colors hover:border-white/50">
+                    @if (auth()->user()->profile_photo)
+                        <img src="{{ asset('storage/' . auth()->user()->profile_photo) }}" alt="Profile Picture"
+                            class="h-full w-full object-cover" />
+                    @else
+                        <img src="{{ asset('images/placeholder/profile-picture.png') }}" alt="Profile Picture"
+                            class="h-full w-full object-cover" />
                     @endif
-                @else
-                    <span class="text-sm opacity-90">{{ __('elearning.materi') }}</span>
-                @endif
+                </a>
             </div>
-            <h1 class="text-2xl font-bold">{{ $materi->judul }}</h1>
-        </div>
 
-        {{-- Tab Navigation --}}
-        <div class="mb-4 grid grid-cols-4 gap-2">
-            {{-- Pre-test Tab --}}
-            <button onclick="switchTab('pretest')" id="pretest-tab"
-                class="tab-button flex flex-col items-center rounded-lg p-2 transition-colors">
-                <div
-                    class="relative mb-2 flex h-12 w-12 items-center justify-center rounded-full border-2 border-white">
-                    @if ($pretest_completed)
-                        <i class="fas fa-check text-white"></i>
-                    @elseif(true)
-                        {{-- Pre-test is always available --}}
-                        <i class="fas fa-file-alt text-white"></i>
-                    @endif
-                </div>
-                <span class="text-center text-xs text-white">{{ __('elearning.materi.pre_test') }}</span>
-            </button>
-
-            {{-- E-Book Tab --}}
-            <button onclick="switchTab('ebook')" id="ebook-tab"
-                class="tab-button {{ !$ebook_available ? 'opacity-50' : '' }} flex flex-col items-center rounded-lg p-2 transition-colors">
-                <div
-                    class="relative mb-2 flex h-12 w-12 items-center justify-center rounded-full border-2 border-white">
-                    @if (!$ebook_available)
-                        <i class="fas fa-lock text-white"></i>
-                    @elseif($all_ebooks_read)
-                        <i class="fas fa-check text-white"></i>
+            <div class="mb-8">
+                <div class="mb-2 flex items-center space-x-2">
+                    <i class="fas fa-book text-yellow-400"></i>
+                    @if ($materi->era)
+                        <span class="text-sm opacity-90">{{ $materi->era->kode }}. {{ $materi->era->nama }}</span>
+                        @if ($materi->bab)
+                            <span class="text-sm opacity-70">— {{ __('elearning.bab') }} {{ $materi->bab }}</span>
+                        @endif
                     @else
-                        <i class="fas fa-book text-white"></i>
+                        <span class="text-sm opacity-90">{{ __('elearning.materi') }}</span>
                     @endif
                 </div>
-                <span class="text-center text-xs text-white">{{ __('elearning.materi.e_book') }}</span>
-            </button>
+                <h1 class="text-2xl font-bold">{{ $materi->judul }}</h1>
+            </div>
 
-            {{-- Virtual Living Museum Tab --}}
-            <button onclick="switchTab('museum')" id="museum-tab"
-                class="tab-button {{ !$museum_available ? 'opacity-50' : '' }} flex flex-col items-center rounded-lg p-2 transition-colors">
-                <div
-                    class="relative mb-2 flex h-12 w-12 items-center justify-center rounded-full border-2 border-white">
-                    @if (!$museum_available)
-                        <i class="fas fa-lock text-white"></i>
-                    @elseif($all_museums_visited)
-                        <i class="fas fa-check text-white"></i>
-                    @else
-                        <i class="fas fa-map-marker-alt text-white"></i>
-                    @endif
-                </div>
-                <span class="text-center text-xs text-white">{{ __('elearning.materi.virtual_living_museum') }}</span>
-            </button>
+            {{-- Tab Navigation --}}
+            <div class="mb-4 grid grid-cols-4 gap-2">
+                {{-- Pre-test Tab --}}
+                <button onclick="switchTab('pretest')" id="pretest-tab"
+                    class="tab-button flex flex-col items-center rounded-lg p-2 transition-colors">
+                    <div
+                        class="relative mb-2 flex h-12 w-12 items-center justify-center rounded-full border-2 border-white">
+                        @if ($pretest_completed)
+                            <i class="fas fa-check text-white"></i>
+                        @elseif(true)
+                            {{-- Pre-test is always available --}}
+                            <i class="fas fa-file-alt text-white"></i>
+                        @endif
+                    </div>
+                    <span class="text-center text-xs text-white">{{ __('elearning.materi.pre_test') }}</span>
+                </button>
 
-            {{-- Post-test Tab --}}
-            <button onclick="switchTab('posttest')" id="posttest-tab"
-                class="tab-button {{ !$posttest_available ? 'opacity-50' : '' }} flex flex-col items-center rounded-lg p-2 transition-colors">
-                <div
-                    class="relative mb-2 flex h-12 w-12 items-center justify-center rounded-full border-2 border-white">
-                    @if (!$posttest_available)
-                        <i class="fas fa-lock text-white"></i>
-                    @elseif($posttest_completed)
-                        <i class="fas fa-check text-white"></i>
-                    @else
-                        <i class="fas fa-clipboard-check text-white"></i>
-                    @endif
-                </div>
-                <span class="text-center text-xs text-white">{{ __('elearning.materi.post_test') }}</span>
-            </button>
+                {{-- E-Book Tab --}}
+                <button onclick="switchTab('ebook')" id="ebook-tab"
+                    class="tab-button {{ !$ebook_available ? 'opacity-50' : '' }} flex flex-col items-center rounded-lg p-2 transition-colors">
+                    <div
+                        class="relative mb-2 flex h-12 w-12 items-center justify-center rounded-full border-2 border-white">
+                        @if (!$ebook_available)
+                            <i class="fas fa-lock text-white"></i>
+                        @elseif($all_ebooks_read)
+                            <i class="fas fa-check text-white"></i>
+                        @else
+                            <i class="fas fa-book text-white"></i>
+                        @endif
+                    </div>
+                    <span class="text-center text-xs text-white">{{ __('elearning.materi.e_book') }}</span>
+                </button>
+
+                {{-- Virtual Living Museum Tab --}}
+                <button onclick="switchTab('museum')" id="museum-tab"
+                    class="tab-button {{ !$museum_available ? 'opacity-50' : '' }} flex flex-col items-center rounded-lg p-2 transition-colors">
+                    <div
+                        class="relative mb-2 flex h-12 w-12 items-center justify-center rounded-full border-2 border-white">
+                        @if (!$museum_available)
+                            <i class="fas fa-lock text-white"></i>
+                        @elseif($all_museums_visited)
+                            <i class="fas fa-check text-white"></i>
+                        @else
+                            <i class="fas fa-map-marker-alt text-white"></i>
+                        @endif
+                    </div>
+                    <span class="text-center text-xs text-white">{{ __('elearning.materi.virtual_living_museum') }}</span>
+                </button>
+
+                {{-- Post-test Tab --}}
+                <button onclick="switchTab('posttest')" id="posttest-tab"
+                    class="tab-button {{ !$posttest_available ? 'opacity-50' : '' }} flex flex-col items-center rounded-lg p-2 transition-colors">
+                    <div
+                        class="relative mb-2 flex h-12 w-12 items-center justify-center rounded-full border-2 border-white">
+                        @if (!$posttest_available)
+                            <i class="fas fa-lock text-white"></i>
+                        @elseif($posttest_completed)
+                            <i class="fas fa-check text-white"></i>
+                        @else
+                            <i class="fas fa-clipboard-check text-white"></i>
+                        @endif
+                    </div>
+                    <span class="text-center text-xs text-white">{{ __('elearning.materi.post_test') }}</span>
+                </button>
+            </div>
         </div>
     </div>
 
     {{-- Content Section --}}
     <div class="relative -mt-6 min-h-screen rounded-t-3xl bg-white">
-        <div class="px-6 py-8">
+        <div class="max-w-7xl mx-auto px-6 py-8">
             {{-- Pre Test Tab Content --}}
             <div id="pretest-content" class="tab-content">
                 @if ($materi->pretest->count() > 0)

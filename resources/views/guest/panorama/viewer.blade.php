@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,43 +9,179 @@
     <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
     <script src="https://unpkg.com/aframe-look-at-component@0.8.0/dist/aframe-look-at-component.min.js"></script>
     @vite(['resources/css/app.css'])
-    
+
     <style>
         /* Base styles */
-        body, html { width: 100%; height: 100%; margin: 0; padding: 0; overflow: hidden; background-color: #000; font-family: 'Inter', sans-serif; }
-        
+        body,
+        html {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background-color: #000;
+            font-family: 'Inter', sans-serif;
+        }
+
         /* UI Overlays */
-        #ui-layer { position: absolute; inset: 0; pointer-events: none; z-index: 10; display: flex; flex-direction: column; justify-content: space-between; padding: 1rem; }
-        .interactive { pointer-events: auto; }
-        
+        #ui-layer {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 1rem;
+        }
+
+        .interactive {
+            pointer-events: auto;
+        }
+
         /* Header bar */
-        #header-bar { display: flex; justify-content: space-between; align-items: flex-start; }
-        
-        .btn-circle { width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.5); backdrop-filter: blur(8px); color: white; border: 1px solid rgba(255,255,255,0.2); cursor: pointer; transition: all 0.2s ease; }
-        .btn-circle:hover { background: rgba(255,255,255,0.2); transform: scale(1.05); }
-        
-        .tour-title-box { background: rgba(0,0,0,0.5); backdrop-filter: blur(8px); padding: 0.75rem 1.5rem; border-radius: 9999px; border: 1px solid rgba(255,255,255,0.2); color: white; text-align: center; }
-        
+        #header-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .btn-circle {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(8px);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-circle:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.05);
+        }
+
+        .tour-title-box {
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(8px);
+            padding: 0.75rem 1.5rem;
+            border-radius: 9999px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            text-align: center;
+        }
+
         /* Loading Overlay */
-        #loading-overlay { position: absolute; inset: 0; background: #000; z-index: 50; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; transition: opacity 0.5s ease; }
-        .spinner { width: 40px; height: 40px; border: 4px solid rgba(255,255,255,0.1); border-top-color: #0ea5e9; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 1rem; }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        
+        #loading-overlay {
+            position: absolute;
+            inset: 0;
+            background: #000;
+            z-index: 50;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            transition: opacity 0.5s ease;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-top-color: #0ea5e9;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 1rem;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
         /* Modal Info */
-        #info-modal { position: absolute; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); z-index: 40; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; padding: 1rem; }
-        #info-modal.active { opacity: 1; pointer-events: auto; }
-        .modal-card { background: white; border-radius: 1rem; width: 100%; max-width: 28rem; overflow: hidden; transform: translateY(20px); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); display: flex; flex-direction: column; max-height: 90vh; }
-        #info-modal.active .modal-card { transform: translateY(0); }
-        .modal-header { display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.5rem; border-bottom: 1px solid #f1f5f9; }
-        .modal-body { padding: 1.5rem; overflow-y: auto; }
-        .modal-img { width: 100%; height: auto; max-height: 200px; object-fit: cover; border-radius: 0.5rem; margin-bottom: 1rem; display: none; }
-        
+        #info-modal {
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(4px);
+            z-index: 40;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            padding: 1rem;
+        }
+
+        #info-modal.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-card {
+            background: white;
+            border-radius: 1rem;
+            width: 100%;
+            max-width: 28rem;
+            overflow: hidden;
+            transform: translateY(20px);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: flex;
+            flex-direction: column;
+            max-height: 90vh;
+        }
+
+        #info-modal.active .modal-card {
+            transform: translateY(0);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+            overflow-y: auto;
+        }
+
+        .modal-img {
+            width: 100%;
+            height: auto;
+            max-height: 200px;
+            object-fit: cover;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+            display: none;
+        }
+
         /* Scene Transition Overlay */
-        #transition-overlay { position: absolute; inset: 0; background: black; z-index: 5; opacity: 0; pointer-events: none; transition: opacity 0.4s ease; }
+        #transition-overlay {
+            position: absolute;
+            inset: 0;
+            background: black;
+            z-index: 5;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.4s ease;
+        }
     </style>
     <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
+
 <body>
 
     <!-- Loading Screen -->
@@ -57,34 +194,38 @@
     <!-- UI Overlay -->
     <div id="ui-layer">
         <div id="header-bar">
-            <a href="{{ route('guest.situs.detail', $situs->situs_id) }}" class="btn-circle interactive" title="Kembali ke Detail Situs">
+            <a href="{{ route('guest.situs.detail', $situs->situs_id) }}" class="btn-circle interactive"
+                title="Kembali ke Detail Situs">
                 <i class="fas fa-arrow-left"></i>
             </a>
-            
+
             <div class="tour-title-box">
                 <h1 class="text-sm font-bold m-0">{{ $situs->nama }}</h1>
                 <p class="text-xs opacity-75 m-0" id="current-scene-name">Memuat...</p>
             </div>
-            
+
             <button class="btn-circle interactive" id="btn-fullscreen" title="Layar Penuh">
                 <i class="fas fa-expand"></i>
             </button>
         </div>
-        
+
         <!-- Bottom Controls -->
         <div class="flex justify-center interactive">
-            <div class="bg-black/50 backdrop-blur-md rounded-full px-6 py-2 border border-white/20 flex gap-4 text-white">
-                <button id="btn-gyro" class="p-2 hover:text-cyan-400 transition-colors" title="Sensor Gyroscope (Mobile)">
+            <div
+                class="bg-black/50 backdrop-blur-md rounded-full px-6 py-2 border border-white/20 flex gap-4 text-white">
+                <button id="btn-gyro" class="p-2 hover:text-cyan-400 transition-colors"
+                    title="Sensor Gyroscope (Mobile)">
                     <i class="fas fa-compass"></i>
                 </button>
                 <div class="w-px bg-white/20 my-2"></div>
-                <button class="p-2 hover:text-cyan-400 transition-colors cursor-help" title="Geser untuk melihat sekeliling. Klik ikon untuk berinteraksi.">
+                <button class="p-2 hover:text-cyan-400 transition-colors cursor-help"
+                    title="Geser untuk melihat sekeliling. Klik ikon untuk berinteraksi.">
                     <i class="fas fa-info-circle"></i>
                 </button>
             </div>
         </div>
     </div>
-    
+
     <!-- Info Modal -->
     <div id="info-modal" class="interactive">
         <div class="modal-card">
@@ -100,25 +241,27 @@
             </div>
         </div>
     </div>
-    
+
     <!-- Transition Overlay -->
     <div id="transition-overlay"></div>
 
     <!-- A-Frame Scene -->
-    <a-scene 
-        id="panorama-scene" 
-        vr-mode-ui="enabled: true; enterVRButton: #btn-vr-custom"
-        loading-screen="enabled: false"
-        renderer="antialias: true; colorManagement: true; sortObjects: true"
-    >
+    <a-scene id="panorama-scene" vr-mode-ui="enabled: true; enterVRButton: #btn-vr-custom"
+        loading-screen="enabled: false" renderer="antialias: true; colorManagement: true; sortObjects: true">
         <a-assets id="scene-assets">
             <!-- Assets will be dynamically loaded here -->
-            <img id="icon-door" crossorigin="anonymous" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='512' height='512' viewBox='0 0 512 512'><path fill='%23ffffff' d='M320 48v416c0 26.5-21.5 48-48 48H128c-26.5 0-48-21.5-48-48V48C80 21.5 101.5 0 128 0h144c26.5 0 48 21.5 48 48zm-16 0c0-8.8-7.2-16-16-16H128c-8.8 0-16 7.2-16 16v416c0 8.8 7.2 16 16 16h144c8.8 0 16-7.2 16-16V48zm128 0v416c0 26.5-21.5 48-48 48h-16v-32h16c8.8 0 16-7.2 16-16V48c0-8.8-7.2-16-16-16h-16V0h16c26.5 0 48 21.5 48 48zm-96 240c0 13.3-10.7 24-24 24s-24-10.7-24-24 10.7-24 24-24 24 10.7 24 24z'/></svg>">
-            <img id="icon-arrow-up" crossorigin="anonymous" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='512' height='512' viewBox='0 0 512 512'><path fill='%23ffffff' d='M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM256 127c9.4 0 18.8 3.8 26.3 11.3l112 112c14.6 14.6 14.6 38.2 0 52.7s-38.2 14.6-52.7 0L256 225 178 303c-14.6 14.6-38.2 14.6-52.7 0s-14.6-38.2 0-52.7l112-112c7.5-7.5 16.9-11.3 26.3-11.3z'/></svg>">
-            <img id="icon-arrow-down" crossorigin="anonymous" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='512' height='512' viewBox='0 0 512 512'><path fill='%23ffffff' d='M256 0a256 256 0 1 0 0 512A256 256 0 1 0 256 0zM256 385c-9.4 0-18.8-3.8-26.3-11.3l-112-112c-14.6-14.6-14.6-38.2 0-52.7s38.2-14.6 52.7 0L256 287 334 209c14.6-14.6 38.2-14.6 52.7 0s14.6 38.2 0 52.7l-112 112c-7.5 7.5-16.9 11.3-26.3 11.3z'/></svg>">
-            <img id="icon-arrow-right" crossorigin="anonymous" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='512' height='512' viewBox='0 0 512 512'><path fill='%23ffffff' d='M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM385 256c0 9.4-3.8 18.8-11.3 26.3l-112 112c-14.6 14.6-38.2 14.6-52.7 0s-14.6-38.2 0-52.7L287 256 209 178c-14.6-14.6-14.6-38.2 0-52.7s38.2-14.6 52.7 0l112 112c7.5 7.5 11.3 16.9 11.3 26.3z'/></svg>">
-            <img id="icon-arrow-left" crossorigin="anonymous" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='512' height='512' viewBox='0 0 512 512'><path fill='%23ffffff' d='M256 0a256 256 0 1 0 0 512A256 256 0 1 0 256 0zM127 256c0-9.4 3.8-18.8 11.3-26.3l112-112c14.6-14.6 38.2-14.6 52.7 0s14.6 38.2 0 52.7L225 256l78 78c14.6 14.6 14.6 38.2 0 52.7s-38.2 14.6-52.7 0l-112-112c-7.5-7.5-11.3-16.9-11.3-26.3z'/></svg>">
-            <img id="icon-info" crossorigin="anonymous" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='512' height='512' viewBox='0 0 512 512'><path fill='%23ffffff' d='M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM216 336h24V272H216c-13.3 0-24-10.7-24-24s10.7-24 24-24h48c13.3 0 24 10.7 24 24v88h8c13.3 0 24 10.7 24 24s-10.7 24-24 24H216c-13.3 0-24-10.7-24-24s10.7-24 24-24zm40-208a32 32 0 1 1 0 64 32 32 0 1 1 0-64z'/></svg>">
+            <img id="icon-door" crossorigin="anonymous"
+                src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='512' height='512' viewBox='0 0 512 512'><path fill='%23ffffff' d='M320 48v416c0 26.5-21.5 48-48 48H128c-26.5 0-48-21.5-48-48V48C80 21.5 101.5 0 128 0h144c26.5 0 48 21.5 48 48zm-16 0c0-8.8-7.2-16-16-16H128c-8.8 0-16 7.2-16 16v416c0 8.8 7.2 16 16 16h144c8.8 0 16-7.2 16-16V48zm128 0v416c0 26.5-21.5 48-48 48h-16v-32h16c8.8 0 16-7.2 16-16V48c0-8.8-7.2-16-16-16h-16V0h16c26.5 0 48 21.5 48 48zm-96 240c0 13.3-10.7 24-24 24s-24-10.7-24-24 10.7-24 24-24 24 10.7 24 24z'/></svg>">
+            <img id="icon-arrow-up" crossorigin="anonymous"
+                src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='512' height='512' viewBox='0 0 512 512'><path fill='%23ffffff' d='M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM256 127c9.4 0 18.8 3.8 26.3 11.3l112 112c14.6 14.6 14.6 38.2 0 52.7s-38.2 14.6-52.7 0L256 225 178 303c-14.6 14.6-38.2 14.6-52.7 0s-14.6-38.2 0-52.7l112-112c7.5-7.5 16.9-11.3 26.3-11.3z'/></svg>">
+            <img id="icon-arrow-down" crossorigin="anonymous"
+                src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='512' height='512' viewBox='0 0 512 512'><path fill='%23ffffff' d='M256 0a256 256 0 1 0 0 512A256 256 0 1 0 256 0zM256 385c-9.4 0-18.8-3.8-26.3-11.3l-112-112c-14.6-14.6-14.6-38.2 0-52.7s38.2-14.6 52.7 0L256 287 334 209c14.6-14.6 38.2-14.6 52.7 0s14.6 38.2 0 52.7l-112 112c-7.5 7.5-16.9 11.3-26.3 11.3z'/></svg>">
+            <img id="icon-arrow-right" crossorigin="anonymous"
+                src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='512' height='512' viewBox='0 0 512 512'><path fill='%23ffffff' d='M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM385 256c0 9.4-3.8 18.8-11.3 26.3l-112 112c-14.6 14.6-38.2 14.6-52.7 0s-14.6-38.2 0-52.7L287 256 209 178c-14.6-14.6-14.6-38.2 0-52.7s38.2-14.6 52.7 0l112 112c7.5 7.5 11.3 16.9 11.3 26.3z'/></svg>">
+            <img id="icon-arrow-left" crossorigin="anonymous"
+                src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='512' height='512' viewBox='0 0 512 512'><path fill='%23ffffff' d='M256 0a256 256 0 1 0 0 512A256 256 0 1 0 256 0zM127 256c0-9.4 3.8-18.8 11.3-26.3l112-112c14.6-14.6 38.2-14.6 52.7 0s14.6 38.2 0 52.7L225 256l78 78c14.6 14.6 14.6 38.2 0 52.7s-38.2 14.6-52.7 0l-112-112c-7.5-7.5-11.3-16.9-11.3-26.3z'/></svg>">
+            <img id="icon-info" crossorigin="anonymous"
+                src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='512' height='512' viewBox='0 0 512 512'><path fill='%23ffffff' d='M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM216 336h24V272H216c-13.3 0-24-10.7-24-24s10.7-24 24-24h48c13.3 0 24 10.7 24 24v88h8c13.3 0 24 10.7 24 24s-10.7 24-24 24H216c-13.3 0-24-10.7-24-24s10.7-24 24-24zm40-208a32 32 0 1 1 0 64 32 32 0 1 1 0-64z'/></svg>">
         </a-assets>
 
         <!-- Sky -->
@@ -129,21 +272,12 @@
 
         <!-- Camera Rig -->
         <a-entity id="camera-rig" position="0 0 0">
-            <a-camera 
-                id="camera" 
-                look-controls="pointerLockEnabled: false; magicWindowTrackingEnabled: false; reverseMouseDrag: true" 
-                wasd-controls="enabled: false"
-                fov="80"
-            >
-                <a-entity 
-                    id="cursor" 
-                    cursor="fuse: false; rayOrigin: mouse"
-                    raycaster="objects: .clickable; far: 500"
+            <a-camera id="camera"
+                look-controls="pointerLockEnabled: false; magicWindowTrackingEnabled: false; reverseMouseDrag: true"
+                wasd-controls="enabled: false" fov="80">
+                <a-entity id="cursor" cursor="fuse: false; rayOrigin: mouse" raycaster="objects: .clickable; far: 500"
                     geometry="primitive: ring; radiusInner: 0.006; radiusOuter: 0.009"
-                    material="color: #0ea5e9; shader: flat; opacity: 0.8"
-                    position="0 0 -1"
-                    visible="false"
-                ></a-entity>
+                    material="color: #0ea5e9; shader: flat; opacity: 0.8" position="0 0 -1" visible="false"></a-entity>
             </a-camera>
         </a-entity>
 
@@ -154,7 +288,7 @@
     <script>
         // Tour Data Payload
         const tourData = @json($situs->toViewerJson());
-        
+
         const State = {
             currentSceneId: null,
             isGyroEnabled: false
@@ -178,20 +312,20 @@
         };
 
         // --- Core Functions ---
-        
+
         function init() {
             if (!tourData.scenes || tourData.scenes.length === 0) {
                 DOM.loadingText.textContent = "Tidak ada adegan (scene) yang tersedia.";
                 return;
             }
-            
+
             // Wait for A-Frame scene to load
             if (DOM.scene.hasLoaded) {
                 loadInitialScene();
             } else {
                 DOM.scene.addEventListener('loaded', loadInitialScene);
             }
-            
+
             setupEventListeners();
         }
 
@@ -199,7 +333,7 @@
             // Find first scene, or a specific one if needed
             const firstScene = tourData.scenes[0];
             loadScene(firstScene.id);
-            
+
             // Hide loading overlay after a short delay
             setTimeout(() => {
                 DOM.loadingOverlay.style.opacity = '0';
@@ -214,44 +348,44 @@
         function loadScene(sceneId) {
             const scene = getSceneById(sceneId);
             if (!scene) return;
-            
+
             State.currentSceneId = sceneId;
             DOM.currentSceneName.textContent = scene.name;
-            
+
             // Zoom In & Blur effect
             DOM.camera.setAttribute('animation__zoom', 'property: fov; to: 20; dur: 400; easing: easeInQuad');
             DOM.scene.style.transition = 'filter 0.4s ease';
             DOM.scene.style.filter = 'blur(8px)';
             DOM.transitionOverlay.style.transition = 'opacity 0.4s ease';
             DOM.transitionOverlay.style.opacity = '1';
-            
+
             setTimeout(() => {
                 // Update Sky Image
                 DOM.sky.setAttribute('src', scene.image);
-                
+
                 // Render Hotspots
                 renderHotspots(scene.hotspots);
-                
+
                 // Prepare for zoom out
                 DOM.camera.removeAttribute('animation__zoom');
                 DOM.camera.setAttribute('fov', 120);
-                
+
                 let isLoaded = false;
                 const finishTransition = () => {
-                    if(isLoaded) return;
+                    if (isLoaded) return;
                     isLoaded = true;
-                    
+
                     DOM.transitionOverlay.style.opacity = '0';
                     DOM.scene.style.filter = 'blur(0px)';
                     DOM.camera.setAttribute('animation__zoom', 'property: fov; to: 80; dur: 600; easing: easeOutQuad');
                 };
-                
+
                 // Wait for image to load before fading back in
                 DOM.sky.addEventListener('materialtextureloaded', function onTextureLoaded() {
                     finishTransition();
                     DOM.sky.removeEventListener('materialtextureloaded', onTextureLoaded);
                 });
-                
+
                 // Fallback fade in if texture event fails or takes too long
                 setTimeout(finishTransition, 1500);
             }, 400); // Wait for fade to black
@@ -262,26 +396,26 @@
             while (DOM.hotspotsContainer.firstChild) {
                 DOM.hotspotsContainer.removeChild(DOM.hotspotsContainer.firstChild);
             }
-            
+
             if (!hotspots) return;
-            
+
             hotspots.forEach(hs => {
                 const entity = document.createElement('a-entity');
                 entity.setAttribute('position', hs.position);
                 entity.setAttribute('rotation', hs.rotation || "0 0 0");
                 entity.setAttribute('look-at', '#camera');
-                
+
                 // Icon base
                 let imgSrc = '#icon-info';
                 let isCustomVideo = false;
                 const isNav = hs.type === 'navigation';
-                
-                if(hs.animation_config && hs.animation_config.icon) {
+
+                if (hs.animation_config && hs.animation_config.icon) {
                     if (hs.animation_config.icon === 'custom') {
                         if (hs.animation_config.custom_url) {
                             const url = hs.animation_config.custom_url;
                             isCustomVideo = !!url.match(/\.(mp4|webm)$/i);
-                            
+
                             if (isCustomVideo) {
                                 const assetId = 'video-' + hs.id;
                                 let videoEl = document.getElementById(assetId);
@@ -311,10 +445,10 @@
                 } else {
                     imgSrc = isNav ? '#icon-arrow-up' : '#icon-info';
                 }
-                
+
                 let img;
                 let hasScaleAnimation = false;
-                
+
                 if (isCustomVideo) {
                     img = document.createElement('a-video');
                     img.setAttribute('src', imgSrc);
@@ -328,7 +462,7 @@
                     img.setAttribute('width', '1');
                     img.setAttribute('height', '1');
                     img.setAttribute('class', 'clickable');
-                    
+
                     // Apply animation if config exists
                     if (hs.animation_config && hs.animation_config.animation) {
                         if (hs.animation_config.animation === 'pulse') {
@@ -341,13 +475,13 @@
                         }
                     }
                 }
-                
+
                 // Hover animations (skip if pulsing to avoid conflict)
                 if (!hasScaleAnimation && !isCustomVideo) {
                     img.setAttribute('animation__mouseenter', 'property: scale; to: 1.2 1.2 1.2; dur: 200; startEvents: mouseenter');
                     img.setAttribute('animation__mouseleave', 'property: scale; to: 1 1 1; dur: 200; startEvents: mouseleave');
                 }
-                
+
                 // Interactions
                 img.addEventListener('click', () => {
                     if (isNav && hs.targetScene) {
@@ -356,9 +490,9 @@
                         showInfoModal(hs);
                     }
                 });
-                
+
                 entity.appendChild(img);
-                
+
                 // Label
                 if (hs.label && hs.label.trim() !== '') {
                     const label = document.createElement('a-text');
@@ -369,7 +503,7 @@
                     label.setAttribute('color', 'white');
                     entity.appendChild(label);
                 }
-                
+
                 DOM.hotspotsContainer.appendChild(entity);
             });
         }
@@ -379,14 +513,14 @@
         function showInfoModal(hs) {
             DOM.modalTitle.textContent = hs.modalTitle || hs.label;
             DOM.modalContent.innerHTML = hs.modalContent || '';
-            
+
             if (hs.modalImage) {
                 DOM.modalImage.src = hs.modalImage;
                 DOM.modalImage.style.display = 'block';
             } else {
                 DOM.modalImage.style.display = 'none';
             }
-            
+
             DOM.modal.classList.add('active');
         }
 
@@ -403,7 +537,7 @@
                     document.exitFullscreen();
                 }
             });
-            
+
             // Gyro
             DOM.btnGyro.addEventListener('click', () => {
                 State.isGyroEnabled = !State.isGyroEnabled;
@@ -426,36 +560,36 @@
                     DOM.btnGyro.classList.remove('text-cyan-400');
                 }
             });
-            
+
             // Modal close
             document.getElementById('btn-close-modal').addEventListener('click', closeInfoModal);
             DOM.modal.addEventListener('click', (e) => {
                 if (e.target === DOM.modal) closeInfoModal();
             });
-            
+
             // Add cursor if not touch device
             if (!('ontouchstart' in window)) {
                 document.getElementById('cursor').setAttribute('visible', 'true');
             }
-            
+
             // Scroll to zoom
             window.addEventListener('wheel', (e) => {
                 const camera = document.getElementById('camera');
-                if(!camera) return;
-                
+                if (!camera) return;
+
                 let fov = parseFloat(camera.getAttribute('fov')) || 80;
-                
+
                 // Zoom speed
                 const zoomSpeed = 3;
-                if(e.deltaY > 0) {
+                if (e.deltaY > 0) {
                     fov += zoomSpeed; // Zoom out
-                } else if(e.deltaY < 0) {
+                } else if (e.deltaY < 0) {
                     fov -= zoomSpeed; // Zoom in
                 }
-                
+
                 // Clamp zoom level
                 fov = Math.max(30, Math.min(110, fov));
-                
+
                 camera.setAttribute('fov', fov);
             }, { passive: true });
         }
@@ -464,4 +598,5 @@
         window.addEventListener('DOMContentLoaded', init);
     </script>
 </body>
+
 </html>

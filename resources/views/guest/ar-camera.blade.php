@@ -271,9 +271,11 @@
     <audio id="ar-marker-audio" preload="auto" style="display:none;"></audio>
 
     <!-- Audio toggle button -->
-    <button id="ar-audio-toggle" type="button" aria-label="Toggle audio" style="position:absolute;top:16px;left:16px;z-index:1200;width:40px;height:40px;border:0;border-radius:999px;background:rgba(0,0,0,0.78);cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,0.35);">
+    <button id="ar-audio-toggle" type="button" aria-label="Toggle audio"
+        style="position:absolute;top:16px;left:16px;z-index:1200;width:40px;height:40px;border:0;border-radius:999px;background:rgba(0,0,0,0.78);cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,0.35);">
         <svg id="ar-audio-icon" class="w-5 h-5" style="fill:none;stroke:#fff" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"/>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
         </svg>
     </button>
 
@@ -305,7 +307,7 @@
     <div id="ar-debug-panel" role="log" aria-live="polite" aria-label="AR debug log"></div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             /**
              *
              * @type {HTMLDivElement}
@@ -608,7 +610,7 @@
             const svgMuted = '<path stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"/><path stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2"/>';
             const svgOn = '<path stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"/>';
             if (audioToggleBtn && arMarkerAudio) {
-                audioToggleBtn.addEventListener('click', function() {
+                audioToggleBtn.addEventListener('click', function () {
                     arMarkerAudio.muted = !arMarkerAudio.muted;
                     if (arMarkerAudio.muted) {
                         audioIcon.innerHTML = svgMuted;
@@ -956,9 +958,9 @@
                     if (knownRiskExtensions.length > 0) {
                         pushDebugLog('warn',
                             'Model memakai extension yang berisiko tidak kompatibel dengan GLTFLoader lama.', {
-                                modelSrc,
-                                knownRiskExtensions,
-                            });
+                            modelSrc,
+                            knownRiskExtensions,
+                        });
                     }
                 } catch (error) {
                     pushDebugLog('warn', 'Gagal parsing struktur GLB', {
@@ -1077,7 +1079,7 @@
                     if (existingState.loadedMode === 'three' && entity.getObject3D('mesh')) {
                         pushDebugLog('warn',
                             'Object three cache tidak sedang aktif. Load ulang agar mesh sesuai object terpilih.'
-                            );
+                        );
                     }
 
                     if (existingState.loadedMode !== 'three') {
@@ -1144,7 +1146,7 @@
                                 );
                             }
                         })
-                        .catch(() => {});
+                        .catch(() => { });
                 }
 
                 const loadingPromise = new Promise((resolve, reject) => {
@@ -1154,7 +1156,7 @@
                     let longLoadingHintTimer = null;
                     let loadingTimeoutTimer = null;
 
-                    const rejectIfStaleMarker = function() {
+                    const rejectIfStaleMarker = function () {
                         if (isMarkerLoadStillRelevant(marker.id, visibilityVersion)) {
                             return false;
                         }
@@ -1176,7 +1178,7 @@
                         return true;
                     };
 
-                    const clearModelTimers = function() {
+                    const clearModelTimers = function () {
                         if (loadingHintTimer) {
                             clearTimeout(loadingHintTimer);
                             loadingHintTimer = null;
@@ -1193,12 +1195,12 @@
                         }
                     };
 
-                    const cleanupListeners = function() {
+                    const cleanupListeners = function () {
                         entity.removeEventListener('model-loaded', handleLoaded);
                         entity.removeEventListener('model-error', handleError);
                     };
 
-                    const failLoading = function(message) {
+                    const failLoading = function (message) {
                         if (finished) {
                             return;
                         }
@@ -1234,7 +1236,7 @@
                         reject(new Error(message));
                     };
 
-                    const handleLoaded = function() {
+                    const handleLoaded = function () {
                         if (finished) {
                             return;
                         }
@@ -1276,7 +1278,7 @@
                         }, 180);
                     };
 
-                    const handleError = function(event) {
+                    const handleError = function (event) {
                         if (finished) {
                             return;
                         }
@@ -1329,21 +1331,21 @@
                                     entity.setAttribute('data-active-model-key', modelKey);
                                     pushDebugLog('info',
                                         'Fallback Three.js berhasil memuat model.', {
-                                            objectName,
-                                            markerId: marker.id,
-                                            modelSrc,
-                                        });
+                                        objectName,
+                                        markerId: marker.id,
+                                        modelSrc,
+                                    });
 
                                     setTimeout(() => {
                                         hideLoading();
                                         if (isDebugMode) {
                                             pushDebugLog('info',
                                                 'Marker ke model visible (fallback)', {
-                                                    markerId: marker.id,
-                                                    objectName,
-                                                    durationMs: Math.round(performance
-                                                        .now() - startedAt),
-                                                });
+                                                markerId: marker.id,
+                                                objectName,
+                                                durationMs: Math.round(performance
+                                                    .now() - startedAt),
+                                            });
                                         }
                                         resolve();
                                     }, 180);
@@ -1548,7 +1550,7 @@
 
             markers.forEach(marker => {
                 // When marker becomes visible
-                marker.addEventListener('markerFound', function() {
+                marker.addEventListener('markerFound', function () {
                     const visibilityVersion = bumpMarkerVisibilityVersion(this.id);
                     const markerObjects = parseMarkerObjects(this);
                     if (markerObjects.length === 0) {
@@ -1588,7 +1590,7 @@
                 });
 
                 // When marker becomes invisible
-                marker.addEventListener('markerLost', function() {
+                marker.addEventListener('markerLost', function () {
                     stopMarkerAudio();
                     visibleMarkers.delete(this.id);
                     pushDebugLog('warn', 'Marker hilang', {

@@ -18,8 +18,8 @@ class MapsController extends Controller
             $userAuth = Auth::user();
             $user = User::findOrFail($userAuth->id);
 
-            $progress = $user->progress_level_sekarang;
-            $level = $user->level_sekarang;
+            $progress = $user->progress_level_sekarang ?? 0;
+            $level = $user->level_sekarang ?? 0;
 
             // Mendapatkan semua situs
             $allSitus = SitusPeninggalan::all();
@@ -43,7 +43,7 @@ class MapsController extends Controller
             $user = Auth::user();
             $searchQuery = $request->query('q', '');
 
-            $level = $user->level_sekarang;
+            $level = $user->level_sekarang ?? 0;
 
             // Get unlocked situs IDs (based on materi sequence)
             $unlockedSitusIds = SitusPeninggalan::whereHas('materi', function ($query) use ($level) {

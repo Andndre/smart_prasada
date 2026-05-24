@@ -58,105 +58,107 @@
 
     {{-- Menu Grid Section --}}
     <div class="px-4 py-8 lg:px-8 lg:py-12 bg-gray-50 min-h-screen">
-        <div class="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 lg:gap-6">
-            {{-- E-Learning --}}
-            <div class="flex flex-col items-center">
-                <a href="{{ route('guest.elearning') }}"
-                    class="flex items-center justify-center w-16 h-16 md:w-20 md:h-20 bg-white rounded-2xl shadow-sm hover:shadow-md transition-shadow mb-3">
-                    <img src="{{ asset('images/icons/elearning.png') }}" alt="E-Learning"
-                        class="w-10 h-10 md:w-12 md:h-12" />
-                </a>
-                <span class="text-xs font-medium text-gray-700 text-center">{{ __('app.elearning') }}</span>
-            </div>
+        <div class="max-w-7xl mx-auto">
+            <div class="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 lg:gap-6">
+                {{-- E-Learning --}}
+                <div class="flex flex-col items-center">
+                    <a href="{{ route('guest.elearning') }}"
+                        class="flex items-center justify-center w-16 h-16 md:w-20 md:h-20 bg-white rounded-2xl shadow-sm hover:shadow-md transition-shadow mb-3">
+                        <img src="{{ asset('images/icons/elearning.png') }}" alt="E-Learning"
+                            class="w-10 h-10 md:w-12 md:h-12" />
+                    </a>
+                    <span class="text-xs font-medium text-gray-700 text-center">{{ __('app.elearning') }}</span>
+                </div>
 
-            {{-- Maps --}}
-            <div class="flex flex-col items-center">
-                <a href="{{ route('guest.maps') }}"
-                    class="flex items-center justify-center w-16 h-16 md:w-20 md:h-20 bg-white rounded-2xl shadow-sm hover:shadow-md transition-shadow mb-3">
-                    <img src="{{ asset('images/icons/maps.png') }}" alt="Maps" class="w-10 h-10 md:w-12 md:h-12" />
-                </a>
-                <span class="text-xs font-medium text-gray-700 text-center">{{ __('app.maps') }}</span>
-            </div>
+                {{-- Maps --}}
+                <div class="flex flex-col items-center">
+                    <a href="{{ route('guest.maps') }}"
+                        class="flex items-center justify-center w-16 h-16 md:w-20 md:h-20 bg-white rounded-2xl shadow-sm hover:shadow-md transition-shadow mb-3">
+                        <img src="{{ asset('images/icons/maps.png') }}" alt="Maps" class="w-10 h-10 md:w-12 md:h-12" />
+                    </a>
+                    <span class="text-xs font-medium text-gray-700 text-center">{{ __('app.maps') }}</span>
+                </div>
 
-            {{-- Statistik --}}
-            <div class="flex flex-col items-center">
-                <a href="{{ route('guest.statistik') }}"
-                    class="flex items-center justify-center w-16 h-16 md:w-20 md:h-20 bg-white rounded-2xl shadow-sm hover:shadow-md transition-shadow mb-3">
-                    <img src="{{ asset('images/icons/statistik.png') }}" alt="Statistik"
-                        class="w-10 h-10 md:w-12 md:h-12" />
-                </a>
-                <span class="text-xs font-medium text-gray-700 text-center">{{ __('app.statistics') }}</span>
-            </div>
+                {{-- Statistik --}}
+                <div class="flex flex-col items-center">
+                    <a href="{{ route('guest.statistik') }}"
+                        class="flex items-center justify-center w-16 h-16 md:w-20 md:h-20 bg-white rounded-2xl shadow-sm hover:shadow-md transition-shadow mb-3">
+                        <img src="{{ asset('images/icons/statistik.png') }}" alt="Statistik"
+                            class="w-10 h-10 md:w-12 md:h-12" />
+                    </a>
+                    <span class="text-xs font-medium text-gray-700 text-center">{{ __('app.statistics') }}</span>
+                </div>
 
-            {{-- Lapor Peninggalan --}}
-            <div class="flex flex-col items-center">
-                <a href="{{ route('guest.laporan-peninggalan') }}"
-                    class="flex items-center justify-center w-16 h-16 md:w-20 md:h-20 bg-white rounded-2xl shadow-sm hover:shadow-md transition-shadow mb-3">
-                    <img src="{{ asset('images/icons/lapor-peninggalan.png') }}" alt="Lapor Peninggalan"
-                        class="w-10 h-10 md:w-12 md:h-12" />
-                </a>
-                <span class="text-xs font-medium text-gray-700 text-center">{{ __('app.report_heritage') }}</span>
-            </div>
+                {{-- Lapor Peninggalan --}}
+                <div class="flex flex-col items-center">
+                    <a href="{{ route('guest.laporan-peninggalan') }}"
+                        class="flex items-center justify-center w-16 h-16 md:w-20 md:h-20 bg-white rounded-2xl shadow-sm hover:shadow-md transition-shadow mb-3">
+                        <img src="{{ asset('images/icons/lapor-peninggalan.png') }}" alt="Lapor Peninggalan"
+                            class="w-10 h-10 md:w-12 md:h-12" />
+                    </a>
+                    <span class="text-xs font-medium text-gray-700 text-center">{{ __('app.report_heritage') }}</span>
+                </div>
 
-            {{-- Video Peninggalan --}}
-            <div class="flex flex-col items-center">
-                <a href="{{ route('guest.video-peninggalan') }}"
-                    class="flex items-center justify-center w-16 h-16 md:w-20 md:h-20 bg-white rounded-2xl shadow-sm hover:shadow-md transition-shadow mb-3">
-                    <img src="{{ asset('images/icons/video-peninggalan.png') }}" alt="Video Peninggalan"
-                        class="w-10 h-10 md:w-12 md:h-12" />
-                </a>
-                <span class="text-xs font-medium text-gray-700 text-center">{{ __('app.heritage_video') }}</span>
-            </div>
+                {{-- Video Peninggalan --}}
+                <div class="flex flex-col items-center">
+                    <a href="{{ route('guest.video-peninggalan') }}"
+                        class="flex items-center justify-center w-16 h-16 md:w-20 md:h-20 bg-white rounded-2xl shadow-sm hover:shadow-md transition-shadow mb-3">
+                        <img src="{{ asset('images/icons/video-peninggalan.png') }}" alt="Video Peninggalan"
+                            class="w-10 h-10 md:w-12 md:h-12" />
+                    </a>
+                    <span class="text-xs font-medium text-gray-700 text-center">{{ __('app.heritage_video') }}</span>
+                </div>
 
-            {{-- Kritik & Saran --}}
-            <div class="flex flex-col items-center">
-                <a href="{{ route('guest.kritik-saran') }}"
-                    class="flex items-center justify-center w-16 h-16 md:w-20 md:h-20 bg-white rounded-2xl shadow-sm hover:shadow-md transition-shadow mb-3">
-                    <img src="{{ asset('images/icons/kritik-dan-saran.png') }}" alt="Kritik & Saran"
-                        class="w-10 h-10 md:w-12 md:h-12" />
-                </a>
-                <span class="text-xs font-medium text-gray-700 text-center">{{ __('app.feedback_suggestion') }}</span>
-            </div>
+                {{-- Kritik & Saran --}}
+                <div class="flex flex-col items-center">
+                    <a href="{{ route('guest.kritik-saran') }}"
+                        class="flex items-center justify-center w-16 h-16 md:w-20 md:h-20 bg-white rounded-2xl shadow-sm hover:shadow-md transition-shadow mb-3">
+                        <img src="{{ asset('images/icons/kritik-dan-saran.png') }}" alt="Kritik & Saran"
+                            class="w-10 h-10 md:w-12 md:h-12" />
+                    </a>
+                    <span class="text-xs font-medium text-gray-700 text-center">{{ __('app.feedback_suggestion') }}</span>
+                </div>
 
-            {{-- Tanya AI --}}
-            <div class="flex flex-col items-center">
-                <a href="#"
-                    class="flex items-center justify-center w-16 h-16 md:w-20 md:h-20 bg-white rounded-2xl shadow-sm hover:shadow-md transition-shadow mb-3 relative">
-                    <img src="{{ asset('images/icons/tanya-ai.png') }}" alt="Tanya AI"
-                        class="w-10 h-10 md:w-12 md:h-12" />
-                    <div
-                        class="absolute -bottom-1 -right-1 w-5 h-5 md:w-6 md:h-6 bg-yellow-400 rounded-full flex items-center justify-center">
-                        <i class="fas fa-lock text-gray-800 text-xs"></i>
-                    </div>
-                </a>
-                <span class="text-xs font-medium text-gray-700 text-center">{{ __('app.ask_ai') }}</span>
-            </div>
+                {{-- Tanya AI --}}
+                <div class="flex flex-col items-center">
+                    <a href="#"
+                        class="flex items-center justify-center w-16 h-16 md:w-20 md:h-20 bg-white rounded-2xl shadow-sm hover:shadow-md transition-shadow mb-3 relative">
+                        <img src="{{ asset('images/icons/tanya-ai.png') }}" alt="Tanya AI"
+                            class="w-10 h-10 md:w-12 md:h-12" />
+                        <div
+                            class="absolute -bottom-1 -right-1 w-5 h-5 md:w-6 md:h-6 bg-yellow-400 rounded-full flex items-center justify-center">
+                            <i class="fas fa-lock text-gray-800 text-xs"></i>
+                        </div>
+                    </a>
+                    <span class="text-xs font-medium text-gray-700 text-center">{{ __('app.ask_ai') }}</span>
+                </div>
 
-            {{-- Peninggalan Terdekat --}}
-            <div class="flex flex-col items-center">
-                <a href="#"
-                    class="flex items-center justify-center w-16 h-16 md:w-20 md:h-20 bg-white rounded-2xl shadow-sm hover:shadow-md transition-shadow mb-3 relative">
-                    <img src="{{ asset('images/icons/peninggalan-terdekat.png') }}" alt="Peninggalan Terdekat"
-                        class="w-10 h-10 md:w-12 md:h-12" />
-                    <div
-                        class="absolute -bottom-1 -right-1 w-5 h-5 md:w-6 md:h-6 bg-yellow-400 rounded-full flex items-center justify-center">
-                        <i class="fas fa-lock text-gray-800 text-xs"></i>
-                    </div>
-                </a>
-                <span class="text-xs font-medium text-gray-700 text-center">{{ __('app.nearby_heritage') }}</span>
-            </div>
+                {{-- Peninggalan Terdekat --}}
+                <div class="flex flex-col items-center">
+                    <a href="#"
+                        class="flex items-center justify-center w-16 h-16 md:w-20 md:h-20 bg-white rounded-2xl shadow-sm hover:shadow-md transition-shadow mb-3 relative">
+                        <img src="{{ asset('images/icons/peninggalan-terdekat.png') }}" alt="Peninggalan Terdekat"
+                            class="w-10 h-10 md:w-12 md:h-12" />
+                        <div
+                            class="absolute -bottom-1 -right-1 w-5 h-5 md:w-6 md:h-6 bg-yellow-400 rounded-full flex items-center justify-center">
+                            <i class="fas fa-lock text-gray-800 text-xs"></i>
+                        </div>
+                    </a>
+                    <span class="text-xs font-medium text-gray-700 text-center">{{ __('app.nearby_heritage') }}</span>
+                </div>
 
-            {{-- Game --}}
-            <div class="flex flex-col items-center">
-                <a href="#"
-                    class="flex items-center justify-center w-16 h-16 md:w-20 md:h-20 bg-white rounded-2xl shadow-sm hover:shadow-md transition-shadow mb-3 relative">
-                    <img src="{{ asset('images/icons/game.png') }}" alt="Game" class="w-10 h-10 md:w-12 md:h-12" />
-                    <div
-                        class="absolute -bottom-1 -right-1 w-5 h-5 md:w-6 md:h-6 bg-yellow-400 rounded-full flex items-center justify-center">
-                        <i class="fas fa-lock text-gray-800 text-xs"></i>
-                    </div>
-                </a>
-                <span class="text-xs font-medium text-gray-700 text-center">{{ __('app.game') }}</span>
+                {{-- Game --}}
+                <div class="flex flex-col items-center">
+                    <a href="#"
+                        class="flex items-center justify-center w-16 h-16 md:w-20 md:h-20 bg-white rounded-2xl shadow-sm hover:shadow-md transition-shadow mb-3 relative">
+                        <img src="{{ asset('images/icons/game.png') }}" alt="Game" class="w-10 h-10 md:w-12 md:h-12" />
+                        <div
+                            class="absolute -bottom-1 -right-1 w-5 h-5 md:w-6 md:h-6 bg-yellow-400 rounded-full flex items-center justify-center">
+                            <i class="fas fa-lock text-gray-800 text-xs"></i>
+                        </div>
+                    </a>
+                    <span class="text-xs font-medium text-gray-700 text-center">{{ __('app.game') }}</span>
+                </div>
             </div>
         </div>
     </div>

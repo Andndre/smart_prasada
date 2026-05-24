@@ -1,91 +1,95 @@
 <x-guest-layout>
     {{-- Header Section --}}
     <div class="px-6 py-6 bg-primary text-white">
-        <div class="flex justify-between items-center">
-            <button
-                class="back-button w-12 h-12 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 transition-colors">
-                <i class="fas fa-arrow-left text-white text-lg"></i>
-            </button>
-        </div>
-
-        <div class="flex flex-col items-center">
-            {{-- Profile Photo Section --}}
-            <div class="relative mb-6">
-                <div class="w-32 h-32 rounded-full overflow-hidden border-4 border-white/30">
-                    @if(auth()->user()->profile_photo)
-                        <img src="{{ asset('storage/' . auth()->user()->profile_photo) }}" alt="Profile Picture"
-                             class="w-full h-full object-cover"/>
-                    @else
-                        <img src="{{ asset('images/placeholder/profile-picture.png') }}" alt="Profile Picture"
-                             class="w-full h-full object-cover"/>
-                    @endif
-                </div>
-                {{-- Edit Button --}}
-                <button type="button"
-                        class="absolute -bottom-2 -right-2 w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-lg hover:bg-gray-100 transition-colors"
-                        onclick="document.getElementById('profile-photo').click()">
-                    <i class="fas fa-edit text-primary text-lg"></i>
+        <div class="max-w-7xl mx-auto">
+            <div class="flex justify-between items-center">
+                <button
+                    class="back-button w-12 h-12 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 transition-colors">
+                    <i class="fas fa-arrow-left text-white text-lg"></i>
                 </button>
-                {{-- Hidden File Input --}}
-                <input type="file" id="profile-photo" name="profile_photo" accept="image/*" class="hidden"
-                       onchange="handlePhotoUpload(this)">
             </div>
 
-            <div class="text-center mb-8">
-                <h1 class="text-xl font-bold">{{ __('app.profile') }}</h1>
-                <p class="text-sm opacity-90">{{ __('app.manage_profile') }}</p>
+            <div class="flex flex-col items-center">
+                {{-- Profile Photo Section --}}
+                <div class="relative mb-6">
+                    <div class="w-32 h-32 rounded-full overflow-hidden border-4 border-white/30">
+                        @if(auth()->user()->profile_photo)
+                            <img src="{{ asset('storage/' . auth()->user()->profile_photo) }}" alt="Profile Picture"
+                                 class="w-full h-full object-cover"/>
+                        @else
+                            <img src="{{ asset('images/placeholder/profile-picture.png') }}" alt="Profile Picture"
+                                 class="w-full h-full object-cover"/>
+                        @endif
+                    </div>
+                    {{-- Edit Button --}}
+                    <button type="button"
+                            class="absolute -bottom-2 -right-2 w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-lg hover:bg-gray-100 transition-colors"
+                            onclick="document.getElementById('profile-photo').click()">
+                        <i class="fas fa-edit text-primary text-lg"></i>
+                    </button>
+                    {{-- Hidden File Input --}}
+                    <input type="file" id="profile-photo" name="profile_photo" accept="image/*" class="hidden"
+                           onchange="handlePhotoUpload(this)">
+                </div>
+
+                <div class="text-center mb-8">
+                    <h1 class="text-xl font-bold">{{ __('app.profile') }}</h1>
+                    <p class="text-sm opacity-90">{{ __('app.manage_profile') }}</p>
+                </div>
             </div>
         </div>
     </div>
 
     {{-- Content Section --}}
     <div class="px-6 py-8 bg-gray-50 rounded-t-3xl -mt-6 relative">
-        <div class="space-y-6">
-            {{-- Update Profile Information --}}
-            <div class="bg-white rounded-2xl p-6 shadow-sm">
-                <div class="max-w-xl">
-                    @include('profile.partials.update-profile-information-form')
-                </div>
-            </div>
-
-            {{-- Update Password --}}
-            <div class="bg-white rounded-2xl p-6 shadow-sm">
-                <div class="max-w-xl">
-                    @include('profile.partials.update-password-form')
-                </div>
-            </div>
-
-            {{-- Logout --}}
-            <div class="bg-white rounded-2xl p-6 shadow-sm">
-                <div class="max-w-xl">
-                    <header>
-                        <h2 class="text-lg font-medium text-gray-900">
-                            {{ __('Keluar Akun') }}
-                        </h2>
-                        <p class="mt-1 text-sm text-gray-600">
-                            {{ __('Keluar dari akun aplikasi ini.') }}
-                        </p>
-                    </header>
-
-                    <div class="mt-6">
-                        <form method="POST" action="{{ route('logout') }}">
-                            @csrf
-                            <div class="flex items-center gap-4">
-                                <button type="submit"
-                                        class="flex items-center justify-center gap-2 rounded-lg bg-red-50 px-4 py-3 text-red-600 shadow-sm hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-colors">
-                                    <i class="fas fa-sign-out-alt"></i>
-                                    <span>{{ __('Keluar dari Akun') }}</span>
-                                </button>
-                            </div>
-                        </form>
+        <div class="max-w-7xl mx-auto">
+            <div class="space-y-6">
+                {{-- Update Profile Information --}}
+                <div class="bg-white rounded-2xl p-6 shadow-sm">
+                    <div class="max-w-xl">
+                        @include('profile.partials.update-profile-information-form')
                     </div>
                 </div>
-            </div>
 
-            {{-- Delete Account --}}
-            <div class="bg-white rounded-2xl p-6 shadow-sm">
-                <div class="max-w-xl">
-                    @include('profile.partials.delete-user-form')
+                {{-- Update Password --}}
+                <div class="bg-white rounded-2xl p-6 shadow-sm">
+                    <div class="max-w-xl">
+                        @include('profile.partials.update-password-form')
+                    </div>
+                </div>
+
+                {{-- Logout --}}
+                <div class="bg-white rounded-2xl p-6 shadow-sm">
+                    <div class="max-w-xl">
+                        <header>
+                            <h2 class="text-lg font-medium text-gray-900">
+                                {{ __('Keluar Akun') }}
+                            </h2>
+                            <p class="mt-1 text-sm text-gray-600">
+                                {{ __('Keluar dari akun aplikasi ini.') }}
+                            </p>
+                        </header>
+
+                        <div class="mt-6">
+                            <form method="POST" action="{{ route('logout') }}">
+                                @csrf
+                                <div class="flex items-center gap-4">
+                                    <button type="submit"
+                                            class="flex items-center justify-center gap-2 rounded-lg bg-red-50 px-4 py-3 text-red-600 shadow-sm hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-colors">
+                                        <i class="fas fa-sign-out-alt"></i>
+                                        <span>{{ __('Keluar dari Akun') }}</span>
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Delete Account --}}
+                <div class="bg-white rounded-2xl p-6 shadow-sm">
+                    <div class="max-w-xl">
+                        @include('profile.partials.delete-user-form')
+                    </div>
                 </div>
             </div>
         </div>
