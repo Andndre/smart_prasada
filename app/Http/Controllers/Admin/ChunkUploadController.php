@@ -135,10 +135,10 @@ class ChunkUploadController extends Controller
         // Move to final public storage location
         $extension = pathinfo($originalFilename, PATHINFO_EXTENSION) ?: 'glb';
         $filename = Str::uuid()->toString().'.'.strtolower($extension);
-        $finalPath = $targetPath.'/'.$filename;
+        $finalPath = "{$targetPath}/{$filename}";
 
         Storage::disk('public')->put($finalPath, File::get($tempMergedPath));
-        $publicUrl = '/storage/'.$finalPath;
+        $publicUrl = "/storage/{$finalPath}";
 
         // Cleanup
         File::delete($tempMergedPath);

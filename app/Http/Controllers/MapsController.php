@@ -40,8 +40,7 @@ class MapsController extends Controller
     public function peninggalan(Request $request)
     {
         try {
-            $userAuth = Auth::user();
-            $user = User::findOrFail($userAuth->id);
+            $user = Auth::user();
             $searchQuery = $request->query('q', '');
 
             $level = $user->level_sekarang;

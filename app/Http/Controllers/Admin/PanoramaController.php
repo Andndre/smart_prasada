@@ -167,11 +167,11 @@ class PanoramaController extends Controller
         $data['adegan_id'] = $data['scene_id'];
         unset($data['scene_id']);
 
-        if (array_key_exists('target_scene_id', $data)) {
+        if (\array_key_exists('target_scene_id', $data)) {
             $data['target_adegan_id'] = $data['target_scene_id'];
             unset($data['target_scene_id']);
         }
-        if (array_key_exists('template_id', $data)) {
+        if (\array_key_exists('template_id', $data)) {
             $data['templat_hotspot_id'] = $data['template_id'];
             unset($data['template_id']);
         }
@@ -180,11 +180,11 @@ class PanoramaController extends Controller
 
         // Apply hotspot defaults from scene if not provided
         $scene = Scene::find($data['adegan_id']);
-        if ($scene && $scene->hotspot_defaults) {
+        if ($scene?->hotspot_defaults) {
             $defaults = $scene->hotspot_defaults;
-            $data['position_x'] = $data['position_x'] ?? ($defaults['position_x'] ?? 0);
-            $data['position_y'] = $data['position_y'] ?? ($defaults['position_y'] ?? -0.5);
-            $data['position_z'] = $data['position_z'] ?? ($defaults['position_z'] ?? -4);
+            $data['position_x'] ??= ($defaults['position_x'] ?? 0);
+            $data['position_y'] ??= ($defaults['position_y'] ?? -0.5);
+            $data['position_z'] ??= ($defaults['position_z'] ?? -4);
         }
 
         $hotspot = Hotspot::create($data);
@@ -221,11 +221,11 @@ class PanoramaController extends Controller
             'animation_config' => 'nullable|array',
         ]);
 
-        if (array_key_exists('target_scene_id', $data)) {
+        if (\array_key_exists('target_scene_id', $data)) {
             $data['target_adegan_id'] = $data['target_scene_id'];
             unset($data['target_scene_id']);
         }
-        if (array_key_exists('template_id', $data)) {
+        if (\array_key_exists('template_id', $data)) {
             $data['templat_hotspot_id'] = $data['template_id'];
             unset($data['template_id']);
         }
@@ -346,7 +346,7 @@ class PanoramaController extends Controller
         $filename = Str::uuid().'.'.$extension;
 
         $path = $request->file('file')->storeAs($directory, $filename, 'public');
-        $url = '/storage/'.$path;
+        $url = "/storage/{$path}";
 
         return response()->json([
             'url' => $url,

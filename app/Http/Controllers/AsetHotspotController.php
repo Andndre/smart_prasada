@@ -15,15 +15,16 @@ class AsetHotspotController extends Controller
     public function index()
     {
         $assets = AsetHotspot::latest()->get();
-        
-        $assets->transform(function($asset) {
+
+        $assets->transform(function ($asset) {
             $asset->url = Storage::disk('public')->url($asset->file_path);
+
             return $asset;
         });
-        
+
         return response()->json([
             'status' => 'success',
-            'data' => $assets
+            'data' => $assets,
         ]);
     }
 
@@ -39,11 +40,11 @@ class AsetHotspotController extends Controller
 
         $file = $request->file('file');
         $extension = $file->getClientOriginalExtension();
-        $filename = Str::slug($request->nama) . '-' . time() . '.' . $extension;
-        
+        $filename = Str::slug($request->nama).'-'.time().'.'.$extension;
+
         // Determine type based on extension
-        $tipe = in_array(strtolower($extension), ['webm', 'mp4']) ? 'video' : 'image';
-        
+        $tipe = \in_array(strtolower($extension), ['webm', 'mp4']) ? 'video' : 'image';
+
         $path = $file->storeAs('hotspots/assets', $filename, 'public');
 
         $asset = AsetHotspot::create([
@@ -58,7 +59,7 @@ class AsetHotspotController extends Controller
         return response()->json([
             'status' => 'success',
             'message' => 'Aset berhasil diunggah',
-            'data' => $asset
+            'data' => $asset,
         ]);
     }
 
@@ -68,17 +69,17 @@ class AsetHotspotController extends Controller
     public function destroy(string $id)
     {
         $asset = AsetHotspot::findOrFail($id);
-        
+
         // Delete file from storage
         if (Storage::disk('public')->exists($asset->file_path)) {
             Storage::disk('public')->delete($asset->file_path);
         }
-        
+
         $asset->delete();
-        
+
         return response()->json([
             'status' => 'success',
-            'message' => 'Aset berhasil dihapus'
+            'message' => 'Aset berhasil dihapus',
         ]);
     }
 }

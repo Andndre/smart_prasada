@@ -70,7 +70,7 @@ class HomeController extends Controller
 
         // Filter out non-guide keys (app_guide, learn_how_to_use)
         foreach ($allGuides as $key => $guide) {
-            if (is_array($guide) && isset($guide['id'], $guide['title'], $guide['description'], $guide['steps'])) {
+            if (\is_array($guide) && isset($guide['id'], $guide['title'], $guide['description'], $guide['steps'])) {
                 $guides[] = $guide;
             }
         }
@@ -259,7 +259,7 @@ class HomeController extends Controller
             ->get();
 
         // Tandai status tiap materi (completed, available, locked) berdasarkan level user
-        $materis = $materis->map(function ($materi) use ($user) {
+        $materis = $materis->map(function (Materi $materi) use ($user) {
             $materiLevel = $materi->getLinearLevel();
             if ($materiLevel < $user->level_sekarang + 1) {
                 $materi->is_completed = true;
@@ -283,34 +283,8 @@ class HomeController extends Controller
             return $materi->is_available && ! $materi->is_completed;
         });
 
-        $riwayatAktivitas = LogAktivitas::where('user_id', $user->id)
-            ->orderBy('created_at', 'desc')
-            ->take(50)
-            ->get()
-            ->groupBy(function ($item) {
-                return $item->created_at->format('Y-m-d');
-            });
-
-        $eraCards = $materis->groupBy(function ($materi) {
-            return $materi->era_id ?? 0;
-        })->map(function ($eraMateris, $eraId) {
-            $era = $eraMateris->first()->era;
-            $totalMateriEra = $eraMateris->count();
-            $completedMateriEra = $eraMateris->where('is_completed', true)->count();
-            $availableMateriEra = $eraMateris->where('is_available', true)->count();
-
-            return (object) [
-                'era_id' => (int) $eraId,
-                'era' => $era,
-                'judul' => $era ? $era->nama : 'Materi Lainnya',
-                'kode' => $era ? $era->kode : null,
-                'rentang_waktu' => $era ? $era->rentang_waktu : null,
-                'total_materi' => $totalMateriEra,
-                'completed_materi' => $completedMateriEra,
-                'progress_percentage' => $totalMateriEra > 0 ? round(($completedMateriEra / $totalMateriEra) * 100) : 0,
-                'is_available' => $availableMateriEra > 0,
-            ];
-        })->values();
+        $riwayatAktivitas = $this->getRiwayatAktivitas($user->id);
+        $eraCards = $this->getEraCards($materis);
 
         return view('guest.elearning', compact(
             'eraCards',
@@ -318,6 +292,39 @@ class HomeController extends Controller
             'nextMateri',
             'riwayatAktivitas'
         ));
+    }
+
+    /**
+     * Get user's recent activity history
+     */
+    private function getRiwayatAktivitas(int $userId)
+    {
+        return LogAktivitas::where('user_id', $userId)
+            ->orderBy('created_at', 'desc')
+            ->take(50)
+            ->get()
+            ->groupBy(fn ($item) => $item->created_at->format('Y-m-d'));
+    }
+
+    private function getEraCards($materis)
+    {
+        return $materis->groupBy(fn ($materi) => $materi->era_id ?? 0)->map(function ($eraMateris, $eraId) {
+            $era = $eraMateris->first()->era;
+            $totalMateriEra = $eraMateris->count();
+            $completedMateriEra = $eraMateris->where('is_completed', true)->count();
+            $availableMateriEra = $eraMateris->where('is_available', true)->count();
+
+            return (object) [
+                'era_id' => (int) $eraId,
+                'judul' => $era?->nama ?? 'Materi Lainnya',
+                'kode' => $era?->kode,
+                'rentang_waktu' => $era?->rentang_waktu,
+                'total_materi' => $totalMateriEra,
+                'completed_materi' => $completedMateriEra,
+                'progress_percentage' => $totalMateriEra > 0 ? round(($completedMateriEra / $totalMateriEra) * 100) : 0,
+                'is_available' => $availableMateriEra > 0,
+            ];
+        })->values();
     }
 
     /**
@@ -343,7 +350,7 @@ class HomeController extends Controller
         $materis = $materisQuery->get();
 
         // Tandai status tiap materi (completed, available, locked) berdasarkan level user.
-        $materis = $materis->map(function ($materi) use ($user) {
+        $materis = $materis->map(function (Materi $materi) use ($user) {
             $materiLevel = $materi->getLinearLevel();
             if ($materiLevel < $user->level_sekarang + 1) {
                 $materi->is_completed = true;
@@ -682,7 +689,7 @@ class HomeController extends Controller
 
         return view('guest.situs.detail', [
             'situs' => $situs,
-            'is_unlocked' => $isUnlocked
+            'is_unlocked' => $isUnlocked,
         ]);
     }
 
@@ -696,7 +703,7 @@ class HomeController extends Controller
 
         // Log activity
         if ($user) {
-            $this->logActivity($user->id, 'Memulai pengalaman VR 360 Panorama untuk situs: ' . $situs->nama);
+            $this->logActivity($user->id, "Memulai pengalaman VR 360 Panorama untuk situs: {$situs->nama}");
         }
 
         return view('guest.panorama.viewer', compact('situs'));
@@ -714,14 +721,10 @@ class HomeController extends Controller
         }
 
         // Get model file size if it exists
-        if ($museum->path_obj && Storage::disk('public')->exists($museum->path_obj)) {
-            $museum->file_size = Storage::disk('public')->size($museum->path_obj);
-        } else {
-            $museum->file_size = 0;
-        }
+        $museum->file_size = ($museum->path_obj && Storage::disk('public')->exists($museum->path_obj)) ? Storage::disk('public')->size($museum->path_obj) : 0;
 
         // Log AR activity
-        $this->logActivity($user->id, 'Memulai pengalaman AR untuk spot: '.$museum->nama.' di '.$situs->nama);
+        $this->logActivity($user->id, "Memulai pengalaman AR untuk spot: {$museum->nama} di {$situs->nama}");
 
         // --- Museum Visit Tracking Logic ---
         // 1. Catat kunjungan user ke museum ini (jika belum ada)
@@ -751,10 +754,10 @@ class HomeController extends Controller
 
             // Jika semua museum sudah dikunjungi dan user progress di step museum, increment progress
             // Skip in demo mode — exploration only, no progress tracking
-            if (count($allMuseumIds) > 0 && count($visitedMuseumIds) === count($allMuseumIds)) {
+            if (\count($allMuseumIds) > 0 && \count($visitedMuseumIds) === \count($allMuseumIds)) {
                 if (! env('APP_DEMO_MODE', false) && $user->progress_level_sekarang == User::EBOOK && $user->level_sekarang + 1 == $materi->getLinearLevel()) {
                     $user->incrementProgressLevel();
-                    $this->logActivity($user->id, 'Menuntaskan semua spot Virtual Living Museum pada materi ID: '.$materiId);
+                    $this->logActivity($user->id, "Menuntaskan semua spot Virtual Living Museum pada materi ID: {$materiId}");
                 }
             }
         }
@@ -776,7 +779,7 @@ class HomeController extends Controller
         $katalog = Katalog::first();
         //      download katalog
         if ($katalog->path_pdf && Storage::disk('public')->exists($katalog->path_pdf)) {
-            return response()->download(storage_path('app/public/'.$katalog->path_pdf));
+            return response()->download(storage_path("app/public/{$katalog->path_pdf}"));
         }
 
         //      not found
@@ -799,13 +802,13 @@ class HomeController extends Controller
         }
 
         // Check if file exists
-        if (! $ebook->path_file || ! file_exists(storage_path('app/public/'.$ebook->path_file))) {
+        if (! $ebook->path_file || ! file_exists(storage_path("app/public/{$ebook->path_file}"))) {
             return redirect()->route('guest.elearning.materi', $ebook->materi_id)
                 ->with('error', 'File e-book tidak ditemukan.');
         }
 
         // Log activity with ebook_id for tracking
-        $this->logActivity($user->id, 'Telah membaca E-Book: '.$ebook->judul.' [ebook_id:'.$ebook->ebook_id.']');
+        $this->logActivity($user->id, "Telah membaca E-Book: {$ebook->judul}");
 
         // Catatan: Progress level akan diupdate via AJAX saat user membaca halaman terakhir (lihat endpoint di bawah)
 
@@ -830,7 +833,7 @@ class HomeController extends Controller
         }
 
         // Log aktivitas jika perlu
-        $this->logActivity($user->id, 'Menuntaskan semua halaman E-Book: '.$ebook->judul.' [ebook_id:'.$ebook->ebook_id.']');
+        $this->logActivity($user->id, "Menuntaskan semua halaman E-Book: {$ebook->judul}");
 
         return response()->json(['success' => true]);
     }
@@ -844,97 +847,6 @@ class HomeController extends Controller
         $materi = Materi::with(['tugas'])->findOrFail($materi_id);
 
         return view('guest.elearning.tugas', compact('materi'));
-    }
-
-    /**
-     * Calculate materi progress
-     */
-    private function calculateMateriProgress($user_id, $materi_id)
-    {
-        $materi = Materi::with(['pretest', 'posttest', 'ebook'])->find($materi_id);
-
-        $totalSteps = 0;
-        $completedSteps = 0;
-
-        // Count pretest
-        if ($materi->pretest->count() > 0) {
-            $totalSteps++;
-            if ($this->isPretestCompleted($user_id, $materi_id)) {
-                $completedSteps++;
-            }
-        }
-
-        // Count ebooks (assume read if pretest completed)
-        if ($materi->ebook->count() > 0) {
-            $totalSteps++;
-            if ($this->isPretestCompleted($user_id, $materi_id)) {
-                $completedSteps++;
-            }
-        }
-
-        // Count posttest
-        if ($materi->posttest->count() > 0) {
-            $totalSteps++;
-            if ($this->isPosttestCompleted($user_id, $materi_id)) {
-                $completedSteps++;
-            }
-        }
-
-        $progressPercentage = $totalSteps > 0 ? round(($completedSteps / $totalSteps) * 100) : 100;
-        $isCompleted = $this->isMateriCompleted($user_id, $materi_id);
-        $isStarted = $this->isPretestCompleted($user_id, $materi_id) || $this->isPosttestCompleted($user_id, $materi_id);
-
-        return [
-            'progress_percentage' => $progressPercentage,
-            'completed_steps' => $completedSteps,
-            'total_steps' => $totalSteps,
-            'is_completed' => $isCompleted,
-            'is_started' => $isStarted,
-        ];
-    }
-
-    /**
-     * Check if posttest is completed
-     */
-    private function isPosttestCompleted($user_id, $materi_id)
-    {
-        $materi = Materi::find($materi_id);
-        if (! $materi) {
-            return false;
-        }
-        $user = User::find($user_id);
-        if (! $user) {
-            return false;
-        }
-
-        // Jika materi sudah lewat level user, pasti sudah selesai
-        if ($materi->getLinearLevel() < $user->level_sekarang + 1) {
-            return true;
-        }
-
-        // Jika progress user pada materi ini sudah mencapai atau melewati step posttest
-        return $user->progress_level_sekarang >= User::POST_TEST;
-    }
-
-    /**
-     * Check if materi is completed
-     */
-    private function isMateriCompleted($user_id, $materi_id)
-    {
-        if (! $materi_id) {
-            return true;
-        }
-
-        $materi = Materi::with(['pretest', 'posttest'])->find($materi_id);
-        if (! $materi) {
-            return false;
-        }
-
-        // Check if both pretest and posttest are completed
-        $pretestCompleted = $this->isPretestCompleted($user_id, $materi_id);
-        $posttestCompleted = $this->isPosttestCompleted($user_id, $materi_id);
-
-        return $pretestCompleted && $posttestCompleted;
     }
 
     /**

@@ -354,8 +354,8 @@ class AdminController extends Controller
         $nama = $situs->nama;
 
         // Delete thumbnail if exists
-        if ($situs->thumbnail && Storage::exists('public/'.$situs->thumbnail)) {
-            Storage::delete('public/'.$situs->thumbnail);
+        if ($situs->thumbnail && Storage::exists("public/{$situs->thumbnail}")) {
+            Storage::delete("public/{$situs->thumbnail}");
         }
 
         $situs->delete();
@@ -433,7 +433,7 @@ class AdminController extends Controller
             // Standard upload
             $file = $request->file('obj_file');
             $mime = $file->getMimeType();
-            if (! str_starts_with($mime, 'model/') && ! in_array($mime, ['application/octet-stream'])) {
+            if (! str_starts_with($mime, 'model/') && ! \in_array($mime, ['application/octet-stream'])) {
                 throw ValidationException::withMessages(['obj_file' => 'File model harus bertipe GLB.']);
             }
             // Stream-based GLB magic bytes check (reads only 4 bytes, not whole file)
@@ -842,11 +842,11 @@ class AdminController extends Controller
             }
 
             $patternContent = ArPatternHelper::encodeImageToPattern($sourcePath);
-            $patternPath = 'virtual-museum/objects/patterns/'.$timestamp.'_patt_'.$baseName.'.patt';
+            $patternPath = "virtual-museum/objects/patterns/{$timestamp}_patt_{$baseName}.patt";
             Storage::disk('public')->put($patternPath, $patternContent);
 
             $markerPng = ArPatternHelper::buildFullMarkerPng($sourcePath, 0.5, 512, 'black');
-            $markerPath = 'virtual-museum/objects/markers/'.$timestamp.'_marker_'.$baseName.'.png';
+            $markerPath = "virtual-museum/objects/markers/{$timestamp}_marker_{$baseName}.png";
             Storage::disk('public')->put($markerPath, $markerPng);
         } catch (\Throwable $exception) {
             $this->deletePublicFile($markerPath);
@@ -1350,9 +1350,15 @@ class AdminController extends Controller
      */
     public function destroyPosttest($materi_id, $posttest_id)
     {
-        $materi = Materi::findOrFail($materi_id);
-        $posttest = Posttest::where('materi_id', $materi_id)->findOrFail($posttest_id);
-
+        $materi = Materi::find($materi_id);
+        if (! $materi) {
+            return back()->with('error', 'Materi tidak ditemukan.');
+        }
+        $posttest = Posttest::find($posttest_id);
+        if (! $posttest) {
+            return back()->with('error', 'Soal posttest tidak ditemukan.');
+        }
+        
         $posttest->delete();
 
         return redirect()->route('admin.posttest', $materi_id)
@@ -1364,7 +1370,11 @@ class AdminController extends Controller
      */
     public function ebook($materi_id)
     {
-        $materi = Materi::findOrFail($materi_id);
+        $materi = Materi::find($materi_id);
+        if (! $materi) {
+            return back()->with('error', 'Materi tidak ditemukan.');
+        }
+        
         $ebooks = Ebook::where('materi_id', $materi_id)->paginate(10);
 
         return view('admin.ebook.index', compact('materi', 'ebooks'));
@@ -1375,7 +1385,10 @@ class AdminController extends Controller
      */
     public function createEbook($materi_id)
     {
-        $materi = Materi::findOrFail($materi_id);
+        $materi = Materi::find($materi_id);
+        if (! $materi) {
+            return back()->with('error', 'Materi tidak ditemukan.');
+        }
 
         return view('admin.ebook.create', compact('materi'));
     }
@@ -1385,7 +1398,10 @@ class AdminController extends Controller
      */
     public function storeEbook(Request $request, $materi_id)
     {
-        $materi = Materi::findOrFail($materi_id);
+        $materi = Materi::find($materi_id);
+        if (! $materi) {
+            return back()->with('error', 'Materi tidak ditemukan.');
+        }
 
         $request->validate([
             'judul' => 'required|string|max:255',
@@ -1416,7 +1432,10 @@ class AdminController extends Controller
      */
     public function editEbook($materi_id, $ebook_id)
     {
-        $materi = Materi::findOrFail($materi_id);
+        $materi = Materi::find($materi_id);
+        if (! $materi) {
+            return back()->with('error', 'Materi tidak ditemukan.');
+        }
         $ebook = Ebook::where('materi_id', $materi_id)->where('ebook_id', $ebook_id)->firstOrFail();
 
         return view('admin.ebook.edit', compact('materi', 'ebook'));
@@ -1427,7 +1446,10 @@ class AdminController extends Controller
      */
     public function updateEbook(Request $request, $materi_id, $ebook_id)
     {
-        $materi = Materi::findOrFail($materi_id);
+        $materi = Materi::find($materi_id);
+        if (! $materi) {
+            return back()->with('error', 'Materi tidak ditemukan.');
+        }
         $ebook = Ebook::where('materi_id', $materi_id)->where('ebook_id', $ebook_id)->firstOrFail();
 
         $request->validate([
@@ -1463,7 +1485,10 @@ class AdminController extends Controller
      */
     public function destroyEbook($ebook_id)
     {
-        $ebook = Ebook::where('ebook_id', $ebook_id)->firstOrFail();
+        $ebook = Ebook::find($ebook_id);
+        if (! $ebook) {
+            return back()->with('error', 'E-book tidak ditemukan.');
+        }
         $materi_id = $ebook->materi_id;
 
         // Delete associated file
@@ -1484,7 +1509,10 @@ class AdminController extends Controller
      */
     public function tugas($materi_id)
     {
-        $materi = Materi::findOrFail($materi_id);
+        $materi = Materi::find($materi_id);
+        if (! $materi) {
+            return back()->with('error', 'Materi tidak ditemukan.');
+        }
         $tugas = $materi->tugas()->orderBy('created_at', 'desc')->paginate(20);
 
         return view('admin.tugas.index', compact('materi', 'tugas'));
@@ -1495,7 +1523,10 @@ class AdminController extends Controller
      */
     public function createTugas($materi_id)
     {
-        $materi = Materi::findOrFail($materi_id);
+        $materi = Materi::find($materi_id);
+        if (! $materi) {
+            return back()->with('error', 'Materi tidak ditemukan.');
+        }
 
         return view('admin.tugas.create', compact('materi'));
     }
@@ -1505,7 +1536,10 @@ class AdminController extends Controller
      */
     public function storeTugas(Request $request, $materi_id)
     {
-        $materi = Materi::findOrFail($materi_id);
+        $materi = Materi::find($materi_id);
+        if (! $materi) {
+            return back()->with('error', 'Materi tidak ditemukan.');
+        }
 
         $validated = $request->validate([
             'judul' => 'required|string|max:255',
@@ -1536,10 +1570,14 @@ class AdminController extends Controller
      */
     public function editTugas($materi_id, $tugas_id)
     {
-        $materi = Materi::findOrFail($materi_id);
-        $tugas = Tugas::where('materi_id', $materi_id)
-            ->where('tugas_id', $tugas_id)
-            ->firstOrFail();
+        $materi = Materi::find($materi_id);
+        if (! $materi) {
+            return back()->with('error', 'Materi tidak ditemukan.');
+        }
+        $tugas = Tugas::find($tugas_id);
+        if (! $tugas) {
+            return back()->with('error', 'Tugas tidak ditemukan.');
+        }
 
         return view('admin.tugas.edit', compact('materi', 'tugas'));
     }
@@ -1549,9 +1587,14 @@ class AdminController extends Controller
      */
     public function updateTugas(Request $request, $materi_id, $tugas_id)
     {
-        $tugas = Tugas::where('materi_id', $materi_id)
-            ->where('tugas_id', $tugas_id)
-            ->firstOrFail();
+        $materi = Materi::find($materi_id);
+        if (! $materi) {
+            return back()->with('error', 'Materi tidak ditemukan.');
+        }
+        $tugas = Tugas::find($tugas_id);
+        if (! $tugas) {
+            return back()->with('error', 'Tugas tidak ditemukan.');
+        }
 
         $validated = $request->validate([
             'judul' => 'required|string|max:255',
