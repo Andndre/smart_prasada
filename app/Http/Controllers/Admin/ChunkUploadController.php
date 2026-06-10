@@ -37,16 +37,11 @@ class ChunkUploadController extends Controller
         $fieldName = $request->fieldName;
 
         $chunkDir = $this->getChunkDir($uuid, $fieldName);
-        $chunkDirFull = storage_path($chunkDir);
-        $chunkPath = $chunkDirFull.'/chunk_'.str_pad($chunkIndex, 6, '0', STR_PAD_LEFT).'.tmp';
-
-        if (! is_dir($chunkDirFull)) {
-            mkdir($chunkDirFull, 0755, true);
-        }
+        $chunkPath = $chunkDir.'/chunk_'.str_pad($chunkIndex, 6, '0', STR_PAD_LEFT).'.tmp';
 
         $file = $request->file('file');
         $fileSize = $file->getSize();
-        $file->move($chunkDirFull, basename($chunkPath));
+        Storage::disk('local')->putFileAs($chunkDir, $file, basename($chunkPath));
 
         // Check if this is the last chunk
         if ($chunkIndex === $totalChunks - 1) {
@@ -91,8 +86,7 @@ class ChunkUploadController extends Controller
         $originalFilename = $request->input('original_filename', 'model.glb');
 
         $chunkDir = $this->getChunkDir($uuid, $fieldName);
-        $chunkDirFull = storage_path($chunkDir);
-        $tempMergedPath = $chunkDirFull.'/merged_'.$uuid.'.tmp';
+        $tempMergedPath = $chunkDir.'/merged_'.$uuid.'.tmp';
 
         $chunks = $this->getSortedChunks($uuid, $fieldName);
 
@@ -100,33 +94,32 @@ class ChunkUploadController extends Controller
             Log::warning('Chunked upload: no chunks found', [
                 'uuid' => $uuid,
                 'fieldName' => $fieldName,
-                'chunkDirFull' => $chunkDirFull,
-                'is_dir' => is_dir($chunkDirFull),
+                'chunkDir' => $chunkDir,
             ]);
 
             return response()->json(['error' => 'No chunks found.'], 404);
         }
 
-        // Merge chunks
-        $out = fopen($tempMergedPath, 'wb');
+        // Merge chunks using storage paths
+        $tempMergedFullPath = Storage::disk('local')->path($tempMergedPath);
+        $out = fopen($tempMergedFullPath, 'wb');
         if ($out === false) {
             return response()->json(['error' => 'Cannot create merged file.'], 500);
         }
 
-        foreach ($chunks as $chunk) {
-            $chunkPath = $chunk->getPathname();
-            $chunkData = File::get($chunkPath);
+        foreach ($chunks as $chunkPath) {
+            $chunkData = Storage::disk('local')->get($chunkPath);
             fwrite($out, $chunkData);
         }
         fclose($out);
 
         // Validate GLB magic bytes: first 4 bytes must be "glTF" (0x46546C67)
-        $handle = fopen($tempMergedPath, 'rb');
+        $handle = fopen($tempMergedFullPath, 'rb');
         $header = fread($handle, 4);
         fclose($handle);
 
         if ($header !== 'glTF') {
-            File::delete($tempMergedPath);
+            Storage::disk('local')->delete($tempMergedPath);
             $this->cleanup($uuid, $fieldName);
 
             return response()->json(['error' => 'File is not a valid GLB.'], 422);
@@ -137,11 +130,11 @@ class ChunkUploadController extends Controller
         $filename = Str::uuid()->toString().'.'.strtolower($extension);
         $finalPath = "{$targetPath}/{$filename}";
 
-        Storage::disk('public')->put($finalPath, File::get($tempMergedPath));
+        Storage::disk('public')->put($finalPath, Storage::disk('local')->get($tempMergedPath));
         $publicUrl = "/storage/{$finalPath}";
 
         // Cleanup
-        File::delete($tempMergedPath);
+        Storage::disk('local')->delete($tempMergedPath);
         $this->cleanup($uuid, $fieldName);
 
         Log::info('Chunked upload finalized', [
@@ -206,21 +199,35 @@ class ChunkUploadController extends Controller
      */
     public function cleanupOld()
     {
-        $dir = storage_path(self::CHUNK_DIR);
-        if (! is_dir($dir)) {
+        $dir = self::CHUNK_DIR;
+        if (! Storage::disk('local')->exists($dir)) {
             return;
         }
 
         $cutoff = now()->subHours(self::MAX_CHUNK_AGE_HOURS)->timestamp;
-        $uuids = File::directories($dir);
+        $uuids = Storage::disk('local')->directories($dir);
 
         foreach ($uuids as $uuidDir) {
-            foreach (File::directories($uuidDir) as $fieldDir) {
-                foreach (File::files($fieldDir) as $file) {
-                    if ($file->getMTime() < $cutoff) {
-                        File::delete($file->getPathname());
+            foreach (Storage::disk('local')->directories($uuidDir) as $fieldDir) {
+                foreach (Storage::disk('local')->files($fieldDir) as $file) {
+                    if (Storage::disk('local')->lastModified($file) < $cutoff) {
+                        Storage::disk('local')->delete($file);
                     }
                 }
+
+                // Delete the field directory if it is now empty
+                $files = Storage::disk('local')->allFiles($fieldDir);
+                $dirs = Storage::disk('local')->directories($fieldDir);
+                if (empty($files) && empty($dirs)) {
+                    Storage::disk('local')->deleteDirectory($fieldDir);
+                }
+            }
+
+            // Delete the uuid directory if it is now empty
+            $files = Storage::disk('local')->allFiles($uuidDir);
+            $dirs = Storage::disk('local')->directories($uuidDir);
+            if (empty($files) && empty($dirs)) {
+                Storage::disk('local')->deleteDirectory($uuidDir);
             }
         }
     }
@@ -236,21 +243,21 @@ class ChunkUploadController extends Controller
 
     private function getSortedChunks(string $uuid, string $fieldName): Collection
     {
-        $chunkDir = storage_path($this->getChunkDir($uuid, $fieldName));
-        if (! is_dir($chunkDir)) {
+        $chunkDir = $this->getChunkDir($uuid, $fieldName);
+        if (! Storage::disk('local')->exists($chunkDir)) {
             return collect();
         }
 
-        return collect(File::files($chunkDir))
-            ->filter(fn ($f) => str_starts_with($f->getFilename(), 'chunk_'))
-            ->sortBy(fn ($f) => (int) str_replace('chunk_', '', str_replace('.tmp', '', $f->getFilename())));
+        return collect(Storage::disk('local')->files($chunkDir))
+            ->filter(fn ($f) => str_starts_with(basename($f), 'chunk_'))
+            ->sortBy(fn ($f) => (int) str_replace('chunk_', '', str_replace('.tmp', '', basename($f))));
     }
 
     private function getExpectedTotalChunks(string $uuid, string $fieldName): ?int
     {
-        $metaFile = storage_path($this->getChunkDir($uuid, $fieldName).'/meta.txt');
-        if (File::exists($metaFile)) {
-            $meta = json_decode(File::get($metaFile), true);
+        $metaFile = $this->getChunkDir($uuid, $fieldName).'/meta.txt';
+        if (Storage::disk('local')->exists($metaFile)) {
+            $meta = json_decode(Storage::disk('local')->get($metaFile), true);
 
             return $meta['totalChunks'] ?? null;
         }
@@ -260,9 +267,19 @@ class ChunkUploadController extends Controller
 
     private function cleanup(string $uuid, string $fieldName): void
     {
-        $chunkDir = storage_path($this->getChunkDir($uuid, $fieldName));
-        if (is_dir($chunkDir)) {
-            File::deleteDirectory($chunkDir);
+        $chunkDir = $this->getChunkDir($uuid, $fieldName);
+        if (Storage::disk('local')->exists($chunkDir)) {
+            Storage::disk('local')->deleteDirectory($chunkDir);
+        }
+
+        // Clean up parent uuid directory if it is now empty
+        $uuidDir = self::CHUNK_DIR.'/'.$uuid;
+        if (Storage::disk('local')->exists($uuidDir)) {
+            $files = Storage::disk('local')->allFiles($uuidDir);
+            $directories = Storage::disk('local')->directories($uuidDir);
+            if (empty($files) && empty($directories)) {
+                Storage::disk('local')->deleteDirectory($uuidDir);
+            }
         }
     }
 }
