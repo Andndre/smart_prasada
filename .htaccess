@@ -1,5 +1,4 @@
 <IfModule mod_rewrite.c>
 	RewriteEngine On
-	# Arahkan semua request ke web utama delapanpilarbali
-    RewriteRule ^(.*)$ ./public/$1 [L]
+  RewriteRule ^(.*)$ ./public/$1 [L]
 </IfModule>
