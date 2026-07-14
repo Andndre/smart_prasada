@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Database\Factories\SitusPeninggalanFactory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -86,6 +87,16 @@ class SitusPeninggalan extends Model
     public function panoramaScenes(): HasMany
     {
         return $this->scenes()->where('scene_type', Scene::TYPE_PANORAMA);
+    }
+
+    /**
+     * Scope to situs that have at least one VR-capable museum model.
+     */
+    public function scopeVrReady(Builder $query): Builder
+    {
+        return $query->whereHas('virtualMuseum', function (Builder $q) {
+            $q->whereNotNull('path_obj');
+        });
     }
 
     /**

@@ -79,6 +79,15 @@
                     <span class="text-xs font-medium text-gray-700 text-center">{{ __('app.maps') }}</span>
                 </div>
 
+                {{-- VR --}}
+                <div class="flex flex-col items-center">
+                    <a href="{{ route('guest.vr.maps') }}"
+                        class="flex items-center justify-center w-16 h-16 md:w-20 md:h-20 bg-white rounded-2xl shadow-sm hover:shadow-md transition-shadow mb-3">
+                        <i class="fas fa-vr-cardboard text-2xl md:text-3xl text-purple-600"></i>
+                    </a>
+                    <span class="text-xs font-medium text-gray-700 text-center">{{ __('app.vr') }}</span>
+                </div>
+
                 {{-- Statistik --}}
                 <div class="flex flex-col items-center">
                     <a href="{{ route('guest.statistik') }}"

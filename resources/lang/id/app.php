@@ -25,6 +25,7 @@ return [
     'virtual_museum' => 'Virtual Living Museum',
     'elearning' => 'Kunjungi Peninggalan',
     'maps' => 'Geo Historia',
+    'vr' => 'VR',
     'statistics' => 'Statistik',
     'report_heritage' => 'Lapor Peninggalan',
     'nearby_heritage' => 'Peninggalan Terdekat',

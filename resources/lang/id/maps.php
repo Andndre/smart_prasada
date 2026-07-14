@@ -37,4 +37,9 @@ return [
     'unlocked' => 'Terbuka',
     'locked' => 'Terkunci',
     'complete_material_to_unlock' => 'Selesaikan materi untuk membuka fitur ini',
+
+    // Halaman Peta VR
+    'vr_map_title' => 'Lokasi VR',
+    'enter_vr' => 'Lihat dalam VR',
+    'no_vr_situs' => 'Belum ada situs yang mendukung VR. Cek lagi nanti.',
 ];

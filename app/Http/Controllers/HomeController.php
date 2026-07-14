@@ -242,6 +242,45 @@ class HomeController extends Controller
     }
 
     /**
+     * VR map - lists only situs with a VR-capable museum model.
+     */
+    public function vrMaps(Request $request)
+    {
+        $user = Auth::user();
+        $level = $user->level_sekarang ?? 0;
+
+        $vrSitus = SitusPeninggalan::vrReady()->with('virtualMuseum')->get();
+
+        $unlockedSitusIds = env('APP_DEMO_MODE', false)
+            ? $vrSitus->pluck('situs_id')->toArray()
+            : SitusPeninggalan::whereHas('materi', function ($query) use ($level) {
+                $query->where('urutan', '<=', $level);
+            })->pluck('situs_id')->toArray();
+
+        return view('guest.vr.maps', compact('vrSitus', 'unlockedSitusIds'));
+    }
+
+    /**
+     * VR Museum Viewer - immersive-vr on headset, gyro/stereo fallback on phone.
+     */
+    public function vrMuseum(Request $request, $situs_id, $museum_id)
+    {
+        $user = Auth::user();
+        $situs = SitusPeninggalan::findOrFail($situs_id);
+        $museum = VirtualMuseum::findOrFail($museum_id);
+
+        if ($museum->situs_id != $situs_id) {
+            abort(404, 'Museum tidak ditemukan di situs ini.');
+        }
+
+        $arToken = TokenHelper::generate($user->id);
+
+        $this->logActivity($user->id, "Memulai pengalaman VR untuk spot: {$museum->nama} di {$situs->nama}");
+
+        return view('guest.vr.museum', compact('situs', 'museum', 'arToken'));
+    }
+
+    /**
      * E-Learning Index Page
      */
     public function kunjungiPeninggalan(Request $request)

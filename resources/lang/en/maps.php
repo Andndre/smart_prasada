@@ -37,4 +37,9 @@ return [
     'unlocked' => 'Unlocked',
     'locked' => 'Locked',
     'complete_material_to_unlock' => 'Complete the material to unlock this feature',
+
+    // VR Map Page
+    'vr_map_title' => 'VR Locations',
+    'enter_vr' => 'Enter VR',
+    'no_vr_situs' => 'No VR-ready sites yet. Check back later.',
 ];

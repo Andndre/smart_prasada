@@ -23,13 +23,18 @@ class SecurityHeaders
             $response->headers->set('Referrer-Policy', 'strict-origin-when-cross-origin');
             $response->headers->set('Permissions-Policy', 'camera=(self), geolocation=(self), microphone=()');
 
+            // Allow the Vite dev server (HMR script/style/websocket) only outside production.
+            $viteDevOrigins = app()->environment('local') ? ' http://127.0.0.1:5173 http://localhost:5173' : '';
+            $viteDevSocket = app()->environment('local') ? ' ws://127.0.0.1:5173 ws://localhost:5173' : '';
+
             // Content Security Policy permitting required CDNs and scripts
             $csp = "default-src 'self' 'unsafe-inline' 'unsafe-eval' https: data: blob:; ".
-                   "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://aframe.io https://unpkg.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://code.jquery.com https://launchar.app; ".
-                   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.bunny.net https://unpkg.com https://cdnjs.cloudflare.com; ".
+                   "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://aframe.io https://unpkg.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://code.jquery.com https://launchar.app https://static.cloudflareinsights.com{$viteDevOrigins}; ".
+                   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.bunny.net https://unpkg.com https://cdnjs.cloudflare.com{$viteDevOrigins}; ".
                    "img-src 'self' data: blob: https:; ".
-                   "font-src 'self' https://fonts.gstatic.com https://fonts.bunny.net https://cdnjs.cloudflare.com; ".
-                   "connect-src 'self' https:; ".
+                   "font-src 'self' https://fonts.gstatic.com https://fonts.bunny.net https://cdnjs.cloudflare.com{$viteDevOrigins}; ".
+                   "connect-src 'self' https: blob:{$viteDevOrigins}{$viteDevSocket}; ".
+                   "worker-src 'self' blob:; ".
                    "frame-src 'self' https:;";
             $response->headers->set('Content-Security-Policy', $csp);
 

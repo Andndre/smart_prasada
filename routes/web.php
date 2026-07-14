@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\KatalogController;
 use App\Http\Controllers\Admin\PanoramaController;
 use App\Http\Controllers\Admin\VideoPeninggalanController;
 use App\Http\Controllers\ArMarkerCameraController;
+use App\Http\Controllers\AsetHotspotController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\KritikSaranController;
 use App\Http\Controllers\LanguageController;
@@ -36,6 +37,9 @@ Route::group(['middleware' => ['auth', 'user']], function () {
     Route::get('/maps', [HomeController::class, 'maps'])->name('guest.maps');
     Route::get('/maps/view', [MapsController::class, 'view'])->name('guest.maps.view');
     Route::get('/maps/peninggalan', [MapsController::class, 'peninggalan'])->name('guest.maps.peninggalan');
+
+    // VR routes
+    Route::get('/vr', [HomeController::class, 'vrMaps'])->name('guest.vr.maps');
 
     // E-Learning routes
     Route::get('/kunjungi-peninggalan', [HomeController::class, 'kunjungiPeninggalan'])->name('guest.elearning');
@@ -82,6 +86,9 @@ Route::group(['middleware' => ['auth', 'user']], function () {
 
 // AR routes - Using token-based authentication
 Route::middleware('ar.token')->get('/situs/{situs_id}/ar/{museum_id}', [HomeController::class, 'arMuseum'])->name('ar.museum');
+
+// VR routes - Using token-based authentication (cross-device handoff via QR)
+Route::middleware('ar.token')->get('/situs/{situs_id}/vr/{museum_id}', [HomeController::class, 'vrMuseum'])->name('vr.museum');
 
 // Public 360 Panorama Viewer routes (no auth required)
 Route::get('/panorama/{situsId}', [HomeController::class, 'panoramaViewer'])->name('panorama.viewer');
@@ -217,9 +224,9 @@ Route::group(['middleware' => ['auth', 'admin']], function () {
         Route::delete('templates/{id}', [PanoramaController::class, 'destroyTemplate'])->name('templates.destroy');
 
         // Assets Library
-        Route::get('assets', [\App\Http\Controllers\AsetHotspotController::class, 'index'])->name('assets.index');
-        Route::post('assets', [\App\Http\Controllers\AsetHotspotController::class, 'store'])->name('assets.store');
-        Route::delete('assets/{id}', [\App\Http\Controllers\AsetHotspotController::class, 'destroy'])->name('assets.destroy');
+        Route::get('assets', [AsetHotspotController::class, 'index'])->name('assets.index');
+        Route::post('assets', [AsetHotspotController::class, 'store'])->name('assets.store');
+        Route::delete('assets/{id}', [AsetHotspotController::class, 'destroy'])->name('assets.destroy');
 
         // Image Upload
         Route::post('upload', [PanoramaController::class, 'uploadImage'])->name('upload');

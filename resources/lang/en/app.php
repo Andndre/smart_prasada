@@ -25,6 +25,7 @@ return [
     'virtual_museum' => 'Virtual Living Museum',
     'elearning' => 'Visit Heritage',
     'maps' => 'Geo Historia',
+    'vr' => 'VR',
     'statistics' => 'Statistics',
     'report_heritage' => 'Report Heritage',
     'nearby_heritage' => 'Nearby Heritage',
