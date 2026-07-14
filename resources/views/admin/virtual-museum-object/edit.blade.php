@@ -96,6 +96,18 @@
                             Museum</p>
                     </div>
 
+                    <!-- Nama Mesh di GLB (untuk interaksi VR) -->
+                    <div>
+                        <label for="mesh_name" class="mb-2 block text-sm font-medium text-gray-700">
+                            Nama Mesh di GLB (VR)
+                        </label>
+                        <input type="text" id="mesh_name" name="mesh_name" value="{{ old('mesh_name', $object->mesh_name) }}"
+                            class="block w-full rounded-md border border-gray-300 px-3 py-2 placeholder-gray-500 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            placeholder="Contoh: Lukisan_Barong">
+                        <p class="mt-1 text-xs text-gray-500">Nama objek persis seperti di Blender (terbawa saat export
+                            .glb). Jika diisi, objek ini bisa diklik di mode VR untuk menampilkan info.</p>
+                    </div>
+
                     <!-- Deskripsi -->
                     <div>
                         <label for="deskripsi" class="mb-2 block text-sm font-medium text-gray-700">

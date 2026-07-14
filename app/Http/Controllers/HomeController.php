@@ -15,6 +15,7 @@ use App\Models\SitusPeninggalan;
 use App\Models\User;
 use App\Models\VideoPeninggalan;
 use App\Models\VirtualMuseum;
+use App\Models\VirtualMuseumObject;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -275,9 +276,14 @@ class HomeController extends Controller
 
         $arToken = TokenHelper::generate($user->id);
 
+        $vrObjects = VirtualMuseumObject::query()
+            ->where('museum_id', $museum->museum_id)
+            ->whereNotNull('mesh_name')
+            ->get(['mesh_name', 'nama', 'deskripsi']);
+
         $this->logActivity($user->id, "Memulai pengalaman VR untuk spot: {$museum->nama} di {$situs->nama}");
 
-        return view('guest.vr.museum', compact('situs', 'museum', 'arToken'));
+        return view('guest.vr.museum', compact('situs', 'museum', 'arToken', 'vrObjects'));
     }
 
     /**

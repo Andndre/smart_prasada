@@ -155,6 +155,7 @@ function createScene() {
 // ponytail: raycasts ground only — reticle can show through the model; add occluder check in Fase 2 if it bothers users.
 class TeleportControls {
     static SCREEN_CENTER = new THREE.Vector2(0, 0);
+    static UP = new THREE.Vector3(0, 1, 0);
     static tempMatrix = new THREE.Matrix4();
     static tempVector = new THREE.Vector3();
 
@@ -163,6 +164,9 @@ class TeleportControls {
         this.rig = rig;
         this.targets = targets;
         this.controller = null;
+        this.panel = null;
+        this.hoverInfo = null;
+        this.hoverPoint = null;
         this.raycaster = new THREE.Raycaster();
 
         this.reticle = new THREE.Mesh(
@@ -190,6 +194,23 @@ class TeleportControls {
         }
 
         const hits = this.raycaster.intersectObjects(this.targets, true);
+
+        const first = hits[0];
+        this.hoverInfo = first ? TeleportControls.findVrObject(first.object) : null;
+        this.hoverPoint = this.hoverInfo ? first.point : null;
+
+        if (this.hoverInfo) {
+            this.reticle.visible = true;
+            this.reticle.material.color.setHex(0xfbbf24);
+            this.reticle.position.copy(first.point);
+            this.reticle.scale.setScalar(Math.max(1, first.distance / 6));
+            const normal = TeleportControls.tempVector
+                .copy(first.face.normal)
+                .transformDirection(first.object.matrixWorld);
+            this.reticle.quaternion.setFromUnitVectors(TeleportControls.UP, normal);
+            return;
+        }
+
         const hit = hits.find((h) => {
             if (!h.face) return false;
             const normal = TeleportControls.tempVector
@@ -199,6 +220,8 @@ class TeleportControls {
         });
 
         this.reticle.visible = Boolean(hit);
+        this.reticle.material.color.setHex(0x7c3aed);
+        this.reticle.quaternion.identity();
         if (hit) {
             this.reticle.position.copy(hit.point);
             this.reticle.position.y += 0.01;
@@ -206,12 +229,128 @@ class TeleportControls {
         }
     }
 
+    static findVrObject(object) {
+        let node = object;
+        while (node) {
+            if (node.userData.vrObject) return node.userData.vrObject;
+            node = node.parent;
+        }
+        return null;
+    }
+
+    /** Single entry point for trigger/tap: close panel > open panel > teleport. */
+    trigger() {
+        if (this.panel?.mesh.visible) {
+            this.panel.hide();
+            return;
+        }
+        if (this.hoverInfo && this.hoverPoint) {
+            this.panel?.show(this.hoverInfo, this.hoverPoint);
+            return;
+        }
+        this.teleport();
+    }
+
     teleport() {
-        if (!this.reticle.visible) return;
+        if (!this.reticle.visible || this.hoverInfo) return;
         const cameraWorld = this.camera.getWorldPosition(TeleportControls.tempVector);
         this.rig.position.x += this.reticle.position.x - cameraWorld.x;
         this.rig.position.z += this.reticle.position.z - cameraWorld.z;
         this.rig.position.y = this.reticle.position.y - 0.01;
+    }
+}
+
+// Floating in-scene info card (HTML overlays are not rendered inside a WebXR session).
+class InfoPanel {
+    constructor(scene, camera) {
+        this.camera = camera;
+        this.canvas = document.createElement("canvas");
+        this.canvas.width = 1024;
+        this.canvas.height = 640;
+        this.texture = new THREE.CanvasTexture(this.canvas);
+        this.texture.colorSpace = THREE.SRGBColorSpace;
+
+        this.mesh = new THREE.Mesh(
+            new THREE.PlaneGeometry(1.2, 0.75),
+            new THREE.MeshBasicMaterial({
+                map: this.texture,
+                transparent: true,
+                toneMapped: false,
+                depthTest: false,
+            }),
+        );
+        this.mesh.renderOrder = 1000;
+        this.mesh.visible = false;
+        scene.add(this.mesh);
+    }
+
+    show(info, targetPoint) {
+        this.draw(info);
+
+        const cameraWorld = this.camera.getWorldPosition(new THREE.Vector3());
+        const direction = new THREE.Vector3().subVectors(targetPoint, cameraWorld);
+        const distance = Math.min(direction.length() * 0.7, 2);
+        direction.normalize();
+
+        this.mesh.position.copy(cameraWorld).addScaledVector(direction, distance);
+        this.mesh.lookAt(cameraWorld);
+        this.mesh.visible = true;
+    }
+
+    hide() {
+        this.mesh.visible = false;
+    }
+
+    draw(info) {
+        const ctx = this.canvas.getContext("2d");
+        const { width, height } = this.canvas;
+        ctx.clearRect(0, 0, width, height);
+
+        ctx.fillStyle = "rgba(17, 24, 39, 0.92)";
+        ctx.beginPath();
+        ctx.roundRect(0, 0, width, height, 32);
+        ctx.fill();
+
+        ctx.fillStyle = "#7c3aed";
+        ctx.beginPath();
+        ctx.roundRect(0, 0, width, 110, [32, 32, 0, 0]);
+        ctx.fill();
+
+        ctx.fillStyle = "#ffffff";
+        ctx.font = "bold 52px Inter, sans-serif";
+        ctx.fillText(info.nama, 40, 74);
+
+        ctx.font = "36px Inter, sans-serif";
+        ctx.fillStyle = "#e5e7eb";
+        this.wrapText(ctx, info.deskripsi || "", 40, 180, width - 80, 50, 8);
+
+        ctx.font = "28px Inter, sans-serif";
+        ctx.fillStyle = "#9ca3af";
+        ctx.fillText("Ketuk / tekan trigger untuk menutup", 40, height - 36);
+
+        this.texture.needsUpdate = true;
+    }
+
+    wrapText(ctx, text, x, y, maxWidth, lineHeight, maxLines) {
+        const words = text.split(/\s+/);
+        let line = "";
+        let lines = 0;
+        for (const word of words) {
+            const attempt = line ? line + " " + word : word;
+            if (ctx.measureText(attempt).width > maxWidth && line) {
+                lines++;
+                if (lines === maxLines) {
+                    ctx.fillText(line + "…", x, y);
+                    return;
+                }
+                ctx.fillText(line, x, y);
+                y += lineHeight;
+                line = word;
+            } else {
+                line = attempt;
+            }
+        }
+        if (line) ctx.fillText(line, x, y);
     }
 }
 
@@ -286,7 +425,7 @@ async function startHeadsetSession(renderer, scene, camera, rig, teleport) {
     controller.addEventListener("disconnected", () => {
         controller.userData.connected = false;
     });
-    controller.addEventListener("select", () => teleport.teleport());
+    controller.addEventListener("select", () => teleport.trigger());
     rig.add(controller);
     teleport.controller = controller;
 
@@ -344,7 +483,7 @@ async function startPhoneStereoSession(renderer, scene, camera, teleport) {
 
         document.body.requestFullscreen?.().catch(() => {});
 
-        renderer.domElement.addEventListener("pointerup", () => teleport.teleport());
+        renderer.domElement.addEventListener("pointerup", () => teleport.trigger());
         showTeleportHint();
 
         function render() {
@@ -392,6 +531,7 @@ async function main() {
     scene.add(rig);
 
     const teleport = new TeleportControls(scene, camera, rig, [ground]);
+    teleport.panel = new InfoPanel(scene, camera);
 
     window.addEventListener("resize", () => {
         camera.aspect = window.innerWidth / window.innerHeight;
@@ -413,6 +553,14 @@ async function main() {
     placeModel(model, camera, ground);
     scene.add(model);
     teleport.targets.push(model);
+
+    if (Array.isArray(window.vrObjects) && window.vrObjects.length) {
+        const byMeshName = new Map(window.vrObjects.map((o) => [o.mesh_name, o]));
+        model.traverse((node) => {
+            const info = byMeshName.get(node.name);
+            if (info) node.userData.vrObject = info;
+        });
+    }
 
     const headsetSupported = "xr" in navigator &&
         (await navigator.xr.isSessionSupported("immersive-vr").catch(() => false));

@@ -75,6 +75,7 @@
         var arToken = '{{ $arToken }}';
         var museum = @json($museum);
         var situsNama = @json($situs->nama);
+        var vrObjects = @json($vrObjects);
     </script>
 
     <div class="pointer-events-none fixed inset-x-0 top-0 z-[10000000]">

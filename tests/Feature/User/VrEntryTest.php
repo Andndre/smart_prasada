@@ -5,6 +5,7 @@ namespace Tests\Feature\User;
 use App\Models\SitusPeninggalan;
 use App\Models\User;
 use App\Models\VirtualMuseum;
+use App\Models\VirtualMuseumObject;
 
 test('guest is redirected to login when visiting vr map', function () {
     $this->get(route('guest.vr.maps'))->assertRedirect(route('login'));
@@ -38,6 +39,39 @@ test('authenticated user can open vr museum page for a valid museum', function (
     $response->assertStatus(200);
     $response->assertSee($situs->nama);
     $response->assertSee((string) $museum->museum_id, false);
+});
+
+test('vr museum page exposes only objects with a mesh name', function () {
+    $user = User::factory()->create(['level_sekarang' => 1, 'progress_level_sekarang' => 1]);
+    $situs = SitusPeninggalan::factory()->create(['user_id' => $user->id]);
+    $museum = VirtualMuseum::factory()->create(['situs_id' => $situs->situs_id]);
+
+    $baseAttributes = [
+        'situs_id' => $situs->situs_id,
+        'museum_id' => $museum->museum_id,
+        'gambar_real' => 'objects/images/dummy.jpg',
+        'path_obj' => 'objects/models/dummy.glb',
+        'path_patt' => 'objects/patterns/dummy.patt',
+    ];
+
+    VirtualMuseumObject::create($baseAttributes + [
+        'nama' => 'Lukisan Barong',
+        'mesh_name' => 'Lukisan_Barong',
+        'deskripsi' => 'Lukisan klasik Bali.',
+    ]);
+    VirtualMuseumObject::create($baseAttributes + [
+        'nama' => 'Objek Tanpa Mesh',
+        'deskripsi' => 'Tidak interaktif di VR.',
+    ]);
+
+    $response = $this->actingAs($user)->get(route('vr.museum', [
+        'situs_id' => $situs->situs_id,
+        'museum_id' => $museum->museum_id,
+    ]));
+
+    $response->assertStatus(200);
+    $response->assertSee('Lukisan_Barong');
+    $response->assertDontSee('Objek Tanpa Mesh');
 });
 
 test('vr museum route 404s when museum does not belong to situs', function () {
