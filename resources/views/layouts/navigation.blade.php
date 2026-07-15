@@ -26,7 +26,7 @@
                         <div class="relative h-full flex items-center" x-data="{ open: false }"
                              style="overflow: visible">
                             <button @click="open = !open"
-                                    :class="{'text-gray-900 border-b-2 border-blue-500': open || isRouteActive('/admin/users') || isRouteActive('/admin/materi') || isRouteActive('/admin/situs') || isRouteActive('/admin/virtual-living-museum') || isRouteActive('/admin/reports') || isRouteActive('/admin/feedback') || isRouteActive('/admin/riwayat-pengembang') || isRouteActive('/admin/katalog') || isRouteActive('/admin/video-peninggalan')}"
+                                    :class="{'text-gray-900 border-b-2 border-blue-500': open || isRouteActive('/admin/users') || isRouteActive('/admin/materi') || isRouteActive('/admin/situs') || isRouteActive('/admin/virtual-living-museum') || isRouteActive('/admin/reports') || isRouteActive('/admin/feedback') || isRouteActive('/admin/riwayat-pengembang') || isRouteActive('/admin/video-peninggalan')}"
                                     x-data="{ isRouteActive(path) { return window.location.pathname.startsWith(path) } }"
                                     class="inline-flex items-center px-1 pt-1 h-full text-sm font-medium leading-5 text-gray-500 hover:text-gray-700 hover:border-gray-300 focus:outline-none focus:text-gray-700 focus:border-gray-300 transition duration-150 ease-in-out">
                                 <span>Kelola</span>
@@ -76,10 +76,6 @@
                                                      :active="request()->routeIs('admin.riwayat-pengembang*')">
                                         <i class="fas fa-history mr-2 w-5 text-center"></i> Riwayat Pengembang
                                     </x-dropdown-link>
-                                    <x-dropdown-link :href="route('admin.katalog.edit')"
-                                                     :active="request()->routeIs('admin.katalog*')">
-                                        <i class="fas fa-book-open mr-2 w-5 text-center"></i> Katalog
-                                    </x-dropdown-link>
                                     <x-dropdown-link :href="route('admin.video-peninggalan.index')"
                                                      :active="request()->routeIs('admin.video-peninggalan*')">
                                         <i class="fas fa-video mr-2 w-5 text-center"></i> Video Peninggalan
@@ -97,8 +93,8 @@
                         <x-nav-link :href="route('guest.pengembang')" :active="request()->routeIs('guest.pengembang')">
                             {{ __('app.developers') }}
                         </x-nav-link>
-                        <x-nav-link :href="route('guest.ar-marker')" :active="request()->routeIs('guest.ar-marker')">
-                            {{ __('app.ar_marker') }}
+                        <x-nav-link :href="route('guest.vr.maps')" :active="request()->routeIs('guest.vr.maps')">
+                            VR
                         </x-nav-link>
                     @endif
                 </div>
@@ -189,11 +185,6 @@
                                        :active="request()->routeIs('admin.riwayat-pengembang*')">
                     Riwayat Pengembang
                 </x-responsive-nav-link>
-                {{--                Katalog --}}
-                <x-responsive-nav-link :href="route('admin.katalog.edit')"
-                                       :active="request()->routeIs('admin.katalog*')">
-                    Katalog
-                </x-responsive-nav-link>
                 <x-responsive-nav-link :href="route('admin.video-peninggalan.index')"
                                        :active="request()->routeIs('admin.video-peninggalan*')">
                     Video Peninggalan
@@ -209,8 +200,8 @@
                                        :active="request()->routeIs('guest.pengembang')">
                     {{ __('app.developers') }}
                 </x-responsive-nav-link>
-                <x-responsive-nav-link :href="route('guest.ar-marker')" :active="request()->routeIs('guest.ar-marker')">
-                    {{ __('app.ar_marker') }}
+                <x-responsive-nav-link :href="route('guest.vr.maps')" :active="request()->routeIs('guest.vr.maps')">
+                    VR
                 </x-responsive-nav-link>
             @endif
         </div>

@@ -20,40 +20,32 @@ return [
             ],
             [
                 'title' => 'Ikuti Setiap Langkah',
-                'description' => 'Ikuti setiap langkah: isi pretest, baca e-book, kunjungi fitur AR, dan isi posttest',
+                'description' => 'Ikuti setiap langkah: isi pretest, baca e-book, kunjungi Virtual Living Museum (VR), dan isi posttest',
             ],
         ],
     ],
 
     'virtual_living_museum' => [
         'id' => 'virtual_living_museum',
-        'title' => 'Augmented Reality',
-        'description' => 'Panduan penggunaan fitur AR pada menu Kunjungi Peninggalan',
+        'title' => 'Virtual Living Museum (VR)',
+        'description' => 'Panduan penggunaan fitur VR pada menu Kunjungi Peninggalan',
         'icon' => 'fa-vr-cardboard',
         'steps' => [
             [
-                'title' => 'Kunjungi Fitur AR',
-                'description' => 'Pilih fitur AR dari halaman Kunjungi Peninggalan',
+                'title' => 'Buka Menu VR',
+                'description' => 'Pilih menu VR dari halaman utama, lalu pilih situs yang tersedia',
             ],
             [
-                'title' => 'Pilih Spot AR yang Tersedia',
-                'description' => 'Pilih salah satu spot AR yang tersedia pada halaman fitur AR',
+                'title' => 'Masuk Mode VR',
+                'description' => 'Tekan tombol ENTER VR, lalu pasang HP ke Cardboard atau gunakan headset VR',
             ],
             [
-                'title' => 'Izinkan Akses Kamera',
-                'description' => 'Izinkan aplikasi untuk mengakses kamera perangkat Anda',
+                'title' => 'Berpindah Tempat',
+                'description' => 'Arahkan reticle (lingkaran) ke lantai lalu tekan trigger untuk teleport',
             ],
             [
-                'title' => 'Arahkan Kamera',
-                'description' => 'Arahkan kamera ke area lapang sampai muncul lingkaran putih',
-            ],
-            [
-                'title' => 'Lihat Konten AR',
-                'description' => 'Tekan layar untuk meletakkan objek AR. Anda bisa berkeliling untuk melihat objek AR dari sudut yang berbeda',
-            ],
-            [
-                'title' => 'Lihat Informasi Peninggalan',
-                'description' => 'Gunakan tombol info untuk melihat daftar informasi peninggalan pada objek AR',
+                'title' => 'Lihat Informasi Objek',
+                'description' => 'Arahkan reticle ke objek peninggalan lalu tekan trigger untuk membuka panel informasi',
             ],
         ],
     ],
@@ -112,7 +104,7 @@ return [
             ],
             [
                 'title' => 'Pelajari Materi',
-                'description' => 'Setelah pretest, pelajari materi e-book dan kunjungi fitur AR',
+                'description' => 'Setelah pretest, pelajari materi e-book dan kunjungi Virtual Living Museum (VR)',
             ],
             [
                 'title' => 'Kerjakan Posttest',
@@ -162,40 +154,4 @@ return [
         ],
     ],
 
-    'ar_marker' => [
-        'id' => 'ar_marker',
-        'title' => 'AR Marker',
-        'description' => 'Panduan menggunakan AR Marker untuk pengalaman augmented reality',
-        'icon' => 'fa-qrcode',
-        'steps' => [
-            [
-                'title' => 'Download Katalog AR',
-                'description' => 'Download file katalog yang berisi marker AR dari menu aplikasi',
-            ],
-            [
-                'title' => 'Cetak Marker',
-                'description' => 'Cetak marker AR dari katalog yang sudah didownload. Pastikan kualitas cetakan bagus dan jelas',
-            ],
-            [
-                'title' => 'Buka Menu AR Marker',
-                'description' => 'Pilih menu AR Marker dari halaman utama aplikasi',
-            ],
-            [
-                'title' => 'Izinkan Akses Kamera',
-                'description' => 'Berikan izin aplikasi untuk mengakses kamera perangkat Anda',
-            ],
-            [
-                'title' => 'Arahkan Kamera ke Marker',
-                'description' => 'Arahkan kamera perangkat ke marker yang sudah dicetak. Pastikan marker terlihat jelas dan tidak terpotong',
-            ],
-            [
-                'title' => 'Lihat Objek AR',
-                'description' => 'Objek 3D akan muncul di atas marker. Gerakkan perangkat untuk melihat objek dari berbagai sudut',
-            ],
-            [
-                'title' => 'Interaksi dengan Objek',
-                'description' => 'Tap objek AR untuk melihat informasi detail atau melakukan interaksi lainnya',
-            ],
-        ],
-    ],
 ];

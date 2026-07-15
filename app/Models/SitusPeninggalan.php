@@ -63,11 +63,6 @@ class SitusPeninggalan extends Model
         return $this->hasMany(VirtualMuseumObject::class, 'situs_id', 'situs_id');
     }
 
-    public function arMarkers(): HasMany
-    {
-        return $this->hasMany(ArMarker::class, 'situs_id', 'situs_id');
-    }
-
     public function aksesSitusUser(): HasMany
     {
         return $this->hasMany(AksesSitusUser::class, 'situs_id', 'situs_id');

@@ -31,10 +31,10 @@
         </div>
 
         <div class="mt-6 space-y-1 px-3">
-            <a href="{{ route('guest.ar-marker') }}"
+            <a href="{{ route('guest.vr.maps') }}"
                 class="hover:bg-primary-dark flex items-center gap-3 rounded-lg bg-primary px-4 py-3 font-medium text-white shadow-lg transition-colors">
-                <img src="{{ asset('images/icons/ar-marker.svg') }}" alt="AR Marker" class="h-5 w-5" />
-                <span>AR Marker</span>
+                <i class="fas fa-vr-cardboard w-5 text-center"></i>
+                <span>Virtual Museum (VR)</span>
             </a>
         </div>
     </nav>
@@ -101,11 +101,11 @@
         </div>
 
         <div class="mt-6 space-y-1 px-3">
-            <a href="{{ route('guest.ar-marker') }}"
+            <a href="{{ route('guest.vr.maps') }}"
                 class="hover:bg-primary-dark flex items-center gap-3 rounded-lg bg-primary px-4 py-3 font-medium text-white shadow-lg transition-colors"
                 @click="open = false">
-                <img src="{{ asset('images/icons/ar-marker.svg') }}" alt="AR Marker" class="h-5 w-5" />
-                <span>AR Marker</span>
+                <i class="fas fa-vr-cardboard w-5 text-center"></i>
+                <span>Virtual Museum (VR)</span>
             </a>
         </div>
     </nav>

@@ -163,49 +163,11 @@
                         <div id="audio-file-name" class="mt-2 text-sm text-gray-600 hidden"></div>
                     </div>
 
-                    <div class="rounded-lg border border-blue-100 bg-blue-50 p-4">
-                        <h3 class="text-sm font-semibold text-blue-900">Pengaturan Marker AR</h3>
-                        <p class="mt-1 text-xs text-blue-700">Pindahkan object ke marker lain atau upload marker
-                            baru.</p>
-
-                        <div class="mt-4 space-y-4">
-                            <div>
-                                <label for="marker_id" class="mb-2 block text-sm font-medium text-gray-700">
-                                    Marker Yang Digunakan
-                                </label>
-                                <select id="marker_id" name="marker_id"
-                                    class="block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                    <option value="">-- Tanpa marker --</option>
-                                    @foreach ($markers as $marker)
-                                        <option value="{{ $marker->marker_id }}" @selected(old('marker_id', $object->marker_id) == $marker->marker_id)>
-                                            {{ $marker->nama ?: 'Marker #' . $marker->marker_id }}
-                                            @if ($marker->virtual_museum_objects_count > 0)
-                                                ({{ $marker->virtual_museum_objects_count }} object)
-                                            @endif
-                                        </option>
-                                    @endforeach
-                                </select>
-                            </div>
-
-                            <div>
-                                <label for="nama_marker" class="mb-2 block text-sm font-medium text-gray-700">
-                                    Nama Marker Baru
-                                </label>
-                                <input type="text" id="nama_marker" name="nama_marker"
-                                    value="{{ old('nama_marker') }}"
-                                    class="block w-full rounded-md border border-gray-300 px-3 py-2 placeholder-gray-500 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                    placeholder="Contoh: Marker Ruang Tengah">
-                                <p class="mt-1 text-xs text-gray-500">Digunakan bila Anda upload gambar marker baru.
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-
                 </div>
             </div>
 
             <!-- Current Files Section -->
-            @if ($object->gambar_real || $object->path_obj || $object->path_audio || $object->path_gambar_marker)
+            @if ($object->gambar_real || $object->path_obj || $object->path_audio)
                 <div class="mt-6 rounded-lg border border-gray-200 bg-white shadow-sm">
                     <div class="border-b border-gray-200 px-6 py-4">
                         <h2 class="text-lg font-medium text-gray-900">File Saat Ini</h2>
@@ -245,15 +207,6 @@
                                     </svg>
                                     <span class="text-sm text-gray-900">{{ basename($object->path_audio) }}</span>
                                 </div>
-                            </div>
-                        @endif
-
-                        @if ($object->path_gambar_marker)
-                            <div class="rounded-lg border border-gray-200 p-3">
-                                <h4 class="mb-2 text-sm font-medium text-gray-700">Gambar Marker AR</h4>
-                                <img src="{{ asset('storage/' . $object->path_gambar_marker) }}"
-                                    alt="Current AR Marker" class="h-24 w-full rounded object-cover">
-                                <p class="mt-1 text-xs text-gray-500">{{ basename($object->path_gambar_marker) }}</p>
                             </div>
                         @endif
 
@@ -330,37 +283,6 @@
                             Museum</p>
                     </div>
 
-                    <!-- AR Marker Image -->
-                    <div>
-                        <label for="path_gambar_marker" class="mb-2 block text-sm font-medium text-gray-700">
-                            Gambar Marker AR (Baru)
-                        </label>
-                        <div id="path_gambar_marker_dropzone"
-                            class="mt-1 flex cursor-pointer justify-center rounded-md border-2 border-dashed border-gray-300 px-6 pb-6 pt-5 transition-colors hover:border-gray-400">
-                            <div class="space-y-1 text-center">
-                                <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none"
-                                    viewBox="0 0 48 48">
-                                    <path
-                                        d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
-                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                                </svg>
-                                <div class="flex text-sm text-gray-600">
-                                    <label for="path_gambar_marker"
-                                        class="relative cursor-pointer rounded-md bg-white font-medium text-blue-600 focus-within:outline-none focus-within:ring-2 focus-within:ring-blue-500 focus-within:ring-offset-2 hover:text-blue-500">
-                                        <span id="path_gambar_marker_text">Upload gambar marker</span>
-                                        <input id="path_gambar_marker" name="path_gambar_marker" type="file"
-                                            class="sr-only" accept="image/*"
-                                            onchange="handleFileSelect('path_gambar_marker')">
-                                    </label>
-                                    <p class="pl-1">atau drag and drop</p>
-                                </div>
-                                <p class="text-xs text-gray-500">PNG, JPG, GIF up to 10MB</p>
-                            </div>
-                        </div>
-                        <p class="mt-1 text-xs text-gray-500">Gambar marker yang akan digunakan untuk mendeteksi AR.
-                            Saat diupload, object ini akan memakai marker baru yang juga bisa dipakai object lain.</p>
-                    </div>
-
                 </div>
             </div>
 
@@ -419,9 +341,6 @@
                     break;
                 case 'path_obj':
                     textElement.textContent = 'Upload file 3D';
-                    break;
-                case 'path_gambar_marker':
-                    textElement.textContent = 'Upload gambar marker';
                     break;
             }
         }
@@ -521,7 +440,6 @@
         document.addEventListener('DOMContentLoaded', function() {
             setupDragAndDrop('gambar_real');
             setupDragAndDrop('path_obj');
-            setupDragAndDrop('path_gambar_marker');
         });
 
         // Form validation

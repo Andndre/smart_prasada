@@ -2,10 +2,8 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Helper\ArPatternHelper;
 use App\Http\Controllers\Controller;
 use App\Models\AksesSitusUser;
-use App\Models\ArMarker;
 use App\Models\Ebook;
 use App\Models\Era;
 use App\Models\KritikSaran;
@@ -25,7 +23,6 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
-use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
 class AdminController extends Controller
@@ -610,7 +607,7 @@ class AdminController extends Controller
      */
     public function createVirtualMuseumObject($museum_id)
     {
-        $museum = VirtualMuseum::with(['situsPeninggalan', 'arMarkers.virtualMuseumObjects'])->findOrFail($museum_id);
+        $museum = VirtualMuseum::with('situsPeninggalan')->findOrFail($museum_id);
 
         return view('admin.virtual-museum-object.create', compact('museum'));
     }
@@ -629,15 +626,6 @@ class AdminController extends Controller
             'gambar_real' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:10240', // 10MB
             'path_obj' => 'nullable|file|max:307200', // 300MB
             'audio_file' => 'nullable|file|mimes:mp3,wav,ogg,aac|max:10240', // 10MB
-            'path_gambar_marker' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:10240', // 10MB
-            'marker_id' => [
-                'nullable',
-                'integer',
-                Rule::exists('ar_marker', 'marker_id')->where(function ($query) use ($museum_id) {
-                    $query->where('museum_id', $museum_id);
-                }),
-            ],
-            'nama_marker' => 'nullable|string|max:255',
         ]);
 
         $data = [
@@ -670,13 +658,6 @@ class AdminController extends Controller
             $data['path_audio'] = $path;
         }
 
-        $marker = $this->resolveMarkerForObject($request, $museum);
-        if ($marker) {
-            $data['marker_id'] = $marker->marker_id;
-            $data['path_gambar_marker'] = $marker->path_gambar_marker;
-            $data['path_patt'] = $marker->path_patt;
-        }
-
         VirtualMuseumObject::create($data);
 
         return redirect()->route('admin.virtual-museum.show', $museum_id)
@@ -688,7 +669,7 @@ class AdminController extends Controller
      */
     public function showVirtualMuseumObject($object_id)
     {
-        $object = VirtualMuseumObject::with(['situsPeninggalan', 'virtualMuseum.situsPeninggalan', 'arMarker'])
+        $object = VirtualMuseumObject::with(['situsPeninggalan', 'virtualMuseum.situsPeninggalan'])
             ->findOrFail($object_id);
 
         return view('admin.virtual-museum-object.show', compact('object'));
@@ -699,14 +680,10 @@ class AdminController extends Controller
      */
     public function editVirtualMuseumObject($object_id)
     {
-        $object = VirtualMuseumObject::with(['situsPeninggalan', 'virtualMuseum.situsPeninggalan', 'arMarker'])
+        $object = VirtualMuseumObject::with(['situsPeninggalan', 'virtualMuseum.situsPeninggalan'])
             ->findOrFail($object_id);
-        $markers = ArMarker::withCount('virtualMuseumObjects')
-            ->where('museum_id', $object->museum_id)
-            ->orderBy('created_at')
-            ->get();
 
-        return view('admin.virtual-museum-object.edit', compact('object', 'markers'));
+        return view('admin.virtual-museum-object.edit', compact('object'));
     }
 
     /**
@@ -714,8 +691,7 @@ class AdminController extends Controller
      */
     public function updateVirtualMuseumObject(Request $request, $object_id)
     {
-        $object = VirtualMuseumObject::with('arMarker')->findOrFail($object_id);
-        $museum = VirtualMuseum::findOrFail($object->museum_id);
+        $object = VirtualMuseumObject::findOrFail($object_id);
 
         $request->validate([
             'nama' => 'required|string|max:255',
@@ -724,15 +700,6 @@ class AdminController extends Controller
             'gambar_real' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:10240', // 10MB
             'path_obj' => 'nullable|file|max:307200', // 300MB
             'audio_file' => 'nullable|file|mimes:mp3,wav,ogg,aac|max:10240', // 10MB
-            'path_gambar_marker' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:10240', // 10MB
-            'marker_id' => [
-                'nullable',
-                'integer',
-                Rule::exists('ar_marker', 'marker_id')->where(function ($query) use ($object) {
-                    $query->where('museum_id', $object->museum_id);
-                }),
-            ],
-            'nama_marker' => 'nullable|string|max:255',
         ]);
 
         $data = [
@@ -783,20 +750,7 @@ class AdminController extends Controller
             $data['path_audio'] = $path;
         }
 
-        $oldMarker = $object->arMarker;
-        $marker = $this->resolveMarkerForObject($request, $museum, $object);
-
-        if ($marker) {
-            $data['marker_id'] = $marker->marker_id;
-            $data['path_gambar_marker'] = $marker->path_gambar_marker;
-            $data['path_patt'] = $marker->path_patt;
-        }
-
         $object->update($data);
-
-        if ($oldMarker && $marker && $oldMarker->marker_id !== $marker->marker_id) {
-            $this->cleanupUnusedMarker($oldMarker);
-        }
 
         return redirect()->route('admin.virtual-museum-object.show', $object_id)
             ->with('success', 'Object Virtual Living Museum berhasil diperbarui!');
@@ -807,10 +761,9 @@ class AdminController extends Controller
      */
     public function destroyVirtualMuseumObject($object_id)
     {
-        $object = VirtualMuseumObject::with('arMarker')->findOrFail($object_id);
+        $object = VirtualMuseumObject::findOrFail($object_id);
         $museum_id = $object->museum_id;
         $nama = $object->nama;
-        $oldMarker = $object->arMarker;
 
         // Delete associated files
         $files = ['gambar_real', 'path_obj', 'path_audio'];
@@ -820,103 +773,10 @@ class AdminController extends Controller
             }
         }
 
-        if (! $oldMarker) {
-            $this->deletePublicFile($object->path_gambar_marker);
-            $this->deletePublicFile($object->path_patt);
-        }
-
         $object->delete();
-
-        if ($oldMarker) {
-            $this->cleanupUnusedMarker($oldMarker);
-        }
 
         return redirect()->route('admin.virtual-museum.show', $museum_id)
             ->with('success', "Object Virtual Living Museum '{$nama}' berhasil dihapus.");
-    }
-
-    private function storeMarkerAssets($file): array
-    {
-        $originalName = preg_replace('/[^a-zA-Z0-9\._-]/', '', $file->getClientOriginalName());
-        $baseName = preg_replace('/[^a-zA-Z0-9_-]/', '', pathinfo($originalName, PATHINFO_FILENAME)) ?: 'marker';
-        $timestamp = now()->format('YmdHis');
-
-        $markerPath = null;
-        $patternPath = null;
-
-        try {
-            $sourcePath = $file->getRealPath();
-            if ($sourcePath === false) {
-                throw ValidationException::withMessages([
-                    'path_gambar_marker' => 'File marker tidak valid. Silakan unggah ulang gambar marker.',
-                ]);
-            }
-
-            $patternContent = ArPatternHelper::encodeImageToPattern($sourcePath);
-            $patternPath = "virtual-museum/objects/patterns/{$timestamp}_patt_{$baseName}.patt";
-            Storage::disk('public')->put($patternPath, $patternContent);
-
-            $markerPng = ArPatternHelper::buildFullMarkerPng($sourcePath, 0.5, 512, 'black');
-            $markerPath = "virtual-museum/objects/markers/{$timestamp}_marker_{$baseName}.png";
-            Storage::disk('public')->put($markerPath, $markerPng);
-        } catch (\Throwable $exception) {
-            $this->deletePublicFile($markerPath);
-            $this->deletePublicFile($patternPath);
-
-            Log::error('Gagal membuat AR pattern otomatis', [
-                'marker_path' => $markerPath,
-                'message' => $exception->getMessage(),
-            ]);
-
-            throw ValidationException::withMessages([
-                'path_gambar_marker' => 'Gagal membuat file pattern otomatis dari gambar marker. Pastikan file gambar valid lalu coba lagi.',
-            ]);
-        }
-
-        return [
-            'path_gambar_marker' => $markerPath,
-            'path_patt' => $patternPath,
-        ];
-    }
-
-    private function resolveMarkerForObject(Request $request, VirtualMuseum $museum, ?VirtualMuseumObject $currentObject = null): ?ArMarker
-    {
-        $selectedMarkerId = $request->input('marker_id');
-
-        if ($request->hasFile('path_gambar_marker')) {
-            $assets = $this->storeMarkerAssets($request->file('path_gambar_marker'));
-            $markerName = $request->filled('nama_marker')
-                ? $request->input('nama_marker')
-                : ('Marker '.$request->input('nama', 'AR'));
-
-            return ArMarker::create([
-                'situs_id' => $museum->situs_id,
-                'museum_id' => $museum->museum_id,
-                'nama' => $markerName,
-                'path_gambar_marker' => $assets['path_gambar_marker'],
-                'path_patt' => $assets['path_patt'],
-            ]);
-        }
-
-        if ($selectedMarkerId) {
-            return ArMarker::where('museum_id', $museum->museum_id)
-                ->findOrFail($selectedMarkerId);
-        }
-
-        return $currentObject?->arMarker;
-    }
-
-    private function cleanupUnusedMarker(ArMarker $marker): void
-    {
-        $isStillUsed = VirtualMuseumObject::where('marker_id', $marker->marker_id)->exists();
-
-        if ($isStillUsed) {
-            return;
-        }
-
-        $this->deletePublicFile($marker->path_gambar_marker);
-        $this->deletePublicFile($marker->path_patt);
-        $marker->delete();
     }
 
     private function deletePublicFile(?string $path): void

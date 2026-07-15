@@ -13,10 +13,10 @@
 			</a>
 		</div>
 
-		{{-- Center AR Marker Button --}}
+		{{-- Center VR Button --}}
 		<div class="absolute left-1/2 transform -translate-x-1/2 -translate-y-7">
-			<a href="{{ route('guest.ar-marker') }}" class="flex items-center justify-center w-14 h-14 md:w-16 md:h-16 bg-primary rounded-full border-4 border-primary/30 shadow-lg hover:shadow-xl transition-shadow">
-				<img src="{{ asset('images/icons/ar-marker.svg') }}" alt="AR Marker" class="w-8 h-8 md:w-10 md:h-10" />
+			<a href="{{ route('guest.vr.maps') }}" class="flex items-center justify-center w-14 h-14 md:w-16 md:h-16 bg-primary rounded-full border-4 border-primary/30 shadow-lg hover:shadow-xl transition-shadow">
+				<i class="fas fa-vr-cardboard text-2xl md:text-3xl text-white"></i>
 			</a>
 		</div>
 

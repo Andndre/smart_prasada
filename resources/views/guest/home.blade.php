@@ -70,15 +70,6 @@
                     <span class="text-xs font-medium text-gray-700 text-center">{{ __('app.elearning') }}</span>
                 </div>
 
-                {{-- Maps --}}
-                <div class="flex flex-col items-center">
-                    <a href="{{ route('guest.maps') }}"
-                        class="flex items-center justify-center w-16 h-16 md:w-20 md:h-20 bg-white rounded-2xl shadow-sm hover:shadow-md transition-shadow mb-3">
-                        <img src="{{ asset('images/icons/maps.png') }}" alt="Maps" class="w-10 h-10 md:w-12 md:h-12" />
-                    </a>
-                    <span class="text-xs font-medium text-gray-700 text-center">{{ __('app.maps') }}</span>
-                </div>
-
                 {{-- VR --}}
                 <div class="flex flex-col items-center">
                     <a href="{{ route('guest.vr.maps') }}"

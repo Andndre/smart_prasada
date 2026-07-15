@@ -29,7 +29,7 @@ class SecurityHeaders
 
             // Content Security Policy permitting required CDNs and scripts
             $csp = "default-src 'self' 'unsafe-inline' 'unsafe-eval' https: data: blob:; ".
-                   "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://aframe.io https://unpkg.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://code.jquery.com https://launchar.app https://static.cloudflareinsights.com{$viteDevOrigins}; ".
+                   "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://aframe.io https://unpkg.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://code.jquery.com https://static.cloudflareinsights.com{$viteDevOrigins}; ".
                    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.bunny.net https://unpkg.com https://cdnjs.cloudflare.com{$viteDevOrigins}; ".
                    "img-src 'self' data: blob: https:; ".
                    "font-src 'self' https://fonts.gstatic.com https://fonts.bunny.net https://cdnjs.cloudflare.com{$viteDevOrigins}; ".

@@ -145,7 +145,7 @@
                 <div class="rounded-lg border border-gray-200 bg-white shadow-sm">
                     <div class="flex items-center justify-between border-b border-gray-200 px-6 py-4">
                         <div class="flex items-center space-x-3">
-                            <h2 class="text-lg font-medium text-gray-900">Objek AR Marker</h2>
+                            <h2 class="text-lg font-medium text-gray-900">Objek Virtual Museum</h2>
                             <span
                                 class="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-800">
                                 {{ $museum->virtualMuseumObjects->count() }} Objek
@@ -202,7 +202,7 @@
                                                                 OBJ
                                                             </span>
                                                         @endif
-                                                        @if ($object->path_patt)
+                                                        @if ($object->mesh_name)
                                                             <span class="flex items-center">
                                                                 <svg class="mr-1 h-3 w-3" fill="none"
                                                                     stroke="currentColor" viewBox="0 0 24 24">
@@ -210,7 +210,7 @@
                                                                         stroke-linejoin="round" stroke-width="2"
                                                                         d="M7 4V2a1 1 0 011-1h4a1 1 0 011 1v2m-6 0h8m-8 0a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V6a2 2 0 00-2-2" />
                                                                 </svg>
-                                                                AR
+                                                                VR
                                                             </span>
                                                         @endif
                                                         @if ($object->gambar_real)
@@ -309,9 +309,9 @@
                                 class="text-sm font-semibold text-gray-900">{{ $museum->virtualMuseumObjects->count() }}</span>
                         </div>
                         <div class="flex items-center justify-between">
-                            <span class="text-sm text-gray-600">Objek dengan AR</span>
+                            <span class="text-sm text-gray-600">Objek Interaktif VR</span>
                             <span
-                                class="text-sm font-semibold text-gray-900">{{ $museum->virtualMuseumObjects->whereNotNull('path_patt')->count() }}</span>
+                                class="text-sm font-semibold text-gray-900">{{ $museum->virtualMuseumObjects->whereNotNull('mesh_name')->count() }}</span>
                         </div>
                         <div class="flex items-center justify-between">
                             <span class="text-sm text-gray-600">Objek dengan Gambar</span>

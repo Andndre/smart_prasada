@@ -41,9 +41,4 @@ class VirtualMuseum extends Model
     {
         return $this->hasMany(VirtualMuseumObject::class, 'museum_id', 'museum_id');
     }
-
-    public function arMarkers(): HasMany
-    {
-        return $this->hasMany(ArMarker::class, 'museum_id', 'museum_id');
-    }
 }

@@ -165,6 +165,7 @@ class TeleportControls {
         this.targets = targets;
         this.controller = null;
         this.panel = null;
+        this.hoverNode = null;
         this.hoverInfo = null;
         this.hoverPoint = null;
         this.raycaster = new THREE.Raycaster();
@@ -196,7 +197,8 @@ class TeleportControls {
         const hits = this.raycaster.intersectObjects(this.targets, true);
 
         const first = hits[0];
-        this.hoverInfo = first ? TeleportControls.findVrObject(first.object) : null;
+        this.hoverNode = first ? TeleportControls.findVrNode(first.object) : null;
+        this.hoverInfo = this.hoverNode?.userData.vrObject ?? null;
         this.hoverPoint = this.hoverInfo ? first.point : null;
 
         if (this.hoverInfo) {
@@ -229,13 +231,29 @@ class TeleportControls {
         }
     }
 
-    static findVrObject(object) {
+    static findVrNode(object) {
         let node = object;
         while (node) {
-            if (node.userData.vrObject) return node.userData.vrObject;
+            if (node.userData.vrObject) return node;
             node = node.parent;
         }
         return null;
+    }
+
+    /** Squeeze/grip: pick up the hovered object; release puts it back in the scene graph. */
+    grabStart(controller) {
+        if (!this.hoverNode || controller.userData.grabbedNode) return;
+        controller.userData.grabbedNode = this.hoverNode;
+        controller.userData.grabbedParent = this.hoverNode.parent;
+        controller.attach(this.hoverNode);
+    }
+
+    grabEnd(controller) {
+        const node = controller.userData.grabbedNode;
+        if (!node) return;
+        controller.userData.grabbedParent.attach(node);
+        controller.userData.grabbedNode = null;
+        controller.userData.grabbedParent = null;
     }
 
     /** Single entry point for trigger/tap: close panel > open panel > teleport. */
@@ -295,10 +313,22 @@ class InfoPanel {
         this.mesh.position.copy(cameraWorld).addScaledVector(direction, distance);
         this.mesh.lookAt(cameraWorld);
         this.mesh.visible = true;
+
+        this.stopAudio();
+        if (info.path_audio) {
+            this.audio = new Audio("/storage/" + info.path_audio);
+            this.audio.play().catch(() => {});
+        }
     }
 
     hide() {
         this.mesh.visible = false;
+        this.stopAudio();
+    }
+
+    stopAudio() {
+        this.audio?.pause();
+        this.audio = null;
     }
 
     draw(info) {
@@ -418,16 +448,38 @@ async function startHeadsetSession(renderer, scene, camera, rig, teleport) {
         VRButton.createButton(renderer),
     );
 
-    const controller = renderer.xr.getController(0);
-    controller.addEventListener("connected", (event) => {
-        controller.userData.connected = event.data.targetRayMode === "tracked-pointer";
-    });
-    controller.addEventListener("disconnected", () => {
-        controller.userData.connected = false;
-    });
-    controller.addEventListener("select", () => teleport.trigger());
-    rig.add(controller);
-    teleport.controller = controller;
+    for (const index of [0, 1]) {
+        const controller = renderer.xr.getController(index);
+
+        const ray = new THREE.Line(
+            new THREE.BufferGeometry().setFromPoints([
+                new THREE.Vector3(0, 0, 0),
+                new THREE.Vector3(0, 0, -5),
+            ]),
+            new THREE.LineBasicMaterial({ color: 0x7c3aed, transparent: true, opacity: 0.7 }),
+        );
+        ray.visible = false;
+        controller.add(ray);
+
+        controller.addEventListener("connected", (event) => {
+            const tracked = event.data.targetRayMode === "tracked-pointer";
+            controller.userData.connected = tracked;
+            ray.visible = tracked;
+            if (tracked && !teleport.controller) teleport.controller = controller;
+        });
+        controller.addEventListener("disconnected", () => {
+            controller.userData.connected = false;
+            ray.visible = false;
+            if (teleport.controller === controller) teleport.controller = null;
+        });
+        controller.addEventListener("select", () => {
+            if (controller.userData.connected) teleport.controller = controller;
+            teleport.trigger();
+        });
+        controller.addEventListener("squeezestart", () => teleport.grabStart(controller));
+        controller.addEventListener("squeezeend", () => teleport.grabEnd(controller));
+        rig.add(controller);
+    }
 
     renderer.setAnimationLoop(() => {
         teleport.update();

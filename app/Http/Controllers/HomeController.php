@@ -6,7 +6,6 @@ use App\Helper\TokenHelper;
 use App\Models\Ebook;
 use App\Models\Era;
 use App\Models\JawabanUser;
-use App\Models\Katalog;
 use App\Models\LogAktivitas;
 use App\Models\Materi;
 use App\Models\MuseumUserVisit;
@@ -19,8 +18,6 @@ use App\Models\VirtualMuseumObject;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Storage;
 
 class HomeController extends Controller
 {
@@ -158,11 +155,6 @@ class HomeController extends Controller
         return view('guest.pengembang', compact('riwayatPengembang'));
     }
 
-    public function arMarker(Request $request)
-    {
-        return view('guest.ar-marker');
-    }
-
     /**
      * Display user's test results report
      */
@@ -237,11 +229,6 @@ class HomeController extends Controller
         ]);
     }
 
-    public function maps(Request $request)
-    {
-        return view('guest.maps');
-    }
-
     /**
      * VR map - lists only situs with a VR-capable museum model.
      */
@@ -279,7 +266,33 @@ class HomeController extends Controller
         $vrObjects = VirtualMuseumObject::query()
             ->where('museum_id', $museum->museum_id)
             ->whereNotNull('mesh_name')
-            ->get(['mesh_name', 'nama', 'deskripsi']);
+            ->get(['mesh_name', 'nama', 'deskripsi', 'path_audio']);
+
+        MuseumUserVisit::firstOrCreate([
+            'user_id' => $user->id,
+            'museum_id' => $museum->museum_id,
+        ], [
+            'visited_at' => now(),
+        ]);
+
+        if ($situs->materi_id) {
+            $materi = Materi::findOrFail($situs->materi_id);
+            $allMuseumIds = VirtualMuseum::whereIn(
+                'situs_id',
+                SitusPeninggalan::where('materi_id', $situs->materi_id)->pluck('situs_id')
+            )->pluck('museum_id')->toArray();
+
+            $visitedMuseumIds = MuseumUserVisit::where('user_id', $user->id)
+                ->whereIn('museum_id', $allMuseumIds)
+                ->pluck('museum_id')->unique()->toArray();
+
+            if (\count($allMuseumIds) > 0 && \count($visitedMuseumIds) === \count($allMuseumIds)) {
+                if (! env('APP_DEMO_MODE', false) && $user->progress_level_sekarang == User::EBOOK && $user->level_sekarang + 1 == $materi->getLinearLevel()) {
+                    $user->incrementProgressLevel();
+                    $this->logActivity($user->id, "Menuntaskan semua spot Virtual Living Museum pada materi ID: {$situs->materi_id}");
+                }
+            }
+        }
 
         $this->logActivity($user->id, "Memulai pengalaman VR untuk spot: {$museum->nama} di {$situs->nama}");
 
@@ -752,83 +765,6 @@ class HomeController extends Controller
         }
 
         return view('guest.panorama.viewer', compact('situs'));
-    }
-
-    public function arMuseum(Request $request, $situs_id, $museum_id)
-    {
-        $userAuth = Auth::user();
-        $user = User::findOrFail($userAuth->id);
-        $situs = SitusPeninggalan::findOrFail($situs_id);
-        $museum = VirtualMuseum::with('virtualMuseumObjects')->findOrFail($museum_id);
-        // Verify that this museum belongs to the situs
-        if ($museum->situs_id != $situs_id) {
-            abort(404, 'Museum tidak ditemukan di situs ini.');
-        }
-
-        // Get model file size if it exists
-        $museum->file_size = ($museum->path_obj && Storage::disk('public')->exists($museum->path_obj)) ? Storage::disk('public')->size($museum->path_obj) : 0;
-
-        // Log AR activity
-        $this->logActivity($user->id, "Memulai pengalaman AR untuk spot: {$museum->nama} di {$situs->nama}");
-
-        // --- Museum Visit Tracking Logic ---
-        // 1. Catat kunjungan user ke museum ini (jika belum ada)
-        MuseumUserVisit::firstOrCreate([
-            'user_id' => $user->id,
-            'museum_id' => $museum->museum_id,
-        ], [
-            'visited_at' => now(),
-        ]);
-
-        // 2. Jika materi terkait ada, cek apakah semua museum pada materi ini sudah dikunjungi user
-        if ($situs->materi_id) {
-            $materiId = $situs->materi_id;
-            $materi = Materi::findOrFail($materiId);
-            // Ambil semua museum_id pada materi ini
-            $allMuseumIds = VirtualMuseum::whereIn(
-                'situs_id',
-                SitusPeninggalan::where('materi_id', $materiId)->pluck('situs_id')
-            )->pluck('museum_id')->toArray();
-
-            // dd($allMuseumIds);
-
-            // Ambil semua museum_id yang sudah dikunjungi user
-            $visitedMuseumIds = MuseumUserVisit::where('user_id', $user->id)
-                ->whereIn('museum_id', $allMuseumIds)
-                ->pluck('museum_id')->unique()->toArray();
-
-            // Jika semua museum sudah dikunjungi dan user progress di step museum, increment progress
-            // Skip in demo mode — exploration only, no progress tracking
-            if (\count($allMuseumIds) > 0 && \count($visitedMuseumIds) === \count($allMuseumIds)) {
-                if (! env('APP_DEMO_MODE', false) && $user->progress_level_sekarang == User::EBOOK && $user->level_sekarang + 1 == $materi->getLinearLevel()) {
-                    $user->incrementProgressLevel();
-                    $this->logActivity($user->id, "Menuntaskan semua spot Virtual Living Museum pada materi ID: {$materiId}");
-                }
-            }
-        }
-
-        // Generate a secure token for AR session with user ID and expiration timestamp
-        $arToken = TokenHelper::generate($user->id);
-
-        // Debug log
-        Log::debug('Generated AR Token:', [
-            'user_id' => $user->id,
-            'token' => $arToken,
-        ]);
-
-        return view('guest.ar.museum', compact('situs', 'museum', 'arToken'));
-    }
-
-    public function arMarkerKatalog()
-    {
-        $katalog = Katalog::first();
-        //      download katalog
-        if ($katalog->path_pdf && Storage::disk('public')->exists($katalog->path_pdf)) {
-            return response()->download(storage_path("app/public/{$katalog->path_pdf}"));
-        }
-
-        //      not found
-        return redirect()->back()->with('error', 'Katalog tidak ditemukan');
     }
 
     /**

@@ -20,40 +20,32 @@ return [
             ],
             [
                 'title' => 'Follow Each Step',
-                'description' => 'Follow each step: take pretest, read e-book, visit AR feature, and take posttest',
+                'description' => 'Follow each step: take pretest, read e-book, visit the Virtual Living Museum (VR), and take posttest',
             ],
         ],
     ],
 
     'virtual_living_museum' => [
         'id' => 'virtual_living_museum',
-        'title' => 'Augmented Reality',
-        'description' => 'Guide to using AR feature in Visit Heritage menu',
+        'title' => 'Virtual Living Museum (VR)',
+        'description' => 'Guide to using the VR feature in Visit Heritage menu',
         'icon' => 'fa-vr-cardboard',
         'steps' => [
             [
-                'title' => 'Visit AR Feature',
-                'description' => 'Select AR feature from Visit Heritage page',
+                'title' => 'Open VR Menu',
+                'description' => 'Select the VR menu from the main page, then choose an available site',
             ],
             [
-                'title' => 'Choose Available AR Spot',
-                'description' => 'Choose one of the available AR spots on AR feature page',
+                'title' => 'Enter VR Mode',
+                'description' => 'Press the ENTER VR button, then place your phone in a Cardboard or use a VR headset',
             ],
             [
-                'title' => 'Allow Camera Access',
-                'description' => 'Allow the application to access your device camera',
+                'title' => 'Move Around',
+                'description' => 'Aim the reticle (circle) at the floor and press the trigger to teleport',
             ],
             [
-                'title' => 'Point Camera',
-                'description' => 'Point camera to open area until white circle appears',
-            ],
-            [
-                'title' => 'View AR Content',
-                'description' => 'Tap screen to place AR object. You can walk around to see AR object from different angles',
-            ],
-            [
-                'title' => 'View Heritage Information',
-                'description' => 'Use info button to see list of heritage information on AR object',
+                'title' => 'View Object Information',
+                'description' => 'Aim the reticle at a heritage object and press the trigger to open the info panel',
             ],
         ],
     ],
@@ -112,7 +104,7 @@ return [
             ],
             [
                 'title' => 'Study Material',
-                'description' => 'After pretest, study e-book material and visit AR feature',
+                'description' => 'After pretest, study e-book material and visit the Virtual Living Museum (VR)',
             ],
             [
                 'title' => 'Take Posttest',
@@ -162,40 +154,4 @@ return [
         ],
     ],
 
-    'ar_marker' => [
-        'id' => 'ar_marker',
-        'title' => 'AR Marker',
-        'description' => 'Guide to using AR Marker for augmented reality experience',
-        'icon' => 'fa-qrcode',
-        'steps' => [
-            [
-                'title' => 'Download AR Catalog',
-                'description' => 'Download the catalog file containing AR markers from the app menu',
-            ],
-            [
-                'title' => 'Print Marker',
-                'description' => 'Print the AR marker from the downloaded catalog. Ensure good print quality and clarity',
-            ],
-            [
-                'title' => 'Open AR Marker Menu',
-                'description' => 'Select AR Marker menu from the main application page',
-            ],
-            [
-                'title' => 'Allow Camera Access',
-                'description' => 'Grant permission for the app to access your device camera',
-            ],
-            [
-                'title' => 'Point Camera at Marker',
-                'description' => 'Point your device camera at the printed marker. Make sure the marker is clearly visible and not cut off',
-            ],
-            [
-                'title' => 'View AR Object',
-                'description' => '3D object will appear on top of the marker. Move your device to view the object from different angles',
-            ],
-            [
-                'title' => 'Interact with Object',
-                'description' => 'Tap the AR object to see detailed information or perform other interactions',
-            ],
-        ],
-    ],
 ];

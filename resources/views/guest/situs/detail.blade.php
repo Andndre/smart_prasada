@@ -87,7 +87,7 @@
             <div class="mb-6 rounded-2xl bg-white p-6 shadow-sm">
                 <h3 class="mb-4 flex items-center text-lg font-bold text-gray-900">
                     <i class="fas fa-location-dot mr-2 text-purple-600"></i>
-                    Spot AR Virtual Living Museum
+                    Spot Virtual Living Museum (VR)
                 </h3>
 
                 <div class="grid grid-cols-1 gap-4">
@@ -109,11 +109,11 @@
                                 </div>
                             </div>
 
-                            {{-- AR Launch Button for this specific spot --}}
-                            <button onclick="launchSpotAR({{ $museum->museum_id }}, '{{ $museum->nama }}')"
+                            {{-- VR Launch Button for this specific spot --}}
+                            <button onclick="launchSpotVR({{ $museum->museum_id }}, '{{ $museum->nama }}')"
                                 class="inline-flex w-full transform items-center justify-center rounded-lg bg-gradient-to-r from-purple-600 to-blue-600 px-4 py-3 font-medium text-white shadow-md transition-all duration-200 hover:scale-[1.02] hover:from-purple-700 hover:to-blue-700">
                                 <i class="fas fa-vr-cardboard mr-2"></i>
-                                Jelajahi AR
+                                Jelajahi VR
                             </button>
                         </div>
                     @endforeach
@@ -206,11 +206,11 @@
             </div>
         @endif
 
-        {{-- AR Experience Section --}}
+        {{-- VR Experience Section --}}
         <div class="mb-6 rounded-2xl bg-white p-6 shadow-sm">
             <h3 class="mb-4 flex items-center text-lg font-bold text-gray-900">
-                <i class="fas fa-mobile-alt mr-2 text-green-600"></i>
-                Cara Menggunakan AR
+                <i class="fas fa-vr-cardboard mr-2 text-green-600"></i>
+                Cara Menggunakan VR
             </h3>
 
             <div class="space-y-4">
@@ -224,17 +224,17 @@
                         <li class="flex items-start">
                             <span
                                 class="mr-3 mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-blue-500 text-xs font-bold text-white">1</span>
-                            <span>Pilih spot yang ingin dijelajahi dan klik tombol "Jelajahi AR"</span>
+                            <span>Pilih spot yang ingin dijelajahi dan klik tombol "Jelajahi VR"</span>
                         </li>
                         <li class="flex items-start">
                             <span
                                 class="mr-3 mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-blue-500 text-xs font-bold text-white">2</span>
-                            <span>Izinkan akses kamera dan arahkan ke permukaan datar</span>
+                            <span>Klik tombol "ENTER VR" lalu pasang HP ke Cardboard atau gunakan headset VR</span>
                         </li>
                         <li class="flex items-start">
                             <span
                                 class="mr-3 mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-blue-500 text-xs font-bold text-white">3</span>
-                            <span>Ketuk lingkaran untuk menempatkan objek berukuran besar</span>
+                            <span>Arahkan reticle ke lantai untuk berpindah, atau ke objek untuk melihat informasinya</span>
                         </li>
                     </ol>
                 </div>
@@ -245,8 +245,8 @@
                         <i class="fas fa-exclamation-triangle mt-0.5 text-amber-600"></i>
                         <div class="text-left">
                             <p class="text-sm font-medium text-amber-800">Persyaratan:</p>
-                            <p class="mt-1 text-xs text-amber-700">Browser dengan dukungan WebXR, kamera, koneksi
-                                stabil, dan pencahayaan cukup</p>
+                            <p class="mt-1 text-xs text-amber-700">Browser dengan dukungan WebXR (atau HP dengan
+                                sensor gyro) dan koneksi stabil</p>
                         </div>
                     </div>
                 </div>
@@ -308,10 +308,10 @@
                 </div>
                 <div class="flex gap-3 border-t border-gray-100 bg-gray-50 p-4">
                     @if ($is_unlocked)
-                        <button id="modal-ar-btn" onclick="launchARFromModal()"
+                        <button id="modal-vr-btn" onclick="launchVRFromModal()"
                             class="inline-flex flex-1 items-center justify-center rounded-xl bg-gradient-to-r from-purple-600 to-blue-600 px-4 py-3 text-center font-medium text-white transition-all hover:-translate-y-0.5 hover:shadow-lg">
                             <i class="fas fa-vr-cardboard mr-2"></i>
-                            Jelajahi AR
+                            Jelajahi VR
                         </button>
                     @else
                         <div class="flex-1 text-center">
@@ -328,18 +328,13 @@
         </div>
     </div>
 
-    {{-- AR JavaScript (Three.js WebXR implementation) --}}
+    {{-- VR JavaScript --}}
     <script>
         let currentObjectId = null;
         let currentMuseumId = null;
 
-        function launchSpotAR(museumId, museumName) {
-            const confirmation = confirm(
-                `Memulai pengalaman AR untuk spot "${museumName}"?\n\nPastikan Anda berada di tempat yang memiliki pencahayaan cukup dan permukaan datar untuk penempatan objek.`
-            );
-            if (confirmation) {
-                window.location.href = `{{ url('/situs') }}/{{ $situs->situs_id }}/ar/${museumId}`;
-            }
+        function launchSpotVR(museumId, museumName) {
+            window.location.href = `{{ url('/situs') }}/{{ $situs->situs_id }}/vr/${museumId}`;
         }
 
         function showObjectModal(objectId, name, description, imageUrl, museumName) {
@@ -384,10 +379,10 @@
             }, 200);
         }
 
-        function launchARFromModal() {
+        function launchVRFromModal() {
             if (currentMuseumId) {
                 closeObjectModal();
-                launchSpotAR(currentMuseumId, '');
+                launchSpotVR(currentMuseumId, '');
             }
         }
 

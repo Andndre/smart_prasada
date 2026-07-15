@@ -2,16 +2,13 @@
 
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\ChunkUploadController;
-use App\Http\Controllers\Admin\KatalogController;
 use App\Http\Controllers\Admin\PanoramaController;
 use App\Http\Controllers\Admin\VideoPeninggalanController;
-use App\Http\Controllers\ArMarkerCameraController;
 use App\Http\Controllers\AsetHotspotController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\KritikSaranController;
 use App\Http\Controllers\LanguageController;
 use App\Http\Controllers\LaporanPeninggalanController;
-use App\Http\Controllers\MapsController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
@@ -29,14 +26,6 @@ Route::group(['middleware' => ['auth', 'user']], function () {
     Route::get('/panduan', [HomeController::class, 'panduan'])->name('guest.panduan');
     Route::get('/pengaturan', [HomeController::class, 'pengaturan'])->name('guest.pengaturan');
     Route::get('/pengembang', [HomeController::class, 'pengembang'])->name('guest.pengembang');
-    Route::get('/marker', [HomeController::class, 'arMarker'])->name('guest.ar-marker');
-    Route::get('/ar-marker/camera', [ArMarkerCameraController::class, 'index'])->name('ar-marker.camera');
-    Route::get('/ar-marker/katalog', [HomeController::class, 'arMarkerKatalog'])->name('ar-marker.katalog');
-
-    // Maps routes
-    Route::get('/maps', [HomeController::class, 'maps'])->name('guest.maps');
-    Route::get('/maps/view', [MapsController::class, 'view'])->name('guest.maps.view');
-    Route::get('/maps/peninggalan', [MapsController::class, 'peninggalan'])->name('guest.maps.peninggalan');
 
     // VR routes
     Route::get('/vr', [HomeController::class, 'vrMaps'])->name('guest.vr.maps');
@@ -83,9 +72,6 @@ Route::group(['middleware' => ['auth', 'user']], function () {
     Route::get('/video-peninggalan', [HomeController::class, 'videoPeninggalan'])->name('guest.video-peninggalan');
     Route::get('/video-peninggalan/{id}', [HomeController::class, 'videoPeninggalanShow'])->name('guest.video-peninggalan.show');
 });
-
-// AR routes - Using token-based authentication
-Route::middleware('ar.token')->get('/situs/{situs_id}/ar/{museum_id}', [HomeController::class, 'arMuseum'])->name('ar.museum');
 
 // VR routes - Using token-based authentication (cross-device handoff via QR)
 Route::middleware('ar.token')->get('/situs/{situs_id}/vr/{museum_id}', [HomeController::class, 'vrMuseum'])->name('vr.museum');
@@ -189,10 +175,6 @@ Route::group(['middleware' => ['auth', 'admin']], function () {
     Route::get('/admin/riwayat-pengembang/{id}/edit', [AdminController::class, 'editRiwayatPengembang'])->name('admin.riwayat-pengembang.edit');
     Route::put('/admin/riwayat-pengembang/{id}', [AdminController::class, 'updateRiwayatPengembang'])->name('admin.riwayat-pengembang.update');
     Route::delete('/admin/riwayat-pengembang/{id}', [AdminController::class, 'destroyRiwayatPengembang'])->name('admin.riwayat-pengembang.destroy');
-
-    // Katalog
-    Route::get('admin/katalog', [KatalogController::class, 'edit'])->name('admin.katalog.edit');
-    Route::put('admin/katalog', [KatalogController::class, 'update'])->name('admin.katalog.update');
 
     // Video Peninggalan
     Route::get('admin/video-peninggalan', [VideoPeninggalanController::class, 'index'])->name('admin.video-peninggalan.index');

@@ -468,20 +468,16 @@ class ElearningContentSeeder extends Seeder
         // Create virtual museum objects
         $objects = [
             [
-                'nama' => 'Objek AR '.$situs->nama.' 1',
+                'nama' => 'Objek '.$situs->nama.' 1',
                 'gambar_real' => 'images/ar/placeholder-real.png',
                 'path_obj' => 'virtual-museum/objects/'.bin2hex(random_bytes(4)).'.glb',
-                'path_gambar_marker' => 'images/ar/placeholder-marker.png',
-                'path_patt' => 'patterns/'.bin2hex(random_bytes(4)).'patt',
-                'deskripsi' => 'Objek AR untuk '.$situs->nama,
+                'deskripsi' => 'Objek virtual museum untuk '.$situs->nama,
             ],
             [
-                'nama' => 'Objek AR '.$situs->nama.' 2',
+                'nama' => 'Objek '.$situs->nama.' 2',
                 'gambar_real' => 'images/ar/placeholder-real2.png',
                 'path_obj' => 'virtual-museum/objects/'.bin2hex(random_bytes(4)).'.glb',
-                'path_gambar_marker' => 'images/ar/placeholder-marker2.png',
-                'path_patt' => 'patterns/'.bin2hex(random_bytes(4)).'patt',
-                'deskripsi' => 'Objek AR kedua untuk '.$situs->nama,
+                'deskripsi' => 'Objek virtual museum kedua untuk '.$situs->nama,
             ],
         ];
 

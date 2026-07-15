@@ -20,24 +20,12 @@ test('panduan page renders successfully', function () {
     $response->assertStatus(200);
 });
 
-test('marker page renders successfully', function () {
-    $user = User::factory()->create(['role' => 'user']);
-
-    $response = $this->actingAs($user)->get('/marker');
-
-    $response->assertStatus(200);
-});
-
 test('unauthenticated user is redirected to login on pengaturan', function () {
     $this->get('/pengaturan')->assertRedirect('/login');
 });
 
 test('unauthenticated user is redirected to login on panduan', function () {
     $this->get('/panduan')->assertRedirect('/login');
-});
-
-test('unauthenticated user is redirected to login on marker', function () {
-    $this->get('/marker')->assertRedirect('/login');
 });
 
 test('user can change language and it queues a cookie', function () {

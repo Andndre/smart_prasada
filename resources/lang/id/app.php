@@ -24,7 +24,6 @@ return [
     // Home
     'virtual_museum' => 'Virtual Living Museum',
     'elearning' => 'Kunjungi Peninggalan',
-    'maps' => 'Geo Historia',
     'vr' => 'VR',
     'statistics' => 'Statistik',
     'report_heritage' => 'Lapor Peninggalan',
@@ -138,16 +137,6 @@ return [
     'send' => 'Kirim',
     'feedback_history' => 'Riwayat Kritik & Saran',
     'no_feedback_history' => 'Anda belum memiliki riwayat kritik dan saran.',
-    'ar_greeting' => 'Hai sobat museum...',
-    'ar_description' => 'AR Marker dapat digunakan dengan scan marker yang sudah disediakan untuk menampilkan visual objek sejarah.',
-    'ar_choose_menu' => 'Pilih Menu',
-    'ar_download_catalog' => 'Unduh Katalog',
-    'ar_open_ar' => 'Buka AR',
-    'maps_greeting' => 'Hai sobat museum...',
-    'maps_description' => 'Virtual tour dapat digunakan dengan 2 fitur: akses langsung menggunakan maps pada lokasi tertentu atau dengan fitur AR untuk menelusuri semua peninggalan sejarah.',
-    'maps_choose_menu' => 'Pilih Menu',
-    'maps_maps' => 'Maps',
-    'maps_virtual_museum' => 'Virtual Living Museum',
 
     // Admin Dashboard
     'admin_dashboard' => 'Dashboard Admin',

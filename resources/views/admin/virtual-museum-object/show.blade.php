@@ -61,12 +61,6 @@
 
     <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
 
-        @php
-            $activeMarker = $object->arMarker;
-            $markerPathPatt = $activeMarker->path_patt ?? $object->path_patt;
-            $markerImagePath = $activeMarker->path_gambar_marker ?? $object->path_gambar_marker;
-        @endphp
-
         @if (session('success'))
             <div class="mb-6 rounded-lg border border-green-200 bg-green-50 p-4">
                 <div class="flex items-center">
@@ -127,17 +121,6 @@
                                         class="text-blue-600 hover:text-blue-800">
                                         {{ $object->situsPeninggalan->nama }}
                                     </a>
-                                </dd>
-                            </div>
-
-                            <div>
-                                <dt class="text-sm font-medium text-gray-500">Marker AR</dt>
-                                <dd class="mt-1 text-sm text-gray-900">
-                                    @if ($activeMarker)
-                                        {{ $activeMarker->nama ?: 'Marker #' . $activeMarker->marker_id }}
-                                    @else
-                                        <span class="italic text-gray-400">Belum ditautkan</span>
-                                    @endif
                                 </dd>
                             </div>
 
@@ -212,47 +195,7 @@
                             </div>
                         @endif
 
-                        <!-- AR Pattern -->
-                        @if ($markerPathPatt)
-                            <div>
-                                <h3 class="mb-2 text-sm font-medium text-gray-700">AR Pattern File</h3>
-                                <div
-                                    class="flex items-center space-x-3 rounded-lg border border-gray-200 bg-gray-50 p-4">
-                                    <div class="flex-shrink-0">
-                                        <svg class="h-8 w-8 text-purple-500" fill="none" stroke="currentColor"
-                                            viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M7 4V2a1 1 0 011-1h4a1 1 0 011 1v2m-6 0h8m-8 0a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V6a2 2 0 00-2-2" />
-                                        </svg>
-                                    </div>
-                                    <div class="min-w-0 flex-1">
-                                        <p class="text-sm font-medium text-gray-900">AR Pattern</p>
-                                        <p class="break-all text-sm text-gray-500">{{ basename($markerPathPatt) }}
-                                        </p>
-                                        <a href="{{ asset('storage/' . $markerPathPatt) }}" target="_blank"
-                                            class="text-xs text-blue-600 hover:text-blue-800">Download File</a>
-                                    </div>
-                                </div>
-                            </div>
-                        @endif
-
-                        <!-- AR Marker Image -->
-                        @if ($markerImagePath)
-                            <div>
-                                <h3 class="mb-2 text-sm font-medium text-gray-700">Gambar Marker AR (Siap Cetak)</h3>
-                                <div class="rounded-lg border border-gray-200 bg-gray-50 p-4">
-                                    <img src="{{ asset('storage/' . $markerImagePath) }}"
-                                        alt="Gambar Marker AR {{ $object->nama }}"
-                                        class="h-auto max-h-64 max-w-full rounded-lg bg-white object-contain shadow-sm">
-                                    <p class="mt-2 break-all text-xs text-gray-500">
-                                        {{ basename($markerImagePath) }}</p>
-                                    <a href="{{ asset('storage/' . $markerImagePath) }}" target="_blank"
-                                        class="text-xs text-blue-600 hover:text-blue-800">Download Marker</a>
-                                </div>
-                            </div>
-                        @endif
-
-                        @if (!$object->gambar_real && !$object->path_obj && !$object->path_audio && !$markerPathPatt && !$markerImagePath)
+                        @if (!$object->gambar_real && !$object->path_obj && !$object->path_audio)
                             <div class="py-8 text-center">
                                 <div class="mx-auto h-12 w-12 text-gray-400">
                                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -327,17 +270,10 @@
                             </span>
                         </div>
                         <div class="flex items-center justify-between">
-                            <span class="text-sm text-gray-600">AR Pattern</span>
+                            <span class="text-sm text-gray-600">Audio Narasi</span>
                             <span
-                                class="{{ $markerPathPatt ? 'text-green-600' : 'text-gray-400' }} text-sm font-semibold">
-                                {{ $markerPathPatt ? 'Ada' : 'Tidak Ada' }}
-                            </span>
-                        </div>
-                        <div class="flex items-center justify-between">
-                            <span class="text-sm text-gray-600">Gambar Marker AR</span>
-                            <span
-                                class="{{ $markerImagePath ? 'text-green-600' : 'text-gray-400' }} text-sm font-semibold">
-                                {{ $markerImagePath ? 'Ada' : 'Tidak Ada' }}
+                                class="{{ $object->path_audio ? 'text-green-600' : 'text-gray-400' }} text-sm font-semibold">
+                                {{ $object->path_audio ? 'Ada' : 'Tidak Ada' }}
                             </span>
                         </div>
                     </div>

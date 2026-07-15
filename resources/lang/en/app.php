@@ -24,7 +24,6 @@ return [
     // Home
     'virtual_museum' => 'Virtual Living Museum',
     'elearning' => 'Visit Heritage',
-    'maps' => 'Geo Historia',
     'vr' => 'VR',
     'statistics' => 'Statistics',
     'report_heritage' => 'Report Heritage',
@@ -138,16 +137,6 @@ return [
     'send' => 'Send',
     'feedback_history' => 'Feedback History',
     'no_feedback_history' => 'You don\'t have any feedback history yet.',
-    'ar_greeting' => 'Hello museum friends...',
-    'ar_description' => 'AR Marker can be used by scanning the provided marker to display historical object visuals.',
-    'ar_choose_menu' => 'Choose Menu',
-    'ar_download_catalog' => 'Download Catalog',
-    'ar_open_ar' => 'Open AR',
-    'maps_greeting' => 'Hello museum friends...',
-    'maps_description' => 'Virtual tour can be used with 2 features: direct access using maps for specific locations or with the AR feature to explore all historical artifacts.',
-    'maps_choose_menu' => 'Choose Menu',
-    'maps_maps' => 'Maps',
-    'maps_virtual_museum' => 'Virtual Living Museum',
 
     // Admin Dashboard
     'admin_dashboard' => 'Admin Dashboard',

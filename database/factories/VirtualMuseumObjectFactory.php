@@ -28,8 +28,6 @@ class VirtualMuseumObjectFactory extends Factory
             'deskripsi' => fake()->paragraph(),
             'path_obj' => 'virtual-museum/objects/models/'.fake()->uuid().'.glb',
             'gambar_real' => 'images/'.fake()->uuid().'.jpg',
-            'path_gambar_marker' => 'markers/'.fake()->uuid().'.png',
-            'path_patt' => 'patterns/'.fake()->uuid().'.patt',
             'path_audio' => null,
         ];
     }
