@@ -57,6 +57,7 @@ test('vr museum page exposes only objects with a mesh name', function () {
     VirtualMuseumObject::create($baseAttributes + [
         'nama' => 'Lukisan Barong',
         'mesh_name' => 'Lukisan_Barong',
+        'slot_mesh_name' => 'Slot_Lukisan_Barong',
         'deskripsi' => 'Lukisan klasik Bali.',
     ]);
     VirtualMuseumObject::create($baseAttributes + [
@@ -71,6 +72,7 @@ test('vr museum page exposes only objects with a mesh name', function () {
 
     $response->assertStatus(200);
     $response->assertSee('Lukisan_Barong');
+    $response->assertSee('Slot_Lukisan_Barong');
     $response->assertDontSee('Objek Tanpa Mesh');
 });
 

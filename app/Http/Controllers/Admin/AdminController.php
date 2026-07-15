@@ -622,6 +622,7 @@ class AdminController extends Controller
         $request->validate([
             'nama' => 'required|string|max:255',
             'mesh_name' => 'nullable|string|max:255',
+            'slot_mesh_name' => 'nullable|string|max:255',
             'deskripsi' => 'nullable|string',
             'gambar_real' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:10240', // 10MB
             'path_obj' => 'nullable|file|max:307200', // 300MB
@@ -633,6 +634,7 @@ class AdminController extends Controller
             'museum_id' => $museum_id,
             'nama' => $request->nama,
             'mesh_name' => $request->mesh_name,
+            'slot_mesh_name' => $request->slot_mesh_name,
             'deskripsi' => $request->deskripsi,
         ];
 
@@ -696,6 +698,7 @@ class AdminController extends Controller
         $request->validate([
             'nama' => 'required|string|max:255',
             'mesh_name' => 'nullable|string|max:255',
+            'slot_mesh_name' => 'nullable|string|max:255',
             'deskripsi' => 'nullable|string',
             'gambar_real' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:10240', // 10MB
             'path_obj' => 'nullable|file|max:307200', // 300MB
@@ -705,6 +708,7 @@ class AdminController extends Controller
         $data = [
             'nama' => $request->nama,
             'mesh_name' => $request->mesh_name,
+            'slot_mesh_name' => $request->slot_mesh_name,
             'deskripsi' => $request->deskripsi,
         ];
 

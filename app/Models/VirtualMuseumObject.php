@@ -25,6 +25,7 @@ class VirtualMuseumObject extends Model
         'museum_id',
         'nama',
         'mesh_name',
+        'slot_mesh_name',
         'gambar_real',
         'path_obj',
         'deskripsi',

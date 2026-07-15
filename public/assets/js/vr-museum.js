@@ -169,6 +169,8 @@ class TeleportControls {
         this.hoverInfo = null;
         this.hoverPoint = null;
         this.raycaster = new THREE.Raycaster();
+        this.slots = new Map();
+        this.solvedCount = 0;
 
         this.reticle = new THREE.Mesh(
             new THREE.RingGeometry(0.15, 0.25, 32).rotateX(-Math.PI / 2),
@@ -194,7 +196,9 @@ class TeleportControls {
             this.raycaster.setFromCamera(TeleportControls.SCREEN_CENTER, this.camera);
         }
 
-        const hits = this.raycaster.intersectObjects(this.targets, true);
+        const hits = this.raycaster
+            .intersectObjects(this.targets, true)
+            .filter((h) => h.object.visible);
 
         const first = hits[0];
         this.hoverNode = first ? TeleportControls.findVrNode(first.object) : null;
@@ -242,7 +246,7 @@ class TeleportControls {
 
     /** Squeeze/grip: pick up the hovered object; release puts it back in the scene graph. */
     grabStart(controller) {
-        if (!this.hoverNode || controller.userData.grabbedNode) return;
+        if (!this.hoverNode || this.hoverNode.userData.solved || controller.userData.grabbedNode) return;
         controller.userData.grabbedNode = this.hoverNode;
         controller.userData.grabbedParent = this.hoverNode.parent;
         controller.attach(this.hoverNode);
@@ -254,6 +258,32 @@ class TeleportControls {
         controller.userData.grabbedParent.attach(node);
         controller.userData.grabbedNode = null;
         controller.userData.grabbedParent = null;
+        this.checkSlot(node);
+    }
+
+    /** Puzzle: released piece within reach of its slot snaps in place and counts as solved. */
+    checkSlot(node) {
+        const slot = this.slots.get(node.userData.vrObject?.slot_mesh_name);
+        if (!slot || node.userData.solved) return;
+
+        const nodePos = node.getWorldPosition(new THREE.Vector3());
+        const slotPos = slot.getWorldPosition(new THREE.Vector3());
+        // ponytail: 0.5m snap radius, single knob; make per-object if pieces vary wildly in size.
+        if (nodePos.distanceTo(slotPos) > 0.5) return;
+
+        slot.parent.attach(node);
+        node.position.copy(slot.position);
+        node.quaternion.copy(slot.quaternion);
+        node.userData.solved = true;
+        this.solvedCount++;
+
+        const done = this.solvedCount >= this.slots.size;
+        this.panel?.show({
+            nama: done ? "Puzzle Selesai! 🎉" : "Tepat!",
+            deskripsi: done
+                ? "Semua objek sudah kembali ke tempat yang benar. Kerja bagus!"
+                : `${node.userData.vrObject.nama} sudah di tempat yang benar. (${this.solvedCount}/${this.slots.size})`,
+        }, slotPos);
     }
 
     /** Single entry point for trigger/tap: close panel > open panel > teleport. */
@@ -608,9 +638,16 @@ async function main() {
 
     if (Array.isArray(window.vrObjects) && window.vrObjects.length) {
         const byMeshName = new Map(window.vrObjects.map((o) => [o.mesh_name, o]));
+        const slotNames = new Set(
+            window.vrObjects.map((o) => o.slot_mesh_name).filter(Boolean),
+        );
         model.traverse((node) => {
             const info = byMeshName.get(node.name);
             if (info) node.userData.vrObject = info;
+            if (slotNames.has(node.name)) {
+                node.visible = false;
+                teleport.slots.set(node.name, node);
+            }
         });
     }
 
