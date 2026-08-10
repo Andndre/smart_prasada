@@ -43,6 +43,14 @@
                         </svg>
                         Refleksi
                     </a>
+                    <a href="{{ route('vr.peluncur', $museum->museum_id) }}"
+                        class="inline-flex items-center justify-center rounded-lg bg-slate-700 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-800">
+                        <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 4v1m6 11h2m-6 0h-2v4m0-11V4m0 3h4M4 8h2m10 0h2M4 12h2m0 4h2m10-4h2M4 16h2m6 4h2" />
+                        </svg>
+                        Peluncur Sesi
+                    </a>
                     <a href="{{ route('admin.virtual-museum.edit', $museum->museum_id) }}"
                         class="inline-flex items-center justify-center rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700">
                         <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

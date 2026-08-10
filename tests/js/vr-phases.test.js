@@ -170,5 +170,24 @@ describe("PhaseManager", () => {
 
             assert.match(manager.deskripsi().instruksi, /layar/);
         });
+
+        it("menyebut alasan saat interaksi terlewat karena perangkat", () => {
+            const { manager } = buatManager({ perangkatBerkemampuanController: false });
+            manager.catatTeleport();
+            amatiSemua(manager);
+
+            assert.match(manager.deskripsi().instruksi, /headset VR/);
+        });
+
+        it("tidak menyebut headset kalau scene-nya memang tanpa puzzle", () => {
+            const { manager } = buatManager({
+                perangkatBerkemampuanController: false,
+                totalSlot: 0,
+            });
+            manager.catatTeleport();
+            amatiSemua(manager);
+
+            assert.doesNotMatch(manager.deskripsi().instruksi, /headset VR/);
+        });
     });
 });

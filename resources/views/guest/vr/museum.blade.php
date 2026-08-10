@@ -24,7 +24,8 @@
           "imports": {
             "three": "https://cdn.jsdelivr.net/npm/three@v0.153.0/build/three.module.js",
             "three/jsm/": "https://cdn.jsdelivr.net/npm/three@v0.153.0/examples/jsm/",
-            "vr-phases": "{{ asset('assets/js/vr-phases.js') }}?v={{ filemtime(public_path('assets/js/vr-phases.js')) }}"
+            "vr-phases": "{{ asset('assets/js/vr-phases.js') }}?v={{ filemtime(public_path('assets/js/vr-phases.js')) }}",
+            "vr-responden": "{{ asset('assets/js/vr-responden.js') }}?v={{ filemtime(public_path('assets/js/vr-responden.js')) }}"
           }
         }
     </script>
@@ -87,18 +88,25 @@
         var refleksiUrl = @json(route('refleksi.show', $museum->museum_id));
     </script>
 
-    <div class="pointer-events-none fixed inset-x-0 top-0 z-[10000000]">
-        <div class="pointer-events-auto flex items-center space-x-4 rounded-b-3xl bg-primary px-6 py-6 text-white">
-            <a href="{{ route('guest.situs.detail', $situs->situs_id) }}"
-                class="rounded-full p-2 transition-colors hover:bg-white/10">
-                <i class="fas fa-arrow-left text-xl"></i>
-            </a>
-            <div class="flex-1">
-                <h1 class="text-lg font-bold">{{ config('app.name') }} VR</h1>
-                <p class="text-sm opacity-90">{{ $situs->nama }}</p>
+    {{-- Mode kiosk menyembunyikan navigasi aplikasi. Ini PENGURANG KESASAR, bukan kunci:
+         browser Quest punya bilah alamatnya sendiri yang tidak bisa disembunyikan halaman
+         web, jadi siswa yang berniat tetap bisa mengetik URL lain. Pengamanan sebenarnya
+         adalah menjalankan uji dengan akun kiosk khusus yang tidak punya apa pun untuk
+         dilihat — lihat syarat operasional di CLAUDE.md. --}}
+    @unless (request()->boolean('kiosk'))
+        <div class="pointer-events-none fixed inset-x-0 top-0 z-[10000000]">
+            <div class="pointer-events-auto flex items-center space-x-4 rounded-b-3xl bg-primary px-6 py-6 text-white">
+                <a href="{{ route('guest.situs.detail', $situs->situs_id) }}"
+                    class="rounded-full p-2 transition-colors hover:bg-white/10">
+                    <i class="fas fa-arrow-left text-xl"></i>
+                </a>
+                <div class="flex-1">
+                    <h1 class="text-lg font-bold">{{ config('app.name') }} VR</h1>
+                    <p class="text-sm opacity-90">{{ $situs->nama }}</p>
+                </div>
             </div>
         </div>
-    </div>
+    @endunless
 
     <div id="app">
         <div id="vr-not-supported"

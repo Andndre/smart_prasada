@@ -13,6 +13,7 @@ use App\Http\Controllers\LaporanPeninggalanController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RefleksiController;
 use App\Http\Controllers\VrEventController;
+use App\Http\Controllers\VrPeluncurController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -78,6 +79,10 @@ Route::group(['middleware' => ['auth', 'user']], function () {
 
 // VR routes - Using token-based authentication (cross-device handoff via QR)
 Route::middleware('ar.token')->get('/situs/{situs_id}/vr/{museum_id}', [HomeController::class, 'vrMuseum'])->name('vr.museum');
+
+// Peluncur fasilitator — satu-satunya tempat yang mengirimkan ?kode=. Tanpa ini seluruh
+// data vr_event dan jawaban_refleksi tercatat anonim.
+Route::middleware('auth')->get('/vr/peluncur/{museum_id}', [VrPeluncurController::class, 'show'])->name('vr.peluncur');
 
 // Runtime event batches dari dalam scene VR. Sesi login sudah dibuat ar.token saat
 // halaman VR dibuka, jadi cukup 'auth' di sini.

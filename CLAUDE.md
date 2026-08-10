@@ -283,6 +283,41 @@ fasilitator.
 
 Ekspor di `RefleksiController::export()`, bukan menumpang `VrEventController`.
 
+### Mode kiosk & pengantaran `kode_responden`
+
+Satu-satunya tempat yang mengirimkan `?kode=` adalah **peluncur fasilitator**,
+`GET /vr/peluncur/{museum_id}`. Ia menghasilkan QR/tautan berisi
+`?arToken=…&kode=…&kode_akhir=…&kiosk=1`. Token dibuat **hanya untuk akun yang sedang
+login** — jangan pernah menambahkan parameter `user_id`, itu akan mengubahnya jadi
+mesin pembuat sesi untuk akun mana pun. TTL 30 menit karena fasilitator perlu waktu
+berjalan dari laptop ke headset.
+
+Responden kedua dan seterusnya tidak memindai ulang: sesi login sudah terbentuk, jadi
+mereka hanya butuh `?kode=` baru. Tombol **"Responden berikutnya"** di panel penutup
+sesi memuat ulang halaman dengan kode berikutnya — satu ketukan kalau peluncur mengirim
+`kode_akhir` (deret berurutan), atau satu kolom ketik kalau kodenya tidak berurutan.
+Logika deretnya di `vr-responden.js`, diuji `npm run test:js`.
+
+**Panel penutup tidak bisa ditutup di mode kiosk.** Itu gerbang integritas data:
+sesi berikutnya tidak boleh dimulai sebelum kodenya ditangani, karena dua responden
+yang tergabung di satu kode adalah kesalahan diam-diam — lebih buruk daripada kode
+kosong yang setidaknya jujur. Ini **tidak** melanggar "fase tidak pernah mengunci"
+dari Fase 3: yang itu soal alur belajar siswa di dalam sesi, ini langkah fasilitator
+di antara sesi.
+
+`?kiosk=1` juga menyembunyikan navigasi aplikasi di halaman VR, dan **harus ikut
+terbawa** setiap kali halaman dimuat ulang untuk responden berikutnya.
+
+#### `?kiosk=1` bukan pengamanan
+
+Ia **pengurang kesasar, bukan kunci**. Browser Quest punya bilah alamatnya sendiri
+yang tidak bisa disembunyikan halaman web, jadi siswa yang berniat tetap bisa mengetik
+URL lain dan masuk ke aplikasi memakai akun yang sedang login.
+
+**Syarat operasional untuk Fase 7:** jalankan uji lapangan dengan **akun kiosk khusus**
+yang tidak punya progres, rapor, atau data pribadi untuk dilihat — bukan akun
+fasilitator sungguhan. Itu pengamanan yang sebenarnya; `?kiosk=1` hanya merapikan.
+
 ### Jalur keluar sesi VR
 
 Sebelum Fase 4, jalur HP **tidak punya jalan keluar sama sekali**: tombol masuk

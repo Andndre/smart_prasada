@@ -151,6 +151,16 @@ export class PhaseManager {
                     instruksi: `Genggam objek dan pasang ke tempatnya. ${this.jumlahTerpasang} dari ${this.totalSlot} terpasang.`,
                 };
             default:
+                // Kalau fase interaksi terlewat karena perangkatnya, sebutkan — siswa yang
+                // melihat objek berkedip tapi tidak bisa memasangnya berhak tahu alasannya,
+                // bukan dibiarkan mengira dirinya gagal.
+                if (!this.perangkatBerkemampuanController && this.totalSlot > 0) {
+                    return {
+                        judul: 'Selesai',
+                        instruksi: 'Sesi selesai. Pemasangan objek hanya tersedia di headset VR. Lanjutkan refleksi di layar.',
+                    };
+                }
+
                 return {
                     judul: 'Selesai',
                     instruksi: 'Sesi VR selesai. Lepas headset dan lanjutkan refleksi di layar.',

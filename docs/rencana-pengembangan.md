@@ -221,7 +221,7 @@ tim sebelum produksi bisa dipesan.
 | 2 | ~~**Fase 5** — Runtime event logging~~ *selesai* | Luaran wajib #1 butuh data uji; harus terpasang sebelum uji apa pun dijalankan |
 | 3 | ~~**Fase 3** — State machine 4 fase~~ *selesai* | Alur wajib hal. 22 |
 | 4 | ~~**Fase 4** — Modul refleksi~~ *selesai* | Modul ke-5 blueprint |
-| 5 | **Fase 6** — Capability gating & mode kiosk | Wajib untuk "tanpa intervensi pengembang" |
+| 5 | ~~**Fase 6** — Capability gating & mode kiosk~~ *selesai* | Wajib untuk "tanpa intervensi pengembang" |
 | 6 | **Fase 2b** — Pengisian konten museum uji | Menunggu aset dari jalur paralel |
 | 7 | **Fase 1** — Pembersihan fitur mati | Tidak menghasilkan bukti TKT; kerapian saja |
 | 8 | **Fase 7** — Kesiapan uji TKT 5/6 | Penutup |
@@ -325,14 +325,25 @@ Pertanyaan untuk museum uji belum disusun — menunggu daftar nilai karakter dar
 Pardi dkk. (2017). Sampai itu ada, halaman refleksi menjelaskan keadaannya, bukan
 menampilkan halaman kosong.
 
-### Fase 6 — Capability gating & mode kiosk
+### Fase 6 — Capability gating & mode kiosk *(selesai)*
 
-- Perbaiki puzzle buntu di HP. Di jalur HP hanya `pointerup → trigger()` yang
-  terpasang; `grabStart`/`grabEnd` cuma ada di `squeezestart`/`squeezeend` jalur
-  headset. Lebih buruk: `pulseInteractive` tetap berkedip di HP, jadi objek
-  puzzle **aktif mengundang** di perangkat yang tidak bisa memasangnya. Afordansi
-  yang berbohong, bukan sekadar diam.
-- Mode kiosk headset.
+Rincian di CLAUDE.md. Tiga hal yang mendarat:
+
+**Pengantaran `kode_responden`** — peluncur fasilitator di `/vr/peluncur/{museum_id}`
+menghasilkan QR berisi kode, opsional rentang berurutan, dan bendera kiosk. Ini
+satu-satunya pengirim `?kode=`; tanpanya seluruh Fase 5 menghasilkan data anonim.
+Panel penutup sesi tidak bisa ditutup di mode kiosk, supaya kode basi jadi mustahil,
+bukan sekadar terlihat.
+
+**Afordansi yang berbohong** — kedipan objek puzzle di HP sengaja **tidak** dimatikan:
+objeknya memang tetap interaktif di sana (nama, deskripsi, audio), dan mematikannya
+justru menyembunyikan konten yang sah. Yang ditambahkan adalah satu baris di panel
+info — "Pemasangan objek ini tersedia di headset VR" — plus deskripsi fase refleksi
+yang menyebut alasan pelewatan.
+
+**Mode kiosk** — `?kiosk=1` menyembunyikan navigasi aplikasi. Perlu diingat ia
+pengurang kesasar, bukan kunci; pengamanan sebenarnya adalah akun kiosk khusus, yang
+jadi syarat operasional Fase 7.
 
 ### Fase 2b — Pengisian konten museum uji
 
@@ -360,6 +371,9 @@ Sekalian: perbaiki alamat "Situs Prasasti Sukuh".
 
 ### Fase 7 — Kesiapan uji TKT 5/6
 
+- **Akun kiosk khusus** untuk uji lapangan — tanpa progres, rapor, atau data pribadi
+  untuk dilihat. `?kiosk=1` hanya menyembunyikan navigasi aplikasi; browser Quest tetap
+  punya bilah alamat sendiri, jadi ini pengamanan yang sebenarnya.
 - Kritik & Saran → kuesioner keterpakaian pasca-sesi.
 - Pretest/posttest dilepas dari gerbang progres.
 - Pengecekan frame rate dan latency di Quest 2 dan HP.
