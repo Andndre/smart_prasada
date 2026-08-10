@@ -161,6 +161,51 @@ Three separate bundles in `vite.config.js`:
 - ❌ English naming in DB — use Indonesian throughout
 - ❌ Assuming soft deletes exist — all deletions are permanent
 
+---
+
+## VR Puzzle Mechanic & Visual Editor
+
+Built on top of the existing `mesh_name` scene-graph linking (`VirtualMuseumObject.mesh_name` ↔ node name in the GLB). Not yet committed — pending explicit request.
+
+### `slot_mesh_name` (place-object puzzle)
+
+`VirtualMuseumObject` has a nullable `slot_mesh_name` column alongside `mesh_name`:
+
+- Empty → object behaves as before: tap/trigger shows an info panel (name + description + optional audio).
+- Filled → object becomes a **grabbable puzzle piece**. The value must exactly match another mesh name in the same GLB — an invisible marker mesh authored in Blender at the correct target position. That marker is auto-hidden at load and excluded from raycasts.
+- In VR: squeeze/grip to grab, move, release. If released within 0.5m of its slot, the piece snaps to the slot's position/rotation, locks (`userData.solved = true`, can't be re-grabbed), and increments a solved counter shown via the in-scene info panel ("Tepat! (n/total)" → "Puzzle Selesai! 🎉" when all pieces are done).
+- This is the foundation for future puzzle/game types — no new tables needed for simple variants (matching, category sorting), same column.
+
+Runtime logic lives in `public/assets/js/vr-museum.js` (`TeleportControls` class: `grabStart`/`grabEnd`/`checkSlot`).
+
+### Visual 3D Editor
+
+`GET /admin/virtual-museum/{museum_id}/editor` (`AdminController::editorVirtualMuseum`) — an alternative to the plain text-field admin forms for assigning `mesh_name`/`slot_mesh_name`/`nama`/`deskripsi` to GLB nodes.
+
+- View: `resources/views/admin/virtual-museum/editor.blade.php` — standalone full-screen page (not `x-app-layout`), Three.js via CDN importmap (same pattern as the AR/VR runtime, not bundled through Vite).
+- Logic: `public/assets/js/vr-editor.js` — loads the GLB, renders a mesh tree (left), 3D canvas with click-to-select + orbit controls (middle), property panel (right). "Pilih" button lets the admin click the target slot mesh directly instead of typing its name.
+- Save endpoint: `POST /admin/virtual-museum/{museum_id}/editor/objects` (`AdminController::editorSaveObject`) — `updateOrCreate` keyed by `(museum_id, mesh_name)`, so re-saving the same mesh never duplicates rows.
+- Entry point: purple "Editor VR" button on `resources/views/admin/virtual-museum/show.blade.php`.
+
+### VR interaction affordances (public/assets/js/vr-museum.js)
+
+Iterating on "how does the user know what's interactive" — in order of what was tried:
+
+1. **Permanent faint glow** on every mesh with `userData.vrObject` (`TeleportControls.pulseInteractive`) — clones materials per-instance (so the glow doesn't leak onto other meshes sharing the same material) and oscillates `emissiveIntensity` so objects are spottable without pointing at them. Turns off once a puzzle piece is `solved`.
+2. **Hover outline**: back-side shell mesh (duplicate geometry, 4% larger, `BackSide` material, `raycast = () => {}` so it doesn't self-intersect) shown only while a controller ray / gaze is on that node (`setOutline`). Scaled about the geometry's own bounding-box center (not local origin) to avoid drift on meshes authored off-center. Replaced the old "reticle turns yellow" hover feedback — reticle is now purple-only, reserved for teleport-to-floor.
+3. **Gaze cursor for phone/no-controller mode**: a small ring mesh parented to the camera (`this.cursor`, not an HTML overlay — an HTML overlay would sit on the seam between the two stereo eyes on phone VR). Turns yellow when hovering something interactive. Hidden automatically when a tracked XR controller is connected (controller ray + outline take over).
+4. **Multi-controller active-switching bug fix**: `TeleportControls.controller` (the one driving hover raycasts) used to lock to whichever controller connected first and never change. Fixed so `select` *and* `squeezestart` from either hand promote it to active, with a forced `teleport.update()` before `grabStart()` so the just-activated hand's own hover state (not the previous hand's) is what gets grabbed.
+
+### Infra: tunnel/proxy + CSP
+
+`bootstrap/app.php` calls `$middleware->trustProxies(at: '*')`. Needed because `SecurityHeaders`'s CSP `connect-src` is `'self' https: blob:...` — `'self'` needs exact scheme match and `https:` doesn't cover `http://`. Without trusting the tunnel's `X-Forwarded-Proto`, Laravel generated `http://` URLs even though the page loaded over `https://`, so `fetch()` calls from `vr-editor.js` were blocked by CSP. Don't relax the CSP itself to work around this class of bug — fix proxy trust instead.
+
+### Testing
+
+- `tests/Feature/Admin/VirtualMuseumObjectTest.php` — `describe('VR Editor', ...)` covers the editor page (admin-only) and the save endpoint (create, update-by-mesh_name without duplicating, validation).
+- No automated test for the VR runtime interaction code (`vr-museum.js`) — it's Three.js/WebXR canvas rendering, not practically unit-testable; verify manually.
+- A real **Meta Quest 2** headset is now available for testing (previously only the Chrome "Immersive Web Emulator" extension, which has known quirks: controller rays don't move until you drag the Pos/Rot sliders in its panel, and select/squeeze must be triggered from its panel buttons, not real hardware). Prefer testing puzzle/outline/controller-switching behavior on the real headset over the emulator going forward.
+
 ===
 
 <laravel-boost-guidelines>

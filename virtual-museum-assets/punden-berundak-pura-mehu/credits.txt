@@ -1,0 +1,17 @@
+Situs: Punden Berundak, Pura Mehu, Desa Selulung, Kintamani, Bangli
+File: punden_berundak_pura_mehu.glb
+
+Seluruh geometri pada file ini dimodelkan secara manual (procedural) di Blender
+berdasarkan deskripsi arkeologis dari Balai Pelestarian Cagar Budaya (BPCB) Bali,
+bukan hasil download aset pihak ketiga. Tidak ada aset Sketchfab yang dipakai
+pada scene ini — hasil pencarian ("punden berundak", "stepped pyramid stone",
+"balinese temple", "carved stone floral relief") tidak menemukan model yang
+sesuai secara arkeologis dengan struktur megalitik polos situs ini (kandidat
+yang ada bergaya candi/pura Hindu-Bali berornamen berat, tidak cocok).
+
+Tidak ada kewajiban kredit CC-BY untuk file ini.
+
+Sumber referensi deskriptif (bukan aset 3D):
+- Balai Pelestarian Cagar Budaya Bali, "Punden Berundak (Tinggalan dari Masa
+  Pra Sejarah) di Pura Mehu Desa Selulung, Bangli"
+  https://kebudayaan.kemdikbud.go.id/bpcbbali/punden-berundak-tinggalan-dari-masa-pra-sejarah-di-pura-mehu-desa-selulung-bangli/

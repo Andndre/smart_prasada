@@ -27,6 +27,14 @@
                         untuk {{ $museum->situsPeninggalan->nama }}</p>
                 </div>
                 <div class="mt-4 flex flex-col gap-2 sm:mt-0 sm:flex-row">
+                    <a href="{{ route('admin.virtual-museum.editor', $museum->museum_id) }}"
+                        class="inline-flex items-center justify-center rounded-lg bg-purple-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-purple-700">
+                        <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M18 18l2-1v-2.5" />
+                        </svg>
+                        Editor VR
+                    </a>
                     <a href="{{ route('admin.virtual-museum.edit', $museum->museum_id) }}"
                         class="inline-flex items-center justify-center rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700">
                         <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

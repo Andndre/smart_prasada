@@ -16,6 +16,11 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
+        // Trust the tunnel/reverse-proxy's X-Forwarded-* headers so Laravel knows the
+        // original request was HTTPS — otherwise route()/url() emit http:// links that
+        // get blocked by CSP as cross-origin against the https:// page actually loaded.
+        $middleware->trustProxies(at: '*');
+
         $middleware->alias([
             'ar.token' => ArTokenAuth::class,
             'admin' => IsAdmin::class,

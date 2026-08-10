@@ -1,0 +1,43 @@
+Daftar Objek Interaktif — punden_berundak_pura_mehu.glb
+Situs: Punden Berundak, Pura Mehu, Desa Selulung, Kintamani, Bangli
+
+Catatan: tidak ada relasi puzzle/slot pada scene ini (semua objek statis/
+informatif, bukan piece yang perlu dipasangkan).
+
+1. mesh_name: Punden_Berundak_Utama
+   Nama tampilan: Punden Berundak Utama
+   Deskripsi: Struktur teras batu bertingkat 5 undak yang mengerucut ke atas,
+   terbuat dari batu padas, dengan alas berbentuk segi empat memanjang
+   (±5,7 x 5,5 m) dan tinggi total ±3,1 m. Berfungsi sebagai sarana pemujaan
+   leluhur dan Ida Sang Hyang Widhi Wasa pada masa megalitikum.
+   Slot pasangan: -
+
+2. mesh_name: Padma_Kurung
+   Nama tampilan: Padma Kurung
+   Deskripsi: Relung/wadah di puncak punden berundak, berdinding tiga sisi
+   (kanan, kiri, belakang) tanpa atap — bagian tersuci dari struktur, tempat
+   bersemayamnya arwah leluhur.
+   Slot pasangan: -
+
+3. mesh_name: Motif_Ceplok_Bunga
+   Nama tampilan: Motif Ceplok Bunga
+   Deskripsi: Ornamen hias berupa simbar kecil berpola bunga (ceplok bunga)
+   pada sudut-sudut undakan punden. Representasi disederhanakan sebagai 4
+   medali di sudut alas.
+   Slot pasangan: -
+
+4. mesh_name: Area_Persembahyangan
+   Nama tampilan: Area Persembahyangan
+   Deskripsi: Pelataran batu datar di sekitar punden berundak, tempat
+   pengunjung/umat melakukan persembahyangan.
+   Slot pasangan: -
+
+Catatan teknis:
+- Semua mesh berada di bawah node root "Situs_Punden_Berundak_Root",
+  diposisikan 4 m di depan titik spawn pengguna (0,0,0), berdiri di atas
+  ground level (Y=0 pada konvensi glTF Y-up / Blender Z=0).
+- Material: Principled BSDF saja (Mat_Batu_Padas, Mat_Batu_Berlumut,
+  Mat_Pelataran_Batu) — tanpa tekstur gambar, jadi tidak perlu resize texture.
+- Draco compression aktif, Apply Modifiers aktif.
+- Ukuran file: 7,8 KB (jauh di bawah batas 50-100MB).
+- Tidak ada aset Sketchfab yang dipakai — lihat credits.txt.

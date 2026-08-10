@@ -142,6 +142,8 @@ Route::group(['middleware' => ['auth', 'admin']], function () {
     Route::get('/admin/virtual-living-museum/{museum_id}/edit', [AdminController::class, 'editVirtualMuseum'])->name('admin.virtual-museum.edit');
     Route::put('/admin/virtual-living-museum/{museum_id}', [AdminController::class, 'updateVirtualMuseum'])->name('admin.virtual-museum.update');
     Route::delete('/admin/virtual-living-museum/{museum_id}', [AdminController::class, 'destroyVirtualMuseum'])->name('admin.virtual-museum.destroy');
+    Route::get('/admin/virtual-museum/{museum_id}/editor', [AdminController::class, 'editorVirtualMuseum'])->name('admin.virtual-museum.editor');
+    Route::post('/admin/virtual-museum/{museum_id}/editor/objects', [AdminController::class, 'editorSaveObject'])->name('admin.virtual-museum.editor.save');
 
     // Virtual Living Museum Object routes
     Route::get('/admin/virtual-museum/{museum_id}/objects/create', [AdminController::class, 'createVirtualMuseumObject'])->name('admin.virtual-museum-object.create');

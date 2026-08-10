@@ -783,6 +783,50 @@ class AdminController extends Controller
             ->with('success', "Object Virtual Living Museum '{$nama}' berhasil dihapus.");
     }
 
+    /**
+     * Visual 3D editor for linking museum objects to GLB meshes
+     */
+    public function editorVirtualMuseum($museum_id)
+    {
+        $museum = VirtualMuseum::with('situsPeninggalan')->findOrFail($museum_id);
+        $objects = VirtualMuseumObject::where('museum_id', $museum_id)->get();
+
+        return view('admin.virtual-museum.editor', compact('museum', 'objects'));
+    }
+
+    /**
+     * Upsert an object from the visual editor, keyed by mesh_name (JSON)
+     */
+    public function editorSaveObject(Request $request, $museum_id)
+    {
+        $museum = VirtualMuseum::findOrFail($museum_id);
+
+        $validated = $request->validate([
+            'nama' => 'required|string|max:255',
+            'mesh_name' => 'required|string|max:255',
+            'slot_mesh_name' => 'nullable|string|max:255',
+            'deskripsi' => 'nullable|string',
+        ]);
+
+        $object = VirtualMuseumObject::updateOrCreate(
+            [
+                'museum_id' => $museum->museum_id,
+                'mesh_name' => $validated['mesh_name'],
+            ],
+            [
+                'situs_id' => $museum->situs_id,
+                'nama' => $validated['nama'],
+                'slot_mesh_name' => $validated['slot_mesh_name'] ?? null,
+                'deskripsi' => $validated['deskripsi'] ?? '',
+            ],
+        );
+
+        return response()->json([
+            'object_id' => $object->object_id,
+            'mesh_name' => $object->mesh_name,
+        ]);
+    }
+
     private function deletePublicFile(?string $path): void
     {
         if ($path && Storage::disk('public')->exists($path)) {

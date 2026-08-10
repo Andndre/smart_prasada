@@ -158,6 +158,11 @@ class TeleportControls {
     static UP = new THREE.Vector3(0, 1, 0);
     static tempMatrix = new THREE.Matrix4();
     static tempVector = new THREE.Vector3();
+    static outlineMaterial = new THREE.MeshBasicMaterial({
+        color: 0xfbbf24,
+        side: THREE.BackSide,
+        toneMapped: false,
+    });
 
     constructor(scene, camera, rig, targets) {
         this.camera = camera;
@@ -171,6 +176,8 @@ class TeleportControls {
         this.raycaster = new THREE.Raycaster();
         this.slots = new Map();
         this.solvedCount = 0;
+        this.interactiveMeshes = [];
+        this.outlinedNode = null;
 
         this.reticle = new THREE.Mesh(
             new THREE.RingGeometry(0.15, 0.25, 32).rotateX(-Math.PI / 2),
@@ -185,9 +192,28 @@ class TeleportControls {
         this.reticle.renderOrder = 999;
         this.reticle.visible = false;
         scene.add(this.reticle);
+
+        // Aim cursor for gaze mode (phone/no controller): a ring fixed to the camera so it
+        // renders correctly in both stereo eyes, unlike an HTML overlay.
+        this.cursor = new THREE.Mesh(
+            new THREE.RingGeometry(0.006, 0.011, 24),
+            new THREE.MeshBasicMaterial({
+                color: 0xffffff,
+                toneMapped: false,
+                depthTest: false,
+                transparent: true,
+                opacity: 0.9,
+            }),
+        );
+        this.cursor.position.z = -1;
+        this.cursor.renderOrder = 1001;
+        camera.add(this.cursor);
     }
 
     update() {
+        this.pulseInteractive();
+        this.cursor.visible = !this.controller?.userData.connected;
+
         if (this.controller?.userData.connected) {
             TeleportControls.tempMatrix.identity().extractRotation(this.controller.matrixWorld);
             this.raycaster.ray.origin.setFromMatrixPosition(this.controller.matrixWorld);
@@ -205,15 +231,11 @@ class TeleportControls {
         this.hoverInfo = this.hoverNode?.userData.vrObject ?? null;
         this.hoverPoint = this.hoverInfo ? first.point : null;
 
+        this.setOutline(this.hoverInfo ? this.hoverNode : null);
+        this.cursor.material.color.setHex(this.hoverInfo ? 0xfbbf24 : 0xffffff);
+
         if (this.hoverInfo) {
-            this.reticle.visible = true;
-            this.reticle.material.color.setHex(0xfbbf24);
-            this.reticle.position.copy(first.point);
-            this.reticle.scale.setScalar(Math.max(1, first.distance / 6));
-            const normal = TeleportControls.tempVector
-                .copy(first.face.normal)
-                .transformDirection(first.object.matrixWorld);
-            this.reticle.quaternion.setFromUnitVectors(TeleportControls.UP, normal);
+            this.reticle.visible = false;
             return;
         }
 
@@ -233,6 +255,59 @@ class TeleportControls {
             this.reticle.position.y += 0.01;
             this.reticle.scale.setScalar(Math.max(1, hit.distance / 6));
         }
+    }
+
+    /** Faint permanent glow on interactive objects so they're spottable without pointing at them. */
+    pulseInteractive() {
+        if (!this.interactiveMeshes.length) return;
+        const pulse = 0.12 + 0.1 * Math.sin(performance.now() / 500);
+        for (const { node, materials } of this.interactiveMeshes) {
+            const intensity = node.userData.solved ? 0 : pulse;
+            for (const material of materials) material.emissiveIntensity = intensity;
+        }
+    }
+
+    /** Show/hide the back-side outline shell of the node being looked at. */
+    setOutline(node) {
+        if (node === this.outlinedNode) return;
+        for (const mesh of this.outlinedNode?.userData.outlineMeshes ?? []) mesh.visible = false;
+        for (const mesh of node?.userData.outlineMeshes ?? []) mesh.visible = true;
+        this.outlinedNode = node;
+    }
+
+    /** Clone materials so the glow doesn't leak onto other instances sharing the same material. */
+    markInteractive(node) {
+        const materials = [];
+        const outlineMeshes = [];
+        const meshes = [];
+        node.traverse((child) => {
+            if (child.isMesh) meshes.push(child);
+        });
+        for (const child of meshes) {
+            const wasArray = Array.isArray(child.material);
+            const cloned = (wasArray ? child.material : [child.material]).map((m) => {
+                if (!("emissive" in m)) return m;
+                const clone = m.clone();
+                clone.emissive = new THREE.Color(0xfbbf24);
+                materials.push(clone);
+                return clone;
+            });
+            child.material = wasArray ? cloned : cloned[0];
+
+            // ponytail: outline = back-side shell, 4% bigger; misses concave detail — swap for OutlinePass only if it looks bad on real assets.
+            const outline = new THREE.Mesh(child.geometry, TeleportControls.outlineMaterial);
+            outline.scale.setScalar(1.04);
+            // Scale about the geometry's own center, not its origin — otherwise the shell drifts
+            // when the geometry is authored far from its local origin.
+            child.geometry.computeBoundingBox();
+            outline.position.copy(child.geometry.boundingBox.getCenter(new THREE.Vector3())).multiplyScalar(-0.04);
+            outline.visible = false;
+            outline.raycast = () => {};
+            child.add(outline);
+            outlineMeshes.push(outline);
+        }
+        node.userData.outlineMeshes = outlineMeshes;
+        if (materials.length) this.interactiveMeshes.push({ node, materials });
     }
 
     static findVrNode(object) {
@@ -506,7 +581,11 @@ async function startHeadsetSession(renderer, scene, camera, rig, teleport) {
             if (controller.userData.connected) teleport.controller = controller;
             teleport.trigger();
         });
-        controller.addEventListener("squeezestart", () => teleport.grabStart(controller));
+        controller.addEventListener("squeezestart", () => {
+            if (controller.userData.connected) teleport.controller = controller;
+            teleport.update(); // refresh hoverNode for the hand that just squeezed, not the previous one
+            teleport.grabStart(controller);
+        });
         controller.addEventListener("squeezeend", () => teleport.grabEnd(controller));
         rig.add(controller);
     }
@@ -643,7 +722,10 @@ async function main() {
         );
         model.traverse((node) => {
             const info = byMeshName.get(node.name);
-            if (info) node.userData.vrObject = info;
+            if (info) {
+                node.userData.vrObject = info;
+                teleport.markInteractive(node);
+            }
             if (slotNames.has(node.name)) {
                 node.visible = false;
                 teleport.slots.set(node.name, node);
