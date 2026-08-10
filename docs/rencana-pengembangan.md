@@ -219,7 +219,7 @@ tim sebelum produksi bisa dipesan.
 |---|---|---|
 | 1 | **Fase 2** — Pemetaan nilai karakter | Murah, satu commit, membuka Fase 2b dan Fase 4 |
 | 2 | ~~**Fase 5** — Runtime event logging~~ *selesai* | Luaran wajib #1 butuh data uji; harus terpasang sebelum uji apa pun dijalankan |
-| 3 | **Fase 3** — State machine 4 fase | Alur wajib hal. 22 |
+| 3 | ~~**Fase 3** — State machine 4 fase~~ *selesai* | Alur wajib hal. 22 |
 | 4 | **Fase 4** — Modul refleksi | Modul ke-5 blueprint |
 | 5 | **Fase 6** — Capability gating & mode kiosk | Wajib untuk "tanpa intervensi pengembang" |
 | 6 | **Fase 2b** — Pengisian konten museum uji | Menunggu aset dari jalur paralel |
@@ -292,11 +292,21 @@ peneliti di Excel. Nilai yang diawali `=` `+` `-` `@` ditafsirkan Excel sebagai 
 Risiko sekarang rendah karena kode berasal dari QR yang kita buat sendiri, tapi kalau
 fasilitator mulai mengetik kode manual, saring karakter pembuka itu di `VrEventController::export()`.
 
-### Fase 3 — State machine 4 fase
+### Fase 3 — State machine 4 fase *(selesai)*
 
-- State disimpan per sesi VR, bukan sebagai progres user berjenjang.
-- Indikator fase non-intrusif di dalam scene.
-- Fase interaksi hanya aktif di perangkat berkemampuan controller.
+State hanya di klien, tanpa tabel. Transisi berbasis pencapaian, bukan timer.
+Rincian di CLAUDE.md; logika di `public/assets/js/vr-phases.js`, diuji
+`npm run test:js`.
+
+**Fase melacak dan memandu, tidak pernah mengunci** — keputusan paling penting di
+fase ini. Fase yang mengunci mengubah tiap pemicu transisi jadi titik macet
+permanen, dan siswa macet memanggil fasilitator, yang dilarang kriteria TKT 6.
+
+Fase interaksi baru punya isi setelah model disunting: melepas empat motif ceplok
+bunga dari sudut alas dan menambah empat penanda `Slot_`, sesuai
+`docs/brief-produksi-aset.md` §4. Sampai itu ada, setiap sesi Quest akan mencatat
+`dilewati_tanpa_slot` — jaring pengamannya berfungsi, tapi itu bukan kondisi yang
+diinginkan.
 
 ### Fase 4 — Modul refleksi
 

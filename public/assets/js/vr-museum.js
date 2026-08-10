@@ -4,6 +4,9 @@ import { DRACOLoader } from "three/jsm/loaders/DRACOLoader.js";
 import { VRButton } from "three/jsm/webxr/VRButton.js";
 import { StereoEffect } from "three/jsm/effects/StereoEffect.js";
 import { XRControllerModelFactory } from "three/jsm/webxr/XRControllerModelFactory.js";
+// Bare specifier, bukan "./vr-phases.js": dipetakan lewat importmap di museum.blade.php
+// supaya berkas ini ikut cache-busting. Impor relatif akan tersaji basi di headset.
+import { PhaseManager } from "vr-phases";
 
 // ponytail: three.js removed DeviceOrientationControls from examples/jsm around r125.
 // Inlined minimal port (standard W3C deviceorientation -> camera quaternion algorithm).
@@ -223,6 +226,10 @@ class TeleportControls {
         this.interactiveMeshes = [];
         this.outlinedNode = null;
         this.logger = null;
+        // Fase melacak dan memandu, tidak pernah mengunci — lihat vr-phases.js.
+        // Jangan menambahkan pemeriksaan fase yang memblokir teleport/panel/genggam.
+        this.phases = null;
+        this.phasePanel = null;
         this.gazeNode = null;
         this.gazeSince = 0;
         this.gazeLogged = false;
@@ -283,6 +290,7 @@ class TeleportControls {
         this.setOutline(this.hoverInfo ? this.hoverNode : null);
         this.cursor.material.color.setHex(this.hoverInfo ? 0xfbbf24 : 0xffffff);
         this.trackGaze();
+        if (this.phases) this.phasePanel?.update(this.phases.deskripsi());
 
         if (this.hoverInfo) {
             this.reticle.visible = false;
@@ -425,6 +433,7 @@ class TeleportControls {
         this.solvedCount++;
         pulse(controller, 1, 120);
         this.logger?.log("puzzle_benar", node.name, { urutan: this.solvedCount });
+        this.phases?.catatPemasangan(this.solvedCount);
 
         const done = this.solvedCount >= this.slots.size;
         this.panel?.show({
@@ -453,6 +462,7 @@ class TeleportControls {
             this.panel?.show(this.hoverInfo, this.hoverPoint);
             this.panelDibukaUntuk = this.hoverNode.name;
             this.logger?.log("panel_dibuka", this.panelDibukaUntuk);
+            this.phases?.catatPanelDibuka(this.panelDibukaUntuk);
             return;
         }
         this.teleport();
@@ -470,6 +480,7 @@ class TeleportControls {
             x: Math.round(this.reticle.position.x * 100) / 100,
             z: Math.round(this.reticle.position.z * 100) / 100,
         });
+        this.phases?.catatTeleport();
     }
 }
 
@@ -548,7 +559,7 @@ class InfoPanel {
         ctx.font = "36px Inter, sans-serif";
         ctx.fillStyle = "#e5e7eb";
         // 6 baris, bukan 8 — dua baris terakhir disisihkan untuk chip nilai karakter.
-        this.wrapText(ctx, info.deskripsi || "", 40, 180, width - 80, 50, 6);
+        wrapText(ctx, info.deskripsi || "", 40, 180, width - 80, 50, 6);
 
         this.drawChips(ctx, info.nilai_karakter, 40, 470, width - 80);
 
@@ -593,26 +604,104 @@ class InfoPanel {
         }
     }
 
-    wrapText(ctx, text, x, y, maxWidth, lineHeight, maxLines) {
-        const words = text.split(/\s+/);
-        let line = "";
-        let lines = 0;
-        for (const word of words) {
-            const attempt = line ? line + " " + word : word;
-            if (ctx.measureText(attempt).width > maxWidth && line) {
-                lines++;
-                if (lines === maxLines) {
-                    ctx.fillText(line + "…", x, y);
-                    return;
-                }
-                ctx.fillText(line, x, y);
-                y += lineHeight;
-                line = word;
-            } else {
-                line = attempt;
+}
+
+/** Bungkus teks ke beberapa baris di canvas; sisa yang tidak muat dipotong dengan elipsis. */
+function wrapText(ctx, text, x, y, maxWidth, lineHeight, maxLines) {
+    const words = text.split(/\s+/);
+    let line = "";
+    let lines = 0;
+    for (const word of words) {
+        const attempt = line ? line + " " + word : word;
+        if (ctx.measureText(attempt).width > maxWidth && line) {
+            lines++;
+            if (lines === maxLines) {
+                ctx.fillText(line + "…", x, y);
+                return;
             }
+            ctx.fillText(line, x, y);
+            y += lineHeight;
+            line = word;
+        } else {
+            line = attempt;
         }
-        if (line) ctx.fillText(line, x, y);
+    }
+    if (line) ctx.fillText(line, x, y);
+}
+
+/**
+ * Panel fase kecil yang menempel pada kamera, di kiri-bawah pandangan.
+ *
+ * Menempel kamera, bukan mengambang di dunia, karena ia harus selalu terbaca ke mana
+ * pun kepala menoleh — dan karena DOM tidak dirender di dalam sesi WebXR, jadi overlay
+ * HTML tidak akan terlihat sama sekali. Jarak 1,5 m disengaja: elemen yang terlalu
+ * dekat memaksa mata menyilang dan cepat bikin pusing.
+ *
+ * Tetap tampil (redup) sepanjang sesi, bukan sekadar muncul sesaat: kriteria TKT 6
+ * menuntut alur berjalan tanpa intervensi pengembang, dan siswa yang lupa instruksi
+ * tanpa cara mengingatnya kembali akan memanggil fasilitator.
+ */
+class PhasePanel {
+    static SOROT_MS = 4000;
+    static OPASITAS_REDUP = 0.35;
+
+    constructor(camera) {
+        this.canvas = document.createElement("canvas");
+        this.canvas.width = 512;
+        this.canvas.height = 160;
+        this.texture = new THREE.CanvasTexture(this.canvas);
+        this.texture.colorSpace = THREE.SRGBColorSpace;
+        this.teksTerakhir = null;
+        this.sorotSampai = 0;
+
+        this.mesh = new THREE.Mesh(
+            new THREE.PlaneGeometry(0.5, 0.156),
+            new THREE.MeshBasicMaterial({
+                map: this.texture,
+                transparent: true,
+                toneMapped: false,
+                depthTest: false,
+                opacity: PhasePanel.OPASITAS_REDUP,
+            }),
+        );
+        this.mesh.position.set(-0.45, -0.3, -1.5);
+        this.mesh.renderOrder = 1002;
+        camera.add(this.mesh);
+    }
+
+    sorot() {
+        this.sorotSampai = performance.now() + PhasePanel.SOROT_MS;
+    }
+
+    update(deskripsi) {
+        const teks = deskripsi.judul + "\n" + deskripsi.instruksi;
+        if (teks !== this.teksTerakhir) {
+            this.teksTerakhir = teks;
+            this.draw(deskripsi);
+        }
+        this.mesh.material.opacity =
+            performance.now() < this.sorotSampai ? 1 : PhasePanel.OPASITAS_REDUP;
+    }
+
+    draw({ judul, instruksi }) {
+        const ctx = this.canvas.getContext("2d");
+        const { width, height } = this.canvas;
+        ctx.clearRect(0, 0, width, height);
+
+        ctx.fillStyle = "rgba(17, 24, 39, 0.85)";
+        ctx.beginPath();
+        ctx.roundRect(0, 0, width, height, 20);
+        ctx.fill();
+
+        ctx.fillStyle = "#c4b5fd";
+        ctx.font = "600 30px Inter, sans-serif";
+        ctx.fillText(judul.toUpperCase(), 24, 48);
+
+        ctx.fillStyle = "#e5e7eb";
+        ctx.font = "24px Inter, sans-serif";
+        wrapText(ctx, instruksi, 24, 90, width - 48, 32, 2);
+
+        this.texture.needsUpdate = true;
     }
 }
 
@@ -854,6 +943,20 @@ async function main() {
         perangkat: headsetSupported ? "headset" : "hp",
         objek_interaktif: teleport.interactiveMeshes.length,
         slot: teleport.slots.size,
+    });
+
+    teleport.phasePanel = new PhasePanel(camera);
+    teleport.phases = new PhaseManager({
+        totalObjek: teleport.interactiveMeshes.length,
+        totalSlot: teleport.slots.size,
+        // Kemampuan perangkat, bukan status sambungan controller: controller Quest baru
+        // terhubung beberapa saat setelah sesi XR dimulai, dan fase tidak boleh terlanjur
+        // menyimpulkan perangkat ini tidak bisa menggenggam.
+        perangkatBerkemampuanController: headsetSupported,
+        onChange: ({ dari, ke, alasan }) => {
+            teleport.logger.log("fase_berubah", null, { dari, ke, alasan });
+            teleport.phasePanel.sorot();
+        },
     });
 
     if (headsetSupported) {

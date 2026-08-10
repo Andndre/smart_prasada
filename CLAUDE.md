@@ -26,6 +26,8 @@ php artisan storage:link
 
 # Testing
 php artisan test                      # Pest PHP
+npm run test:js                       # node --test, logika JS murni (tests/js/)
+                                      # WAJIB dari shell WSL — lihat catatan di bawah
 
 # Linting
 ./vendor/bin/pint                     # Laravel Pint (code style)
@@ -218,6 +220,39 @@ di-inject di `guest/vr/museum.blade.php`, supaya enum tetap satu-satunya sumber 
 Karena chip butuh ruang, `wrapText` deskripsi turun dari 8 ke 6 baris. Kalau daftar nilai
 final jauh lebih panjang, batasi tampilan ke 3 nilai teratas per objek.
 
+### Alur 4 fase (`vr-phases.js`)
+
+`orientasi → eksplorasi → interaksi → refleksi`, wajib per hal. 22. State hanya hidup
+di klien — tidak ada tabel, tidak ada kolom. Fase adalah properti sesi VR yang sedang
+berjalan, bukan progres user berjenjang, jadi headset yang mati di tengah sesi membuat
+responden berikutnya mulai dari orientasi. Di mode kiosk itu perilaku yang benar.
+
+**Fase melacak dan memandu, tidak pernah mengunci.** Tidak ada kode yang boleh
+memblokir teleport, panel, atau genggam berdasarkan fase. Kalau fase mengunci, tiap
+pemicu transisi jadi titik macet permanen — punden di museum uji berjarak 4 m dari
+titik spawn dan keempat panelnya bisa dibuka sambil berdiri diam, jadi siswa yang tidak
+pernah teleport akan tersangkut di orientasi tanpa error apa pun, lalu memanggil
+fasilitator. Itu intervensi yang dilarang kriteria TKT 6.
+
+Transisi berbasis pencapaian, bukan timer: teleport pertama → eksplorasi; semua objek
+pernah dibuka panelnya (`AMBANG_PENGAMATAN`, kini 100%) → interaksi; semua puzzle
+terpasang → refleksi. Fase interaksi dilewati kalau perangkat tanpa controller atau
+scene tanpa slot, dan alasannya (`selesai` / `dilewati_perangkat` /
+`dilewati_tanpa_slot`) ikut ke event `FaseBerubah` — supaya tim peneliti bisa memisahkan
+"responden menyelesaikan interaksi" dari "responden tidak pernah diberi kesempatan".
+
+`PhasePanel` di `vr-museum.js` menempel pada kamera di jarak 1,5 m, tetap tampil redup
+lalu menyala 4 detik saat fase berganti. Menempel kamera karena DOM tidak dirender di
+dalam sesi WebXR; 1,5 m karena elemen yang terlalu dekat memaksa mata menyilang.
+
+**Modul JS murni didaftarkan di importmap, bukan diimpor lewat path relatif.**
+`vr-museum.js` memakai `import { PhaseManager } from "vr-phases"` dan blade memetakan
+`"vr-phases"` ke `/assets/js/vr-phases.js?v={filemtime}`. Impor relatif tidak ikut
+cache-busting berkas induknya, jadi headset akan menyajikan versi basi setelah aturannya
+disunting — dan hard-refresh di browser Quest bukan hal sepele saat responden sudah
+antre. Modul murni berikutnya ikuti pola yang sama: satu entri importmap, satu bare
+specifier.
+
 ### Runtime event logging (`vr_event`)
 
 Wajib per proposal hal. 22, sumber bukti luaran wajib #1. Satu tabel `vr_event`, jenis
@@ -271,7 +306,24 @@ Urutan fase, status modul, dan keputusan desain menuju TKT 6 ada di
 ### Testing
 
 - `tests/Feature/Admin/VirtualMuseumObjectTest.php` — `describe('VR Editor', ...)` covers the editor page (admin-only) and the save endpoint (create, update-by-mesh_name without duplicating, validation).
-- No automated test for the VR runtime interaction code (`vr-museum.js`) — it's Three.js/WebXR canvas rendering, not practically unit-testable; verify manually.
+- **Dua perkakas tes, pembagiannya disengaja.** `php artisan test` (Pest) untuk PHP.
+  `npm run test:js` (`node --test`, nol dependensi baru) untuk logika JS murni di
+  `tests/js/`. Pembatasnya: apa pun yang butuh Three.js, canvas, atau WebXR tidak bisa
+  ditest — verifikasi manual di headset. Logika yang bisa dinyatakan sebagai fungsi
+  murni **dipisahkan ke berkas tanpa impor Three.js** supaya bisa ditest; `vr-phases.js`
+  adalah contoh dan polanya. Kalau menambah logika VR yang tidak menggambar apa pun,
+  ikuti pola itu, jangan menaruhnya di `vr-museum.js`.
+- **`npm run test:js` wajib dijalankan dari shell WSL dengan node WSL**, sama seperti
+  `php`/`composer`/`artisan`. Sebagian terminal di mesin ini mewarisi npm Windows dari
+  `/mnt/c/Program Files/nodejs/`, yang berjalan lewat interop dengan cwd berupa path UNC
+  `//wsl.localhost/...` dan tidak bisa menyelesaikan path itu.
+  Periksa dengan `command -v node` — harus di bawah `~/.nvm` atau `/usr`, bukan `/mnt/c`.
+  Skripnya sengaja menyebut berkas tes satu per satu, bukan glob: glob yang tidak cocok
+  membuat `node --test` keluar dengan **kode 0 dan "tests 0"** — lampu hijau palsu yang
+  lebih berbahaya daripada tidak ada tes sama sekali. Dengan path eksplisit, node yang
+  salah gagal keras dengan exit 1. Menambah berkas tes baru berarti menambahkannya ke
+  skrip di `package.json`; itu disengaja.
+- Sisa `vr-museum.js` (rendering, raycast, kontrol XR) tidak ditest otomatis — verifikasi manual.
 - A real **Meta Quest 2** headset is now available for testing (previously only the Chrome "Immersive Web Emulator" extension, which has known quirks: controller rays don't move until you drag the Pos/Rot sliders in its panel, and select/squeeze must be triggered from its panel buttons, not real hardware). Prefer testing puzzle/outline/controller-switching behavior on the real headset over the emulator going forward.
 
 ===
