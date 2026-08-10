@@ -294,10 +294,30 @@ lalu memunculkan `showPostSessionPanel()`.
 Di headset, keluar ditangani sistem; panel yang sama muncul lewat event `sessionend`
 milik `renderer.xr`.
 
-Panel itu HTML biasa dan itu benar: **mode stereo HP bukan sesi WebXR**, hanya halaman
-dengan kanvas terbagi dua, jadi DOM tetap terlihat. Aturan "DOM tidak dirender" hanya
-berlaku untuk `immersive-vr`. Panel dibangun di JS, bukan blade, karena `sesi_id` lahir
-dari `crypto.randomUUID()` di klien.
+Panel itu HTML biasa dan itu benar, tapi alasannya bukan yang paling jelas — baca ini
+sebelum menaruh UI lain di DOM. Panel dibangun di JS, bukan blade, karena `sesi_id`
+lahir dari `crypto.randomUUID()` di klien.
+
+#### DOM di mode stereo HP: terlihat, tapi selalu monokular
+
+**Mode stereo HP bukan sesi WebXR** — hanya halaman dengan kanvas terbagi dua, jadi DOM
+memang tetap dirender. Aturan "DOM tidak dirender" hanya berlaku untuk `immersive-vr`
+di headset.
+
+**Tapi jangan menyimpulkan DOM aman dipakai selama sesi stereo.** Di layout
+berdampingan, separuh kiri layar adalah mata kiri dan separuh kanan adalah mata kanan.
+Elemen DOM di posisi mana pun hanya jatuh di salah satu separuh, jadi **hanya satu mata
+yang melihatnya** — hasilnya rivalitas binokular. Tidak ada "zona aman" di kiri atas
+atau di mana pun; tengah hanya mengganti masalahnya jadi terbelah dua.
+
+Aturannya:
+
+- DOM hanya untuk hal yang dilihat saat **ponsel sudah dikeluarkan dari viewer** —
+  tombol "✕ Selesai", panel penutup sesi, tombol masuk. Siswa tidak bisa menyentuh layar
+  selama ponsel di dalam viewer, jadi ia memang melihat layar utuh secara normal.
+- Apa pun yang harus terbaca **selama sesi berlangsung** wajib digambar di dalam scene,
+  seperti `InfoPanel`, `PhasePanel`, dan kursor pandangan. Kalau butuh DOM di tengah
+  sesi, gandakan elemennya di kedua separuh — atau lebih baik, jangan.
 
 ### Runtime event logging (`vr_event`)
 

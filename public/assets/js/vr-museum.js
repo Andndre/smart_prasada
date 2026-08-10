@@ -899,7 +899,12 @@ async function startPhoneStereoSession(renderer, scene, camera, teleport) {
         // Jalur keluar. Sebelumnya tidak ada sama sekali: tombol masuk dihapus, fullscreen
         // tidak pernah dilepas, dan render loop stereo berjalan selamanya — siswa harus
         // keluar fullscreen sendiri sambil kanvas terbelah tetap merender di belakang.
-        // Diletakkan di kiri atas, bukan tengah, supaya tidak jatuh di jahitan dua mata.
+        //
+        // Tombol DOM boleh di sini karena ia dipakai justru saat ponsel SUDAH dikeluarkan
+        // dari viewer — siswa tidak bisa menyentuh layar selama ponsel di dalam viewer,
+        // jadi ia melihat layar utuh secara normal dan stereo tidak relevan. Jangan pakai
+        // posisi ini sebagai alasan menaruh UI lain di DOM: di layout berdampingan, elemen
+        // DOM mana pun hanya masuk ke satu mata. Lihat catatan di CLAUDE.md.
         const keluar = document.createElement("button");
         keluar.textContent = "✕ Selesai";
         keluar.style.cssText =
