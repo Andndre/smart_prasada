@@ -196,6 +196,11 @@ Iterating on "how does the user know what's interactive" — in order of what wa
 3. **Gaze cursor for phone/no-controller mode**: a small ring mesh parented to the camera (`this.cursor`, not an HTML overlay — an HTML overlay would sit on the seam between the two stereo eyes on phone VR). Turns yellow when hovering something interactive. Hidden automatically when a tracked XR controller is connected (controller ray + outline take over).
 4. **Multi-controller active-switching bug fix**: `TeleportControls.controller` (the one driving hover raycasts) used to lock to whichever controller connected first and never change. Fixed so `select` *and* `squeezestart` from either hand promote it to active, with a forced `teleport.update()` before `grabStart()` so the just-activated hand's own hover state (not the previous hand's) is what gets grabbed.
 
+5. **Controller models**: `XRControllerModelFactory` on `renderer.xr.getControllerGrip(index)` renders the real hardware's controller (Quest Touch, etc.) instead of only a ray line. The factory fetches profiles from `@webxr-input-profiles/assets` on jsDelivr at runtime — allowed by the CSP's `connect-src https:`, so don't be surprised by the network request.
+6. **Haptics**: `controller.userData.gamepad` is captured in the `connected` handler; the `pulse()` helper fires a short vibration on grab (0.4 / 40ms) and a stronger one on a correct puzzle snap (1.0 / 120ms). No-op on devices without haptic actuators.
+
+The on-screen debug surfaces (load banner, fullscreen error box, gyro readout) were removed once a real headset was available — a load failure now logs to the console and shows a message in `#loading-container`.
+
 ### Infra: tunnel/proxy + CSP
 
 `bootstrap/app.php` calls `$middleware->trustProxies(at: '*')`. Needed because `SecurityHeaders`'s CSP `connect-src` is `'self' https: blob:...` — `'self'` needs exact scheme match and `https:` doesn't cover `http://`. Without trusting the tunnel's `X-Forwarded-Proto`, Laravel generated `http://` URLs even though the page loaded over `https://`, so `fetch()` calls from `vr-editor.js` were blocked by CSP. Don't relax the CSP itself to work around this class of bug — fix proxy trust instead.

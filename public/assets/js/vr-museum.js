@@ -3,31 +3,7 @@ import { GLTFLoader } from "three/jsm/loaders/GLTFLoader.js";
 import { DRACOLoader } from "three/jsm/loaders/DRACOLoader.js";
 import { VRButton } from "three/jsm/webxr/VRButton.js";
 import { StereoEffect } from "three/jsm/effects/StereoEffect.js";
-
-// ponytail: temporary on-screen error surface for remote phone testing (no devtools access). Remove once VR is stable.
-(function installDebugSurface() {
-    const banner = document.createElement("div");
-    banner.textContent = "vr-museum.js loaded " + new Date().toLocaleTimeString();
-    banner.style.cssText =
-        "position:fixed;top:0;left:0;right:0;z-index:2147483647;background:#16a34a;" +
-        "color:#fff;font:12px monospace;padding:3px;text-align:center;pointer-events:none";
-    document.body.appendChild(banner);
-    setTimeout(() => banner.remove(), 4000);
-
-    const errorBox = document.createElement("pre");
-    errorBox.style.cssText =
-        "position:fixed;inset:0;z-index:2147483647;background:#000;color:#f87171;" +
-        "font:12px monospace;padding:12px;white-space:pre-wrap;overflow:auto;display:none";
-    document.body.appendChild(errorBox);
-
-    function showError(label, err) {
-        errorBox.style.display = "block";
-        errorBox.textContent += `[${label}] ${err?.stack || err?.message || err}\n\n`;
-    }
-
-    window.addEventListener("error", (e) => showError("error", e.error || e.message));
-    window.addEventListener("unhandledrejection", (e) => showError("promise", e.reason));
-})();
+import { XRControllerModelFactory } from "three/jsm/webxr/XRControllerModelFactory.js";
 
 // ponytail: three.js removed DeviceOrientationControls from examples/jsm around r125.
 // Inlined minimal port (standard W3C deviceorientation -> camera quaternion algorithm).
@@ -84,6 +60,11 @@ function showElement(id) {
     if (!el) return;
     el.style.visibility = "visible";
     el.style.pointerEvents = "auto";
+}
+
+/** Short vibration on the controller that triggered the action; no-op without haptics. */
+function pulse(controller, intensity, milliseconds) {
+    controller?.userData.gamepad?.hapticActuators?.[0]?.pulse(intensity, milliseconds);
 }
 
 class ModelLoader {
@@ -325,6 +306,7 @@ class TeleportControls {
         controller.userData.grabbedNode = this.hoverNode;
         controller.userData.grabbedParent = this.hoverNode.parent;
         controller.attach(this.hoverNode);
+        pulse(controller, 0.4, 40);
     }
 
     grabEnd(controller) {
@@ -333,11 +315,11 @@ class TeleportControls {
         controller.userData.grabbedParent.attach(node);
         controller.userData.grabbedNode = null;
         controller.userData.grabbedParent = null;
-        this.checkSlot(node);
+        this.checkSlot(node, controller);
     }
 
     /** Puzzle: released piece within reach of its slot snaps in place and counts as solved. */
-    checkSlot(node) {
+    checkSlot(node, controller) {
         const slot = this.slots.get(node.userData.vrObject?.slot_mesh_name);
         if (!slot || node.userData.solved) return;
 
@@ -351,6 +333,7 @@ class TeleportControls {
         node.quaternion.copy(slot.quaternion);
         node.userData.solved = true;
         this.solvedCount++;
+        pulse(controller, 1, 120);
 
         const done = this.solvedCount >= this.slots.size;
         this.panel?.show({
@@ -553,6 +536,8 @@ async function startHeadsetSession(renderer, scene, camera, rig, teleport) {
         VRButton.createButton(renderer),
     );
 
+    const controllerModelFactory = new XRControllerModelFactory();
+
     for (const index of [0, 1]) {
         const controller = renderer.xr.getController(index);
 
@@ -569,11 +554,13 @@ async function startHeadsetSession(renderer, scene, camera, rig, teleport) {
         controller.addEventListener("connected", (event) => {
             const tracked = event.data.targetRayMode === "tracked-pointer";
             controller.userData.connected = tracked;
+            controller.userData.gamepad = event.data.gamepad;
             ray.visible = tracked;
             if (tracked && !teleport.controller) teleport.controller = controller;
         });
         controller.addEventListener("disconnected", () => {
             controller.userData.connected = false;
+            controller.userData.gamepad = null;
             ray.visible = false;
             if (teleport.controller === controller) teleport.controller = null;
         });
@@ -588,24 +575,17 @@ async function startHeadsetSession(renderer, scene, camera, rig, teleport) {
         });
         controller.addEventListener("squeezeend", () => teleport.grabEnd(controller));
         rig.add(controller);
+
+        // Renders the real hardware's controller model (Quest Touch, etc.) so the user sees their hands.
+        const grip = renderer.xr.getControllerGrip(index);
+        grip.add(controllerModelFactory.createControllerModel(grip));
+        rig.add(grip);
     }
 
     renderer.setAnimationLoop(() => {
         teleport.update();
         renderer.render(scene, camera);
     });
-}
-
-// ponytail: temporary on-screen debug readout for remote phone testing; remove once teleport is confirmed working.
-function createDebugOverlay() {
-    const el = document.createElement("div");
-    el.id = "vr-debug";
-    el.style.cssText =
-        "position:fixed;top:8px;left:8px;z-index:10000002;color:#0f0;" +
-        "background:rgba(0,0,0,.7);font:11px monospace;padding:4px 8px;" +
-        "border-radius:4px;pointer-events:none;white-space:pre;line-height:1.4";
-    document.body.appendChild(el);
-    return el;
 }
 
 function showTeleportHint() {
@@ -620,18 +600,11 @@ function showTeleportHint() {
 }
 
 async function startPhoneStereoSession(renderer, scene, camera, teleport) {
-    const debugEl = createDebugOverlay();
-    const isSecureCtx = window.isSecureContext;
-    debugEl.textContent = `secure: ${isSecureCtx}\nscript: v2\nwaiting for tap...`;
-
     const button = createEnterButton("Masuk VR");
 
     button.addEventListener("click", async () => {
-        debugEl.textContent = `secure: ${isSecureCtx}\nrequesting permission...`;
-
         const granted = await requestOrientationPermission();
         if (!granted) {
-            debugEl.textContent = `secure: ${isSecureCtx}\npermission: DENIED`;
             alert("Izin sensor orientasi diperlukan untuk mode VR di HP ini.");
             return;
         }
@@ -651,15 +624,6 @@ async function startPhoneStereoSession(renderer, scene, camera, teleport) {
             controls.update();
             teleport.update();
             effect.render(scene, camera);
-
-            const o = controls.deviceOrientation;
-            debugEl.textContent =
-                `secure: ${isSecureCtx}\n` +
-                `alpha: ${o.alpha?.toFixed(1) ?? "none"}\n` +
-                `beta: ${o.beta?.toFixed(1) ?? "none"}\n` +
-                `gamma: ${o.gamma?.toFixed(1) ?? "none"}\n` +
-                `reticle hit: ${teleport.reticle.visible}`;
-
             requestAnimationFrame(render);
         }
         render();
@@ -752,5 +716,8 @@ async function main() {
 }
 
 main().catch((err) => {
-    window.dispatchEvent(new ErrorEvent("error", { error: err }));
+    console.error(err);
+    showElement("loading-container");
+    document.querySelector("#loading-container p").textContent =
+        "Gagal memuat pengalaman VR. Muat ulang halaman untuk mencoba lagi.";
 });
