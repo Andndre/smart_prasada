@@ -209,7 +209,9 @@ bergantung padanya**: Fase 2b tidak punya yang diisi, Fase 3 tidak punya fase
 interaksi yang bermakna, Fase 4 tidak punya bahan refleksi, Fase 5 mencatat event
 dari scene yang hampir kosong, Fase 7 menguji ke 106 responden dengan 4 objek.
 
-Deliverable pertama: **brief produksi aset** (§7), disusun tepat setelah Fase 2.
+Deliverable pertama: **brief produksi aset** — sudah tersedia di
+`docs/brief-produksi-aset.md`. Empat butir di bagian penutupnya perlu keputusan
+tim sebelum produksi bisa dipesan.
 
 ### Jalur kode — berurutan
 
@@ -244,9 +246,9 @@ Melengkapi Learning Content Management Module.
 8. `InfoPanel.draw()` — chip nilai karakter; baris deskripsi turun 8 → 6.
 9. Tes di `VirtualMuseumObjectTest.php`.
 
-### Jalur paralel — Brief produksi aset 3D *(berikutnya)*
+### Jalur paralel — Brief produksi aset 3D *(selesai, menunggu keputusan tim)*
 
-Dokumen spesifikasi untuk pemodel 3D. Harus memuat:
+Dokumen spesifikasi untuk pemodel 3D: `docs/brief-produksi-aset.md`. Memuat:
 
 - **Konvensi penamaan mesh.** `mesh_name` harus persis sama dengan nama node di
   GLB — ini yang menyambungkan baris database ke objek 3D.
