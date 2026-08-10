@@ -104,6 +104,19 @@
                             placeholder="Deskripsi yang tampil saat objek disentuh di VR"></textarea>
                     </div>
                     <div>
+                        <span class="mb-1 block text-xs font-medium text-gray-500">Nilai Karakter (opsional)</span>
+                        <div class="grid grid-cols-1 gap-1">
+                            @foreach (\App\Enums\NilaiKarakter::options() as $value => $label)
+                                <label class="flex items-center gap-2 rounded-md border border-gray-200 px-2 py-1.5 text-xs text-gray-700 hover:bg-gray-50">
+                                    <input type="checkbox" name="nilai_karakter" value="{{ $value }}"
+                                        class="rounded border-gray-300 text-purple-600 focus:ring-purple-500">
+                                    {{ $label }}
+                                </label>
+                            @endforeach
+                        </div>
+                        <p class="mt-1 text-xs text-gray-400">Tampil sebagai chip di panel info VR.</p>
+                    </div>
+                    <div>
                         <label class="mb-1 block text-xs font-medium text-gray-500">Slot Puzzle (opsional)</label>
                         <div class="flex gap-2">
                             <input type="text" id="field-slot" readonly

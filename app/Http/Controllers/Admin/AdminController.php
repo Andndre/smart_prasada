@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Enums\NilaiKarakter;
 use App\Http\Controllers\Controller;
 use App\Models\AksesSitusUser;
 use App\Models\Ebook;
@@ -23,6 +24,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
 class AdminController extends Controller
@@ -624,6 +626,8 @@ class AdminController extends Controller
             'mesh_name' => 'nullable|string|max:255',
             'slot_mesh_name' => 'nullable|string|max:255',
             'deskripsi' => 'nullable|string',
+            'nilai_karakter' => 'nullable|array',
+            'nilai_karakter.*' => [Rule::enum(NilaiKarakter::class)],
             'gambar_real' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:10240', // 10MB
             'path_obj' => 'nullable|file|max:307200', // 300MB
             'audio_file' => 'nullable|file|mimes:mp3,wav,ogg,aac|max:10240', // 10MB
@@ -635,7 +639,8 @@ class AdminController extends Controller
             'nama' => $request->nama,
             'mesh_name' => $request->mesh_name,
             'slot_mesh_name' => $request->slot_mesh_name,
-            'deskripsi' => $request->deskripsi,
+            'deskripsi' => $request->input('deskripsi', ''),
+            'nilai_karakter' => $request->input('nilai_karakter', []),
         ];
 
         // Handle file uploads
@@ -700,6 +705,8 @@ class AdminController extends Controller
             'mesh_name' => 'nullable|string|max:255',
             'slot_mesh_name' => 'nullable|string|max:255',
             'deskripsi' => 'nullable|string',
+            'nilai_karakter' => 'nullable|array',
+            'nilai_karakter.*' => [Rule::enum(NilaiKarakter::class)],
             'gambar_real' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:10240', // 10MB
             'path_obj' => 'nullable|file|max:307200', // 300MB
             'audio_file' => 'nullable|file|mimes:mp3,wav,ogg,aac|max:10240', // 10MB
@@ -709,7 +716,8 @@ class AdminController extends Controller
             'nama' => $request->nama,
             'mesh_name' => $request->mesh_name,
             'slot_mesh_name' => $request->slot_mesh_name,
-            'deskripsi' => $request->deskripsi,
+            'deskripsi' => $request->input('deskripsi', ''),
+            'nilai_karakter' => $request->input('nilai_karakter', []),
         ];
 
         if ($request->boolean('remove_audio')) {
@@ -806,6 +814,8 @@ class AdminController extends Controller
             'mesh_name' => 'required|string|max:255',
             'slot_mesh_name' => 'nullable|string|max:255',
             'deskripsi' => 'nullable|string',
+            'nilai_karakter' => 'nullable|array',
+            'nilai_karakter.*' => [Rule::enum(NilaiKarakter::class)],
         ]);
 
         $object = VirtualMuseumObject::updateOrCreate(
@@ -818,6 +828,7 @@ class AdminController extends Controller
                 'nama' => $validated['nama'],
                 'slot_mesh_name' => $validated['slot_mesh_name'] ?? null,
                 'deskripsi' => $validated['deskripsi'] ?? '',
+                'nilai_karakter' => $validated['nilai_karakter'] ?? [],
             ],
         );
 

@@ -134,6 +134,25 @@
                         </p>
                     </div>
 
+                    <!-- Nilai Karakter -->
+                    <div>
+                        <span class="mb-2 block text-sm font-medium text-gray-700">
+                            Nilai Karakter <span class="text-gray-400">(Opsional)</span>
+                        </span>
+                        <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                            @foreach (\App\Enums\NilaiKarakter::options() as $value => $label)
+                                <label class="flex items-center gap-2 rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                                    <input type="checkbox" name="nilai_karakter[]" value="{{ $value }}"
+                                        @checked(in_array($value, old('nilai_karakter', $object->nilai_karakter ?? []), true))
+                                        class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                                    {{ $label }}
+                                </label>
+                            @endforeach
+                        </div>
+                        <p class="mt-1 text-xs text-gray-500">Nilai karakter yang melekat pada objek ini. Ditampilkan di
+                            panel info dalam mode VR dan jadi dasar pertanyaan modul refleksi.</p>
+                    </div>
+
                     <!-- Audio Narasi -->
                     <div>
                         <label for="audio_file" class="mb-2 block text-sm font-medium text-gray-700">

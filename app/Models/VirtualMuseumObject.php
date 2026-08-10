@@ -29,12 +29,14 @@ class VirtualMuseumObject extends Model
         'gambar_real',
         'path_obj',
         'deskripsi',
+        'nilai_karakter',
         'path_audio',
     ];
 
     protected $casts = [
         'situs_id' => 'integer',
         'museum_id' => 'integer',
+        'nilai_karakter' => 'array',
     ];
 
     // Relationships

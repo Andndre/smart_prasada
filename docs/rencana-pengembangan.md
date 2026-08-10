@@ -1,0 +1,350 @@
+# SmartPrasada — Rencana Pengembangan menuju TKT 6
+
+Dokumen kerja. Diperbarui 2026-08-10.
+
+Acuan: proposal Hilirisasi Riset Prioritas — Pengujian Model dan Prototipe 2026,
+No. Dokumen PRO-251410100722. Ketua: I Wayan Pardi (Undiksha).
+Anggaran Rp 149.790.000. Pelaksanaan Juli–Desember 2026.
+
+---
+
+## 1. Target TKT
+
+**TKT 4 → 6.**
+
+Formulir administratif BIMA (hal. 1) menulis "Target Akhir TKT: 5". Seluruh bagian
+naratif (hal. 6, 9, 10, 11, 19) serta jadwal (hal. 14) dan luaran wajib #1
+menyebut TKT 6. Anggaran juga memuat dua tingkat uji terpisah — uji produk
+(50–56 orang) dan uji lapangan (100–106 orang, ~Rp 52 juta) — dan pos uji
+lapangan tidak punya guna kalau target berhenti di TKT 5.
+
+Keputusan tim: kerjakan sebagai **target 6**, angka 5 di formulir dianggap salah
+isi. Konfirmasi ke ketua peneliti sedang berjalan untuk pencatatan, tidak
+memblokir pekerjaan.
+
+Konsekuensi yang mengikat:
+
+- Mode kiosk wajib — alur harus jalan **tanpa intervensi teknis pengembang**
+  (hal. 11).
+- Data keterpakaian dari pengguna nyata jadi bukti utama.
+- Demonstrasi di kelas/lab nyata bersama guru dan siswa.
+
+---
+
+## 2. Arsitektur wajib — 5 modul
+
+Sumber daftar lima modul adalah **hal. 11 (Blueprint Usulan Prototipe)**, bukan
+hal. 22. Hal. 22 hanya menyebut empat modul; refleksi di situ muncul sebagai
+*fase* dalam state management. Ini penting karena hal. 11 adalah bagian
+"Blueprint", dan blueprint adalah **luaran wajib #2** — modul refleksi bukan
+sekadar fitur kurang, ia komponen dokumen yang harus diserahkan.
+
+| Modul | Status | Catatan |
+|---|---|---|
+| VR Rendering Engine | ADA | Nama resmi yang dipakai konsisten di kode dan dokumen. Hal. 9 menyebutnya "VR Environment Engine" — abaikan, pakai satu nama. |
+| Interaction Module | **SEPARUH** | Navigasi dan seleksi objek ada. Manipulasi artefak (wajib, hal. 19 & 22) belum pernah tereksekusi — tidak ada satu pun data untuk mengujinya, dan asetnya tidak dirancang untuk itu. |
+| Learning Content Management Module | **KOSONG** | Bukan sekadar kurang field nilai karakter. Lihat §3. |
+| User Interface Layer | ADA | `InfoPanel` = context-aware overlay non-intrusif di ruang virtual. Sesuai hal. 22. |
+| Modul Refleksi | **NOL** | Belum ada sama sekali. |
+
+### Alur operasional wajib
+
+    orientasi → eksplorasi → interaksi → refleksi
+
+dengan state management antar fase (hal. 22). Alur aplikasi sekarang
+`pretest → e-book → museum → posttest` — berbeda total. Gap konseptual terbesar.
+
+### Penyimpangan spesifikasi yang disengaja
+
+**Physics simulation** (hal. 22: "scene rendering, *physics simulation*, dan
+event-driven interaction") **tidak akan diimplementasikan.**
+
+Alasan: snap berbasis jarak sudah memenuhi nilai pedagogis manipulasi artefak.
+Physics penuh menambah risiko performa di perangkat mobile tanpa kontribusi ke
+capaian pembelajaran. Dicatat di sini supaya menjadi keputusan sadar, bukan
+kelalaian — kalau validator mempersoalkan, alasannya tersedia.
+
+---
+
+## 3. Kondisi konten — jalur kritis proyek
+
+Ini temuan terpenting dari audit, dan ia menggeser prioritas seluruh rencana.
+
+### Angka
+
+    virtual_museum_object  : 30 baris
+    punya mesh_name        : 4
+    punya slot_mesh_name   : 0
+    punya path_audio       : 0
+    file GLB di repo       : 1
+
+Objek tanpa `mesh_name` disaring keluar di `HomeController::vrMuseum` sebelum
+dikirim ke scene. Jadi **26 dari 30 objek tidak eksis di VR sama sekali** —
+hanya baris database. 13 museum selain museum uji punya persis 2 objek tanpa
+`mesh_name`: keluaran seeder, bukan konten.
+
+Yang bisa ditunjukkan ke validator hari ini: satu museum berisi 4 objek hidup,
+tanpa audio, tanpa puzzle, tanpa nilai karakter.
+
+### Aset 3D adalah sketsa, bukan digitalisasi
+
+`punden_berundak_pura_mehu.glb` berukuran **7,8 KB**. Menurut `credits.txt`,
+model dibuat procedural di Blender dari deskripsi artikel BPCB Bali — bukan
+fotogrametri, tanpa tekstur, hanya 3 material polos (`Mat_Batu_Padas`,
+`Mat_Batu_Berlumut`, `Mat_Pelataran_Batu`). Ornamennya sendiri didokumentasikan
+sebagai "representasi disederhanakan sebagai 4 medali".
+
+Proposal berjudul **"Digitalisasi Peninggalan Prasejarah"** dengan pos anggaran
+**Asset Digital Prasejarah (3D & Audio) Rp 5.000.000** dan **Bahan Produksi
+Konten VR Rp 1.000.000**. Yang ada sekarang adalah sketsa penempatan, bukan
+digitalisasi.
+
+### Manipulasi artefak tidak punya jalur konten
+
+`daftar-objek.txt` menyatakan eksplisit: *"tidak ada relasi puzzle/slot pada
+scene ini (semua objek statis/informatif, bukan piece yang perlu dipasangkan)"*.
+
+Jadi 0/30 `slot_mesh_name` **bukan data yang belum diisi** — asetnya memang tidak
+dirancang untuk puzzle. Mekanik grab/snap yang sudah ditulis di
+`vr-museum.js` tidak punya konten untuk dijalankan, dan tidak akan punya sampai
+ada aset baru yang memodelkan marker slot.
+
+Karena "manipulasi artefak" wajib per hal. 19 ("modul interaksi pengguna berbasis
+*motion controller*") dan hal. 22, ini bukan fitur opsional yang bisa
+dikesampingkan.
+
+### Katalog situs tidak cocok dengan ruang lingkup proposal
+
+Dari 17 `situs_peninggalan`, yang benar-benar prasejarah hanya sekitar 7–9.
+Sisanya di luar lingkup "peninggalan prasejarah":
+
+- Museum Le Mayeur — pelukis Belgia, 1932–1958
+- Monumen Perjuangan Rakyat Bali
+- Gedung Art Deco Singaraja
+- Candi Gunung Kawi
+- Pura Kehen
+- Sentra Wayang Kamasan
+
+Menurut `log_aktivitas`, konten yang **paling banyak dipakai justru Le Mayeur
+(94 sesi)** — di luar lingkup proposal.
+
+Ada juga kesalahan data: **"Situs Prasasti Sukuh" dialamatkan di Karangasem,
+Bali.** Candi Sukuh berada di Karanganyar, Jawa Tengah.
+
+---
+
+## 4. Keputusan desain yang sudah diambil
+
+### Tier perangkat
+
+| Fase | Perangkat |
+|---|---|
+| Orientasi | HP/cardboard cukup |
+| Eksplorasi | HP/cardboard cukup |
+| Interaksi (manipulasi artefak) | **Quest saja** — hal. 19 mengikatnya ke motion controller |
+| Refleksi | layar biasa, tidak perlu VR |
+
+Cardboard **dibekukan** di orientasi + eksplorasi + panel info. Jangan tambah
+fitur ke jalur itu.
+
+Tier ini sesuai proposal, bukan kompromi: hal. 10 menyebut "perangkat VR
+sederhana" dan "perangkat mobile" sebagai sarana pendukung.
+
+### Headset tanpa login (mode kiosk)
+
+Headset langsung ke scene. Identitas responden dipegang perangkat fasilitator.
+Jalur `ar.token` + QR yang sudah ada jadi pondasinya.
+
+Alasan: kriteria "tanpa intervensi teknis pengembang", dan mengetik di keyboard
+virtual akan merusak uji keterpakaian.
+
+### Fitur mati dihapus, dua diubah fungsi
+
+- **Kritik & Saran** → kuesioner keterpakaian pasca-sesi VR (wajib TKT 6)
+- **Pretest/Posttest** → alat ukur outcome, dilepas dari gerbang progres berjenjang
+
+### Nilai karakter: banyak nilai per objek
+
+Satu kolom JSON, kosakata dikunci PHP enum. Bukan tabel/relasi baru.
+
+Alasan utama: arah yang murah dibatalkan adalah multi. Turun dari multi ke single
+= ambil elemen pertama, tanpa migrasi. Naik dari single ke multi = migrasi kolom
+plus menyentuh ulang setiap pembaca (form admin, editor 3D, panel VR, modul
+refleksi).
+
+Kosakata nilai harus berasal dari **Pardi, Sendratari, Margi (2017),
+"Rekonstruksi nilai-nilai pendidikan karakter pada peninggalan purbakala di Desa
+Pakraman Selulung, Kintamani, Bangli"** — referensi #1 proposal, meneliti situs
+yang persis sama dengan museum uji. Sampai daftar itu tersedia, enum diisi
+placeholder 6 dimensi Profil Pelajar Pancasila.
+
+---
+
+## 5. Kendala lapangan
+
+- Anggaran hanya **1 headset standalone** + 2 controller.
+- Responden: **56 orang uji produk** (transport hanya dianggarkan 50 — inkonsistensi
+  internal proposal) dan **100–106 orang uji lapangan**, masing-masing 2 kegiatan.
+- Satu headset bergiliran ratusan orang. Protokol uji harus memastikan setiap
+  responden menyentuh Quest minimal untuk **fase interaksi** — kalau mayoritas
+  diuji di cardboard, fitur utama tidak pernah tervalidasi dan itu langsung
+  menabrak kriteria lulus TKT 6.
+- Jadwal Juli–Desember 2026. Per 2026-08-10 sudah **bulan ke-2 dari 6**.
+
+---
+
+## 6. Urutan kerja
+
+### Jalur paralel — Produksi Aset 3D
+
+**Dimulai sekarang, berjalan bersamaan dengan seluruh jalur kode.**
+
+Bukan fase dalam antrean kode. Ini pekerjaan Blender + audio, sumber dayanya
+pemodel 3D dan pengisi suara, bukan pemrogram — dan pos anggarannya sudah ada
+(Rp 6 juta). Menaruhnya dalam antrean berarti membiarkan sumber daya yang tidak
+bentrok saling menunggu.
+
+Ia jalur kritis karena punya lead time terpanjang dan **semua yang di bawahnya
+bergantung padanya**: Fase 2b tidak punya yang diisi, Fase 3 tidak punya fase
+interaksi yang bermakna, Fase 4 tidak punya bahan refleksi, Fase 5 mencatat event
+dari scene yang hampir kosong, Fase 7 menguji ke 106 responden dengan 4 objek.
+
+Deliverable pertama: **brief produksi aset** (§7), disusun tepat setelah Fase 2.
+
+### Jalur kode — berurutan
+
+| Urutan | Fase | Alasan posisi |
+|---|---|---|
+| 1 | **Fase 2** — Pemetaan nilai karakter | Murah, satu commit, membuka Fase 2b dan Fase 4 |
+| 2 | **Fase 5** — Runtime event logging | Luaran wajib #1 butuh data uji; harus terpasang sebelum uji apa pun dijalankan |
+| 3 | **Fase 3** — State machine 4 fase | Alur wajib hal. 22 |
+| 4 | **Fase 4** — Modul refleksi | Modul ke-5 blueprint |
+| 5 | **Fase 6** — Capability gating & mode kiosk | Wajib untuk "tanpa intervensi pengembang" |
+| 6 | **Fase 2b** — Pengisian konten museum uji | Menunggu aset dari jalur paralel |
+| 7 | **Fase 1** — Pembersihan fitur mati | Tidak menghasilkan bukti TKT; kerapian saja |
+| 8 | **Fase 7** — Kesiapan uji TKT 5/6 | Penutup |
+
+---
+
+## 7. Rincian fase
+
+### Fase 2 — Pemetaan nilai karakter *(disetujui, dieksekusi)*
+
+Melengkapi Learning Content Management Module.
+
+1. Enum `App\Enums\NilaiKarakter` — string-backed, `label()` + `options()`.
+   Placeholder Profil Pelajar Pancasila, diganti setelah daftar Pardi 2017 ada.
+2. Migration `add_nilai_karakter_to_virtual_museum_object` — kolom `json` nullable.
+3. Model: `$fillable` + cast `'array'` (ikut properti `$casts` yang sudah ada).
+4. Form admin: checkbox group di create/edit, chip di show.
+5. Validasi `storeVirtualMuseumObject` + `updateVirtualMuseumObject` — inline
+   `$request->validate()` mengikuti konvensi repo, bukan Form Request.
+6. Editor visual 3D: checkbox di panel properti + validasi `editorSaveObject`.
+7. `HomeController::vrMuseum` — tambah kolom ke `get([...])`.
+8. `InfoPanel.draw()` — chip nilai karakter; baris deskripsi turun 8 → 6.
+9. Tes di `VirtualMuseumObjectTest.php`.
+
+### Jalur paralel — Brief produksi aset 3D *(berikutnya)*
+
+Dokumen spesifikasi untuk pemodel 3D. Harus memuat:
+
+- **Konvensi penamaan mesh.** `mesh_name` harus persis sama dengan nama node di
+  GLB — ini yang menyambungkan baris database ke objek 3D.
+- **Marker slot untuk puzzle.** Setiap piece butuh mesh penanda tak terlihat di
+  posisi target, namanya diisi ke `slot_mesh_name`. Inilah yang hilang dari aset
+  sekarang dan yang membuat "manipulasi artefak" mustahil.
+- Skala dunia nyata, Y-up, origin di titik spawn, model 4 m di depan pengguna.
+- Draco compression, budget poligon dan tekstur untuk standalone headset.
+- Daftar objek interaktif per situs beserta nilai karakter yang melekat.
+- Narasi audio per objek.
+
+**Rekomendasi lingkup: satu situs unggulan, dikerjakan tuntas.** Bukan cakupan
+tipis untuk 14 museum. Kandidat: **Punden Berundak Pura Mehu** — situsnya
+prasejarah tulen (megalitikum), nilai karakternya sudah diteliti ketua peneliti
+sendiri (Pardi 2017), dan sudah ada sketsa GLB plus daftar objek sebagai titik
+mulai.
+
+### Fase 5 — Runtime event logging
+
+Wajib hal. 22, sumber bukti luaran wajib #1.
+
+- Tabel event terpisah. Jangan menumpang `log_aktivitas` yang berbasis teks bebas
+  dan hanya mencatat event masuk.
+- Event minimal: masuk sesi, transisi fase, objek dilihat, panel info dibuka,
+  objek digenggam, puzzle terpasang benar, keluar sesi — dengan timestamp.
+- Dikirim dari scene secara batch, bukan satu request per event.
+- Metrik sasaran: time-on-task, jumlah percobaan, durasi per fase.
+- Harus bisa diekspor untuk tim peneliti.
+
+### Fase 3 — State machine 4 fase
+
+- State disimpan per sesi VR, bukan sebagai progres user berjenjang.
+- Indikator fase non-intrusif di dalam scene.
+- Fase interaksi hanya aktif di perangkat berkemampuan controller.
+
+### Fase 4 — Modul refleksi
+
+- Dijalankan di layar biasa setelah sesi VR, bukan di dalam VR.
+- Pertanyaan reflektif terkait nilai karakter dari Fase 2.
+- Pertimbangkan memakai ulang pola skema pertanyaan pretest/posttest.
+
+### Fase 6 — Capability gating & mode kiosk
+
+- Perbaiki puzzle buntu di HP. Di jalur HP hanya `pointerup → trigger()` yang
+  terpasang; `grabStart`/`grabEnd` cuma ada di `squeezestart`/`squeezeend` jalur
+  headset. Lebih buruk: `pulseInteractive` tetap berkedip di HP, jadi objek
+  puzzle **aktif mengundang** di perangkat yang tidak bisa memasangnya. Afordansi
+  yang berbohong, bukan sekadar diam.
+- Mode kiosk headset.
+
+### Fase 2b — Pengisian konten museum uji
+
+`mesh_name`, audio, nilai karakter untuk museum yang dipakai uji. Editor visual
+3D sudah ada untuk mempercepatnya.
+
+Catatan: audio **bukan** celah fitur — form admin sudah menerima `audio_file`
+(mp3/wav/ogg/aac, maks 10MB) dan `InfoPanel.show()` sudah memutarnya. Murni
+soal konten.
+
+### Fase 1 — Pembersihan fitur mati
+
+Hapus: Tugas · Laporan Peninggalan (+`laporan_gambar`, `laporan_komentar`,
+`laporan_suka`) · Video Peninggalan · Riwayat Pengembang · Templat Hotspot ·
+`akses_situs_user`.
+
+Cakupan tiap fitur: route, controller, model, view, entri nav/menu, kunci
+terjemahan, factory/seeder, test, dan migration penghapus tabel. Ikuti pola
+`2026_07_15_092204_drop_ar_and_katalog_tables.php` — tambah migration drop baru,
+jangan mengedit migration lama.
+
+Jangan sentuh `kritik_saran` dan pretest/posttest.
+
+Sekalian: perbaiki alamat "Situs Prasasti Sukuh".
+
+### Fase 7 — Kesiapan uji TKT 5/6
+
+- Kritik & Saran → kuesioner keterpakaian pasca-sesi.
+- Pretest/posttest dilepas dari gerbang progres.
+- Pengecekan frame rate dan latency di Quest 2 dan HP.
+- Uji alur penuh end-to-end tanpa bantuan teknis, meniru kondisi kelas.
+
+---
+
+## 8. Perlu keputusan ketua peneliti / tim
+
+1. **Daftar nilai karakter** dari Pardi dkk. (2017) untuk mengganti placeholder enum.
+2. **Lingkup katalog situs.** 17 situs, hanya 7–9 prasejarah, dan konten paling
+   dipakai (Le Mayeur, 94 sesi) di luar lingkup. Dipangkas untuk uji TKT, atau
+   dibiarkan? Ini mengubah alur yang dilihat pengguna.
+3. **Panorama 360.** 27 `adegan` berisi data nyata, tapi hal. 10 menegaskan
+   kebaruannya justru "bukan tur virtual pasif" — fitur ini melemahkan klaim
+   novelty utama. Opsi: jadikan modul **orientasi**, atau dilepas.
+4. **Klaim AI** (hal. 3). Kata "AI"/"kecerdasan buatan" hanya muncul sekali di
+   seluruh 27 halaman, di kolom Bidang Strategis, dan rumusan masalah yang
+   dipilih di kolom itu ("6.9 Rendahnya Pengakuan Internasional") bukan tentang
+   AI. Tidak disebut di spesifikasi, blueprint, software engineering, luaran,
+   jadwal, maupun anggaran. Bukti kuat ia normatif — tetap konfirmasi.
+5. **Komisioning aset 3D** — Rp 6 juta tersedia, lead time terpanjang, jalur kritis.
+6. **Inkonsistensi 50 vs 56 orang** dan **mata anggaran lisensi game engine**
+   (Rp 4 juta, sementara implementasi WebXR/Three.js tidak butuh lisensi) —
+   bukan ranah teknis.

@@ -201,6 +201,39 @@ Iterating on "how does the user know what's interactive" — in order of what wa
 
 The on-screen debug surfaces (load banner, fullscreen error box, gyro readout) were removed once a real headset was available — a load failure now logs to the console and shows a message in `#loading-container`.
 
+### Nilai karakter (`nilai_karakter`)
+
+`VirtualMuseumObject.nilai_karakter` — kolom JSON nullable, cast `'array'`, berisi daftar
+value dari `App\Enums\NilaiKarakter`. Satu objek boleh punya beberapa nilai.
+
+Kosakata enum saat ini **placeholder** (6 dimensi Profil Pelajar Pancasila). Daftar final
+harus diambil dari Pardi, Sendratari, Margi (2017) — referensi #1 proposal, meneliti situs
+yang sama dengan museum uji. Ganti isi enum saja, tidak ada kode lain yang perlu disentuh.
+
+Jalur lengkapnya: form admin create/edit (checkbox) → editor visual 3D (checkbox di panel
+properti) → `HomeController::vrMuseum` mengirimnya lewat `window.vrObjects` → `InfoPanel.draw()`
+merendernya jadi chip ungu. Label untuk JS datang dari `window.nilaiKarakterLabels` yang
+di-inject di `guest/vr/museum.blade.php`, supaya enum tetap satu-satunya sumber kebenaran.
+
+Karena chip butuh ruang, `wrapText` deskripsi turun dari 8 ke 6 baris. Kalau daftar nilai
+final jauh lebih panjang, batasi tampilan ke 3 nilai teratas per objek.
+
+### Penyimpangan spesifikasi yang disengaja: physics simulation
+
+Proposal hal. 22 menyebut "real-time 3D engine yang mendukung scene rendering, *physics
+simulation*, dan event-driven interaction". Physics **tidak diimplementasikan** — tidak ada
+rigidbody, gravitasi, atau collision; objek yang dilepas di VR diam di udara, dan snap puzzle
+murni pengecekan jarak 0.5 m.
+
+Keputusan sadar tim: snap berbasis jarak sudah memenuhi nilai pedagogis manipulasi artefak,
+sementara physics penuh menambah risiko performa di perangkat mobile tanpa kontribusi ke
+capaian pembelajaran. Jangan "perbaiki" ini tanpa membaca `docs/rencana-pengembangan.md`.
+
+### Rencana pengembangan
+
+Urutan fase, status modul, dan keputusan desain menuju TKT 6 ada di
+`docs/rencana-pengembangan.md`. Baca itu sebelum mengusulkan pekerjaan baru.
+
 ### Infra: tunnel/proxy + CSP
 
 `bootstrap/app.php` calls `$middleware->trustProxies(at: '*')`. Needed because `SecurityHeaders`'s CSP `connect-src` is `'self' https: blob:...` — `'self'` needs exact scheme match and `https:` doesn't cover `http://`. Without trusting the tunnel's `X-Forwarded-Proto`, Laravel generated `http://` URLs even though the page loaded over `https://`, so `fetch()` calls from `vr-editor.js` were blocked by CSP. Don't relax the CSP itself to work around this class of bug — fix proxy trust instead.

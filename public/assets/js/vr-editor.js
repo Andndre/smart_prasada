@@ -136,6 +136,22 @@ function selectNode(node) {
 }
 
 // ---------- Property panel ----------
+const nilaiKarakterInputs = () => [
+    ...document.querySelectorAll('input[name="nilai_karakter"]'),
+];
+
+function readNilaiKarakter() {
+    return nilaiKarakterInputs()
+        .filter((input) => input.checked)
+        .map((input) => input.value);
+}
+
+function writeNilaiKarakter(values = []) {
+    for (const input of nilaiKarakterInputs()) {
+        input.checked = values.includes(input.value);
+    }
+}
+
 function showPanel(node) {
     const record = objectsByMesh.get(node.name);
     el("panel-empty").classList.add("hidden");
@@ -144,6 +160,7 @@ function showPanel(node) {
     el("field-nama").value = record?.nama ?? node.name.replaceAll("_", " ");
     el("field-deskripsi").value = record?.deskripsi ?? "";
     el("field-slot").value = record?.slot_mesh_name ?? "";
+    writeNilaiKarakter(record?.nilai_karakter ?? []);
     el("btn-delete").classList.toggle("hidden", !record);
     const fullEdit = el("link-full-edit");
     fullEdit.classList.toggle("hidden", !record);
@@ -186,6 +203,7 @@ el("panel-form").addEventListener("submit", async (e) => {
             nama: el("field-nama").value,
             deskripsi: el("field-deskripsi").value || null,
             slot_mesh_name: el("field-slot").value || null,
+            nilai_karakter: readNilaiKarakter(),
         }),
     });
     if (!response.ok) {
@@ -200,6 +218,7 @@ el("panel-form").addEventListener("submit", async (e) => {
         nama: el("field-nama").value,
         deskripsi: el("field-deskripsi").value || null,
         slot_mesh_name: el("field-slot").value || null,
+        nilai_karakter: readNilaiKarakter(),
     });
     setStatus("Tersimpan ✓", "success");
     flashButton(saveBtn, "Tersimpan ✓", "success");

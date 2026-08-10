@@ -76,6 +76,7 @@
         var museum = @json($museum);
         var situsNama = @json($situs->nama);
         var vrObjects = @json($vrObjects);
+        var nilaiKarakterLabels = @json(\App\Enums\NilaiKarakter::options());
     </script>
 
     <div class="pointer-events-none fixed inset-x-0 top-0 z-[10000000]">

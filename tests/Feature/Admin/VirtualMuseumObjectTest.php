@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\NilaiKarakter;
 use App\Models\User;
 use App\Models\VirtualMuseum;
 use App\Models\VirtualMuseumObject;
@@ -168,5 +169,118 @@ describe('VR Editor', function () {
                 ->assertUnprocessable()
                 ->assertJsonValidationErrors(['nama', 'mesh_name']);
         });
+    });
+});
+
+describe('Nilai Karakter', function () {
+    it('stores multiple values from the admin create form', function () {
+        $admin = User::factory()->create(['role' => 'admin']);
+        $museum = VirtualMuseum::factory()->create();
+
+        $this->actingAs($admin)
+            ->post(route('admin.virtual-museum-object.store', $museum->museum_id), [
+                'nama' => 'Punden Berundak Utama',
+                'mesh_name' => 'Punden_Berundak_Utama',
+                'nilai_karakter' => [
+                    NilaiKarakter::Religius->value,
+                    NilaiKarakter::GotongRoyong->value,
+                ],
+            ])
+            ->assertRedirect();
+
+        $object = VirtualMuseumObject::where('mesh_name', 'Punden_Berundak_Utama')->sole();
+        expect($object->nilai_karakter)->toBe(['religius', 'gotong_royong']);
+    });
+
+    it('stores an empty list when no value is checked', function () {
+        $admin = User::factory()->create(['role' => 'admin']);
+        $museum = VirtualMuseum::factory()->create();
+
+        $this->actingAs($admin)
+            ->post(route('admin.virtual-museum-object.store', $museum->museum_id), [
+                'nama' => 'Objek Tanpa Nilai',
+                'mesh_name' => 'Objek_Tanpa_Nilai',
+            ])
+            ->assertRedirect();
+
+        expect(VirtualMuseumObject::where('mesh_name', 'Objek_Tanpa_Nilai')->sole()->nilai_karakter)->toBe([]);
+    });
+
+    it('rejects a value outside the enum', function () {
+        $admin = User::factory()->create(['role' => 'admin']);
+        $museum = VirtualMuseum::factory()->create();
+
+        $this->actingAs($admin)
+            ->post(route('admin.virtual-museum-object.store', $museum->museum_id), [
+                'nama' => 'Objek Nilai Palsu',
+                'nilai_karakter' => ['nilai_yang_tidak_ada'],
+            ])
+            ->assertSessionHasErrors('nilai_karakter.0');
+
+        expect(VirtualMuseumObject::where('nama', 'Objek Nilai Palsu')->exists())->toBeFalse();
+    });
+
+    it('updates values from the edit form', function () {
+        $admin = User::factory()->create(['role' => 'admin']);
+        $object = VirtualMuseumObject::factory()->create([
+            'nilai_karakter' => [NilaiKarakter::Religius->value],
+        ]);
+
+        $this->actingAs($admin)
+            ->put(route('admin.virtual-museum-object.update', $object->object_id), [
+                'nama' => $object->nama,
+                'nilai_karakter' => [NilaiKarakter::BernalarKritis->value],
+            ])
+            ->assertRedirect();
+
+        expect($object->fresh()->nilai_karakter)->toBe(['bernalar_kritis']);
+    });
+
+    it('saves values through the visual editor endpoint', function () {
+        $admin = User::factory()->create(['role' => 'admin']);
+        $museum = VirtualMuseum::factory()->create();
+
+        $this->actingAs($admin)
+            ->postJson(route('admin.virtual-museum.editor.save', $museum->museum_id), [
+                'nama' => 'Padma Kurung',
+                'mesh_name' => 'Padma_Kurung',
+                'nilai_karakter' => [NilaiKarakter::Religius->value],
+            ])
+            ->assertSuccessful();
+
+        expect(VirtualMuseumObject::where('mesh_name', 'Padma_Kurung')->sole()->nilai_karakter)
+            ->toBe(['religius']);
+    });
+
+    it('rejects an invalid value through the visual editor endpoint', function () {
+        $admin = User::factory()->create(['role' => 'admin']);
+        $museum = VirtualMuseum::factory()->create();
+
+        $this->actingAs($admin)
+            ->postJson(route('admin.virtual-museum.editor.save', $museum->museum_id), [
+                'nama' => 'Padma Kurung',
+                'mesh_name' => 'Padma_Kurung',
+                'nilai_karakter' => ['bukan_nilai'],
+            ])
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors(['nilai_karakter.0']);
+    });
+
+    it('sends values to the VR scene', function () {
+        $user = User::factory()->create();
+        $museum = VirtualMuseum::factory()->create();
+        VirtualMuseumObject::factory()->create([
+            'museum_id' => $museum->museum_id,
+            'situs_id' => $museum->situs_id,
+            'mesh_name' => 'Motif_Ceplok_Bunga',
+            'nilai_karakter' => [NilaiKarakter::Kreatif->value],
+        ]);
+
+        $response = $this->actingAs($user)
+            ->get(route('vr.museum', [$museum->situs_id, $museum->museum_id]));
+
+        $response->assertSuccessful();
+        expect($response->viewData('vrObjects')->firstWhere('mesh_name', 'Motif_Ceplok_Bunga')->nilai_karakter)
+            ->toBe(['kreatif']);
     });
 });

@@ -266,7 +266,7 @@ class HomeController extends Controller
         $vrObjects = VirtualMuseumObject::query()
             ->where('museum_id', $museum->museum_id)
             ->whereNotNull('mesh_name')
-            ->get(['mesh_name', 'slot_mesh_name', 'nama', 'deskripsi', 'path_audio']);
+            ->get(['mesh_name', 'slot_mesh_name', 'nama', 'deskripsi', 'nilai_karakter', 'path_audio']);
 
         MuseumUserVisit::firstOrCreate([
             'user_id' => $user->id,

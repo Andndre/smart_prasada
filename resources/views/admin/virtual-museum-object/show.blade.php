@@ -102,6 +102,18 @@
                                 </div>
                             @endif
 
+                            <!-- Nilai Karakter -->
+                            @if ($labelNilaiKarakter = \App\Enums\NilaiKarakter::labels($object->nilai_karakter))
+                                <div>
+                                    <dt class="text-sm font-medium text-gray-500">Nilai Karakter</dt>
+                                    <dd class="mt-1 flex flex-wrap gap-2">
+                                        @foreach ($labelNilaiKarakter as $label)
+                                            <span class="rounded-full bg-purple-100 px-3 py-1 text-xs font-medium text-purple-800">{{ $label }}</span>
+                                        @endforeach
+                                    </dd>
+                                </div>
+                            @endif
+
                             <!-- Virtual Living Museum -->
                             <div>
                                 <dt class="text-sm font-medium text-gray-500">Virtual Living Museum</dt>

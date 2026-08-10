@@ -440,13 +440,50 @@ class InfoPanel {
 
         ctx.font = "36px Inter, sans-serif";
         ctx.fillStyle = "#e5e7eb";
-        this.wrapText(ctx, info.deskripsi || "", 40, 180, width - 80, 50, 8);
+        // 6 baris, bukan 8 — dua baris terakhir disisihkan untuk chip nilai karakter.
+        this.wrapText(ctx, info.deskripsi || "", 40, 180, width - 80, 50, 6);
+
+        this.drawChips(ctx, info.nilai_karakter, 40, 470, width - 80);
 
         ctx.font = "28px Inter, sans-serif";
         ctx.fillStyle = "#9ca3af";
         ctx.fillText("Ketuk / tekan trigger untuk menutup", 40, height - 36);
 
         this.texture.needsUpdate = true;
+    }
+
+    /** Nilai karakter sebagai pil ungu; membungkus ke baris kedua, sisanya dipotong. */
+    drawChips(ctx, values, x, y, maxWidth) {
+        if (!Array.isArray(values) || !values.length) return;
+
+        ctx.font = "600 26px Inter, sans-serif";
+        const paddingX = 20;
+        const gap = 12;
+        const chipHeight = 44;
+        let cursorX = x;
+        let rows = 1;
+
+        for (const value of values) {
+            const label = window.nilaiKarakterLabels?.[value] ?? value;
+            const chipWidth = ctx.measureText(label).width + paddingX * 2;
+
+            if (cursorX + chipWidth > x + maxWidth) {
+                if (rows === 2) return;
+                rows++;
+                cursorX = x;
+                y += chipHeight + gap;
+            }
+
+            ctx.fillStyle = "rgba(124, 58, 237, 0.35)";
+            ctx.beginPath();
+            ctx.roundRect(cursorX, y, chipWidth, chipHeight, chipHeight / 2);
+            ctx.fill();
+
+            ctx.fillStyle = "#ddd6fe";
+            ctx.fillText(label, cursorX + paddingX, y + 31);
+
+            cursorX += chipWidth + gap;
+        }
     }
 
     wrapText(ctx, text, x, y, maxWidth, lineHeight, maxLines) {
