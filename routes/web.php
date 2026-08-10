@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\ChunkUploadController;
 use App\Http\Controllers\Admin\PanoramaController;
+use App\Http\Controllers\Admin\PertanyaanRefleksiController;
 use App\Http\Controllers\Admin\VideoPeninggalanController;
 use App\Http\Controllers\AsetHotspotController;
 use App\Http\Controllers\HomeController;
@@ -10,6 +11,7 @@ use App\Http\Controllers\KritikSaranController;
 use App\Http\Controllers\LanguageController;
 use App\Http\Controllers\LaporanPeninggalanController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\RefleksiController;
 use App\Http\Controllers\VrEventController;
 use Illuminate\Support\Facades\Route;
 
@@ -81,6 +83,14 @@ Route::middleware('ar.token')->get('/situs/{situs_id}/vr/{museum_id}', [HomeCont
 // halaman VR dibuka, jadi cukup 'auth' di sini.
 Route::middleware('auth')->post('/vr/events', [VrEventController::class, 'store'])->name('vr.events.store');
 
+// Modul refleksi — di layar biasa setelah sesi VR, bukan di dalamnya (blueprint hal. 11).
+// Tidak dikunci di balik penyelesaian sesi VR: konsisten dengan fase yang memandu, bukan mengunci.
+Route::middleware('auth')->group(function () {
+    Route::get('/refleksi/selesai', [RefleksiController::class, 'selesai'])->name('refleksi.selesai');
+    Route::get('/refleksi/{museum_id}', [RefleksiController::class, 'show'])->name('refleksi.show');
+    Route::post('/refleksi/{museum_id}', [RefleksiController::class, 'store'])->name('refleksi.store');
+});
+
 // Public 360 Panorama Viewer routes (no auth required)
 Route::get('/panorama/{situsId}', [HomeController::class, 'panoramaViewer'])->name('panorama.viewer');
 Route::get('/api/panorama/{situsId}', [PanoramaController::class, 'viewer'])->name('api.panorama.viewer');
@@ -148,6 +158,13 @@ Route::group(['middleware' => ['auth', 'admin']], function () {
     Route::put('/admin/virtual-living-museum/{museum_id}', [AdminController::class, 'updateVirtualMuseum'])->name('admin.virtual-museum.update');
     Route::delete('/admin/virtual-living-museum/{museum_id}', [AdminController::class, 'destroyVirtualMuseum'])->name('admin.virtual-museum.destroy');
     Route::get('/admin/vr-events/export', [VrEventController::class, 'export'])->name('admin.vr-events.export');
+    Route::get('/admin/refleksi/export', [RefleksiController::class, 'export'])->name('admin.refleksi.export');
+    Route::get('/admin/virtual-museum/{museum_id}/refleksi', [PertanyaanRefleksiController::class, 'index'])->name('admin.pertanyaan-refleksi');
+    Route::get('/admin/virtual-museum/{museum_id}/refleksi/create', [PertanyaanRefleksiController::class, 'create'])->name('admin.pertanyaan-refleksi.create');
+    Route::post('/admin/virtual-museum/{museum_id}/refleksi', [PertanyaanRefleksiController::class, 'store'])->name('admin.pertanyaan-refleksi.store');
+    Route::get('/admin/refleksi/{pertanyaan_id}/edit', [PertanyaanRefleksiController::class, 'edit'])->name('admin.pertanyaan-refleksi.edit');
+    Route::put('/admin/refleksi/{pertanyaan_id}', [PertanyaanRefleksiController::class, 'update'])->name('admin.pertanyaan-refleksi.update');
+    Route::delete('/admin/refleksi/{pertanyaan_id}', [PertanyaanRefleksiController::class, 'destroy'])->name('admin.pertanyaan-refleksi.destroy');
     Route::get('/admin/virtual-museum/{museum_id}/editor', [AdminController::class, 'editorVirtualMuseum'])->name('admin.virtual-museum.editor');
     Route::post('/admin/virtual-museum/{museum_id}/editor/objects', [AdminController::class, 'editorSaveObject'])->name('admin.virtual-museum.editor.save');
 

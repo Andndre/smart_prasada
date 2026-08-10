@@ -253,6 +253,52 @@ disunting — dan hard-refresh di browser Quest bukan hal sepele saat responden 
 antre. Modul murni berikutnya ikuti pola yang sama: satu entri importmap, satu bare
 specifier.
 
+### Modul refleksi (`pertanyaan_refleksi` / `jawaban_refleksi`)
+
+Modul kelima blueprint (hal. 11), dijalankan di layar biasa setelah sesi VR.
+
+Skema pretest/posttest **sengaja tidak dipakai ulang** — ia punya `jawaban_benar`
+yang selamanya kosong di sini dan akan mengundang salah tafsir bahwa refleksi adalah
+kuis bernilai. Yang dipakai ulang hanya konvensinya (PK kustom, cascade, penamaan).
+
+`nilai_karakter` di sini **string tunggal**, sementara di `virtual_museum_object` ia
+array JSON. Disengaja: satu objek membawa beberapa nilai, satu pertanyaan menggali
+tepat satu nilai supaya jawabannya bisa dianalisis per nilai. Alasannya juga ditulis
+di migration-nya.
+
+Penyambungan ke data VR lewat `kode_responden` (utama) dan `sesi_id` (nullable,
+tepat). `sesi_id` hanya tersedia saat refleksi dibuka dari perangkat yang sama dengan
+sesi VR — jalur HP, lewat tombol "Lanjut ke Refleksi" di panel penutup sesi. Perlu
+karena tiap responden mengikuti 2 kegiatan dan `kode_responden` saja akan melebur
+keduanya.
+
+Museum tanpa pertanyaan menampilkan penjelasan, bukan halaman kosong — kelas kegagalan
+yang sama dengan "scene tanpa slot" di Fase 3. Batas jawaban 2000 karakter,
+divalidasi di server, bukan hanya `maxlength` di form.
+
+Setelah simpan: halaman terima kasih netral, bukan daftar materi. Di mode kiosk semua
+responden berbagi satu akun, jadi daftar materi akan membocorkan progres akun bersama
+itu ke setiap siswa. Jangan merantainya ke post-test — langkah berikutnya milik
+fasilitator.
+
+Ekspor di `RefleksiController::export()`, bukan menumpang `VrEventController`.
+
+### Jalur keluar sesi VR
+
+Sebelum Fase 4, jalur HP **tidak punya jalan keluar sama sekali**: tombol masuk
+dihapus, fullscreen tidak pernah dilepas, dan render loop stereo berjalan selamanya.
+Sekarang ada tombol "✕ Selesai" di kiri atas (bukan tengah, supaya tidak jatuh di
+jahitan dua mata) yang membatalkan RAF, keluar fullscreen, mengembalikan render mono,
+lalu memunculkan `showPostSessionPanel()`.
+
+Di headset, keluar ditangani sistem; panel yang sama muncul lewat event `sessionend`
+milik `renderer.xr`.
+
+Panel itu HTML biasa dan itu benar: **mode stereo HP bukan sesi WebXR**, hanya halaman
+dengan kanvas terbagi dua, jadi DOM tetap terlihat. Aturan "DOM tidak dirender" hanya
+berlaku untuk `immersive-vr`. Panel dibangun di JS, bukan blade, karena `sesi_id` lahir
+dari `crypto.randomUUID()` di klien.
+
 ### Runtime event logging (`vr_event`)
 
 Wajib per proposal hal. 22, sumber bukti luaran wajib #1. Satu tabel `vr_event`, jenis

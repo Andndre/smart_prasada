@@ -220,7 +220,7 @@ tim sebelum produksi bisa dipesan.
 | 1 | **Fase 2** — Pemetaan nilai karakter | Murah, satu commit, membuka Fase 2b dan Fase 4 |
 | 2 | ~~**Fase 5** — Runtime event logging~~ *selesai* | Luaran wajib #1 butuh data uji; harus terpasang sebelum uji apa pun dijalankan |
 | 3 | ~~**Fase 3** — State machine 4 fase~~ *selesai* | Alur wajib hal. 22 |
-| 4 | **Fase 4** — Modul refleksi | Modul ke-5 blueprint |
+| 4 | ~~**Fase 4** — Modul refleksi~~ *selesai* | Modul ke-5 blueprint |
 | 5 | **Fase 6** — Capability gating & mode kiosk | Wajib untuk "tanpa intervensi pengembang" |
 | 6 | **Fase 2b** — Pengisian konten museum uji | Menunggu aset dari jalur paralel |
 | 7 | **Fase 1** — Pembersihan fitur mati | Tidak menghasilkan bukti TKT; kerapian saja |
@@ -308,11 +308,22 @@ bunga dari sudut alas dan menambah empat penanda `Slot_`, sesuai
 `dilewati_tanpa_slot` — jaring pengamannya berfungsi, tapi itu bukan kondisi yang
 diinginkan.
 
-### Fase 4 — Modul refleksi
+### Fase 4 — Modul refleksi *(selesai)*
 
-- Dijalankan di layar biasa setelah sesi VR, bukan di dalam VR.
-- Pertanyaan reflektif terkait nilai karakter dari Fase 2.
-- Pertimbangkan memakai ulang pola skema pertanyaan pretest/posttest.
+Modul kelima blueprint. Dua tabel baru (`pertanyaan_refleksi`, `jawaban_refleksi`),
+CRUD admin penuh sehingga tim materi bisa mengarang pertanyaan tanpa lewat
+pengembang, halaman siswa di layar biasa, dan ekspor CSV. Rincian di CLAUDE.md.
+
+Skema pretest tidak dipakai ulang — kolom `jawaban_benar` yang selamanya kosong akan
+mengundang salah tafsir bahwa refleksi adalah kuis bernilai.
+
+Sekalian diperbaiki: jalur stereo HP sebelumnya **tidak punya jalan keluar sama
+sekali**. Sekarang ada tombol selesai yang menutup sesi dengan benar dan mengantarkan
+ke modul refleksi.
+
+Pertanyaan untuk museum uji belum disusun — menunggu daftar nilai karakter dari
+Pardi dkk. (2017). Sampai itu ada, halaman refleksi menjelaskan keadaannya, bukan
+menampilkan halaman kosong.
 
 ### Fase 6 — Capability gating & mode kiosk
 

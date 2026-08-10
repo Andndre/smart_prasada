@@ -815,10 +815,53 @@ async function startHeadsetSession(renderer, scene, camera, rig, teleport) {
         rig.add(grip);
     }
 
+    // Di headset, keluar dari sesi ditangani sistem (tombol Meta / VRButton), jadi yang
+    // perlu kita lakukan hanya menyambut siswa kembali ke layar dengan jalan ke refleksi.
+    renderer.xr.addEventListener("sessionend", () => {
+        teleport.logger?.log("sesi_selesai");
+        teleport.logger?.flush();
+        showPostSessionPanel(teleport.logger);
+    });
+
     renderer.setAnimationLoop(() => {
         teleport.update();
         renderer.render(scene, camera);
     });
+}
+
+/**
+ * Panel penutup sesi: jalan keluar dari VR menuju modul refleksi.
+ *
+ * HTML biasa, dan itu benar di sini — mode stereo HP bukan sesi WebXR, hanya halaman
+ * dengan kanvas terbagi dua, jadi DOM tetap terlihat. (Di headset panel ini baru muncul
+ * setelah sesi immersive berakhir, jadi DOM juga sudah kembali terlihat.)
+ *
+ * Dibangun di JS, bukan dirender blade, karena sesi_id lahir dari crypto.randomUUID()
+ * di klien saat scene siap — blade tidak mungkin tahu nilainya.
+ */
+function showPostSessionPanel(logger) {
+    if (document.getElementById("panel-selesai")) return;
+
+    const tujuan = new URL(refleksiUrl, location.origin);
+    tujuan.searchParams.set("sesi", logger.sesiId);
+    if (logger.kodeResponden) tujuan.searchParams.set("kode", logger.kodeResponden);
+
+    const panel = document.createElement("div");
+    panel.id = "panel-selesai";
+    panel.style.cssText =
+        "position:fixed;inset:0;z-index:10000002;display:flex;flex-direction:column;" +
+        "align-items:center;justify-content:center;gap:16px;background:rgba(17,24,39,.95);" +
+        "color:#fff;font:16px Inter,sans-serif;text-align:center;padding:24px";
+    panel.innerHTML =
+        '<p style="font-size:20px;font-weight:600;margin:0">Sesi VR selesai</p>' +
+        '<p style="margin:0;opacity:.8;max-width:32ch">Lanjutkan dengan menuliskan refleksimu.</p>' +
+        `<a href="${tujuan}" style="background:#7c3aed;color:#fff;padding:14px 28px;` +
+        'border-radius:9999px;font-weight:600;text-decoration:none">Lanjut ke Refleksi</a>' +
+        '<button type="button" id="btn-lanjut-jelajah" style="background:none;border:none;' +
+        'color:#c4b5fd;text-decoration:underline;font:inherit;cursor:pointer">Kembali menjelajah</button>';
+    document.body.appendChild(panel);
+
+    panel.querySelector("#btn-lanjut-jelajah").addEventListener("click", () => panel.remove());
 }
 
 function showTeleportHint() {
@@ -853,16 +896,41 @@ async function startPhoneStereoSession(renderer, scene, camera, teleport) {
         renderer.domElement.addEventListener("pointerup", () => teleport.trigger());
         showTeleportHint();
 
+        // Jalur keluar. Sebelumnya tidak ada sama sekali: tombol masuk dihapus, fullscreen
+        // tidak pernah dilepas, dan render loop stereo berjalan selamanya — siswa harus
+        // keluar fullscreen sendiri sambil kanvas terbelah tetap merender di belakang.
+        // Diletakkan di kiri atas, bukan tengah, supaya tidak jatuh di jahitan dua mata.
+        const keluar = document.createElement("button");
+        keluar.textContent = "✕ Selesai";
+        keluar.style.cssText =
+            "position:fixed;top:12px;left:12px;z-index:10000002;background:rgba(0,0,0,.6);" +
+            "color:#fff;border:1px solid rgba(255,255,255,.4);border-radius:9999px;" +
+            "padding:8px 16px;font:600 13px Inter,sans-serif;cursor:pointer";
+        document.body.appendChild(keluar);
+
+        let frameId = null;
         function render() {
             controls.update();
             teleport.update();
             effect.render(scene, camera);
-            requestAnimationFrame(render);
+            frameId = requestAnimationFrame(render);
         }
         render();
 
-        window.addEventListener("resize", () => {
-            effect.setSize(window.innerWidth, window.innerHeight);
+        const ubahUkuran = () => effect.setSize(window.innerWidth, window.innerHeight);
+        window.addEventListener("resize", ubahUkuran);
+
+        keluar.addEventListener("click", () => {
+            cancelAnimationFrame(frameId);
+            window.removeEventListener("resize", ubahUkuran);
+            document.exitFullscreen?.().catch(() => {});
+            keluar.remove();
+            // Kembalikan render mono supaya kanvas tidak tertinggal terbelah dua.
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.render(scene, camera);
+            teleport.logger?.log("sesi_selesai");
+            teleport.logger?.flush();
+            showPostSessionPanel(teleport.logger);
         });
     });
 }

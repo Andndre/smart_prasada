@@ -84,6 +84,7 @@
         var nilaiKarakterLabels = @json(\App\Enums\NilaiKarakter::options());
         var vrEventsUrl = @json(route('vr.events.store'));
         var csrfToken = @json(csrf_token());
+        var refleksiUrl = @json(route('refleksi.show', $museum->museum_id));
     </script>
 
     <div class="pointer-events-none fixed inset-x-0 top-0 z-[10000000]">
