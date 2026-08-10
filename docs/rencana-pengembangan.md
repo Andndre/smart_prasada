@@ -218,7 +218,7 @@ tim sebelum produksi bisa dipesan.
 | Urutan | Fase | Alasan posisi |
 |---|---|---|
 | 1 | **Fase 2** — Pemetaan nilai karakter | Murah, satu commit, membuka Fase 2b dan Fase 4 |
-| 2 | **Fase 5** — Runtime event logging | Luaran wajib #1 butuh data uji; harus terpasang sebelum uji apa pun dijalankan |
+| 2 | ~~**Fase 5** — Runtime event logging~~ *selesai* | Luaran wajib #1 butuh data uji; harus terpasang sebelum uji apa pun dijalankan |
 | 3 | **Fase 3** — State machine 4 fase | Alur wajib hal. 22 |
 | 4 | **Fase 4** — Modul refleksi | Modul ke-5 blueprint |
 | 5 | **Fase 6** — Capability gating & mode kiosk | Wajib untuk "tanpa intervensi pengembang" |
@@ -266,17 +266,31 @@ prasejarah tulen (megalitikum), nilai karakternya sudah diteliti ketua peneliti
 sendiri (Pardi 2017), dan sudah ada sketsa GLB plus daftar objek sebagai titik
 mulai.
 
-### Fase 5 — Runtime event logging
+### Fase 5 — Runtime event logging *(selesai)*
 
-Wajib hal. 22, sumber bukti luaran wajib #1.
+Wajib hal. 22, sumber bukti luaran wajib #1. Rincian teknis di CLAUDE.md.
 
-- Tabel event terpisah. Jangan menumpang `log_aktivitas` yang berbasis teks bebas
-  dan hanya mencatat event masuk.
-- Event minimal: masuk sesi, transisi fase, objek dilihat, panel info dibuka,
-  objek digenggam, puzzle terpasang benar, keluar sesi — dengan timestamp.
-- Dikirim dari scene secara batch, bukan satu request per event.
-- Metrik sasaran: time-on-task, jumlah percobaan, durasi per fase.
-- Harus bisa diekspor untuk tim peneliti.
+Tabel `vr_event` tunggal, `App\Enums\JenisEventVr`, waktu diukur klien sebagai
+`offset_ms`, dikirim batch lewat `sendBeacon`, ekspor CSV baris mentah di
+`GET /admin/vr-events/export`.
+
+Sepuluh jenis event terpasang; `FaseBerubah` menunggu Fase 3.
+
+`kode_responden` diisi klien dari query string `?kode=`. Fase 6 harus memastikan
+tautan/QR yang dipakai fasilitator membawa parameter itu, kalau tidak seluruh data
+uji lapangan jadi anonim dan tidak bisa disilangkan dengan angket maupun pretest.
+
+Jalur pengantarnya sempat putus: `ArTokenAuth` me-redirect ke `url()->current()`,
+yang di Laravel hanya mengembalikan path sehingga seluruh query ikut terbuang saat
+token ditukar sesi. Sudah diperbaiki — arToken dibuang, parameter lain dipertahankan
+— dan dijaga `tests/Feature/Vr/ArTokenHandoffTest.php`. Tidak terdeteksi lebih awal
+karena di lokal kita sudah login, jadi tidak ada redirect sama sekali: jalan di dev,
+gagal di lapangan.
+
+**Catatan untuk kelak, belum dikerjakan:** `kode_responden` masuk CSV yang dibuka tim
+peneliti di Excel. Nilai yang diawali `=` `+` `-` `@` ditafsirkan Excel sebagai rumus.
+Risiko sekarang rendah karena kode berasal dari QR yang kita buat sendiri, tapi kalau
+fasilitator mulai mengetik kode manual, saring karakter pembuka itu di `VrEventController::export()`.
 
 ### Fase 3 — State machine 4 fase
 

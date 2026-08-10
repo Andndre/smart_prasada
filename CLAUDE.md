@@ -218,6 +218,36 @@ di-inject di `guest/vr/museum.blade.php`, supaya enum tetap satu-satunya sumber 
 Karena chip butuh ruang, `wrapText` deskripsi turun dari 8 ke 6 baris. Kalau daftar nilai
 final jauh lebih panjang, batasi tampilan ke 3 nilai teratas per objek.
 
+### Runtime event logging (`vr_event`)
+
+Wajib per proposal hal. 22, sumber bukti luaran wajib #1. Satu tabel `vr_event`, jenis
+event dikunci `App\Enums\JenisEventVr`. Sengaja tidak ada tabel sesi terpisah — semua
+metrik sesi bisa diturunkan dari baris event, dan sesi yang mati mendadak terbaca dari
+tidak adanya event `SesiSelesai`.
+
+Dua hal yang **jangan diubah tanpa membaca alasannya**:
+
+- **`offset_ms`, bukan timestamp server.** Event dikirim batch, jadi `created_at` server
+  akan memberi waktu identik untuk semua event dalam satu batch dan menghancurkan
+  time-on-task. Klien mengukurnya dengan `performance.now()` yang monoton — koreksi jam
+  NTP di tengah sesi tidak bisa menghasilkan durasi negatif.
+- **`kode_responden`.** Mode kiosk (Fase 6) membuat ratusan responden masuk lewat satu
+  akun, jadi `user_id` berhenti membedakan siapa pun. Tanpa kolom ini data sesi tidak
+  bisa disilangkan dengan angket dan pretest, dan itu tidak bisa direkonstruksi setelah
+  responden pulang. Diisi dari query string `?kode=` saat sesi dimulai.
+
+Pengiriman lewat `navigator.sendBeacon()` — `fetch()` biasa dibatalkan browser saat
+halaman ditutup, justru saat event penutup sesi paling dibutuhkan. `sendBeacon` tidak
+bisa menyetel header, jadi token CSRF ikut di body sebagai `_token`; Laravel memeriksa
+keduanya, tidak ada rute yang dikecualikan dari CSRF.
+
+`EventLogger` di `vr-museum.js` menyangga dan mengirim tiap 15 detik / 20 event / saat
+`pagehide`. `JenisEventVr::FaseBerubah` sudah didefinisikan tapi belum dipanggil —
+Fase 3 (state machine) tinggal memakainya tanpa migrasi baru.
+
+Ekspor: `GET /admin/vr-events/export`, CSV stream baris mentah. Kolom `perangkat`
+diresolusi sekali per sesi dari detail `SesiMulai` lalu diisi ke setiap baris.
+
 ### Penyimpangan spesifikasi yang disengaja: physics simulation
 
 Proposal hal. 22 menyebut "real-time 3D engine yang mendukung scene rendering, *physics

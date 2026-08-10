@@ -53,7 +53,15 @@ class ArTokenAuth
                 'arToken' => $arToken,
             ]);
 
-            return redirect()->to(url()->current());
+            // url()->current() hanya mengembalikan path — query string ikut terbuang.
+            // Handoff lewat QR membawa parameter lain di query (kode responden, dan apa
+            // pun yang ditambahkan kelak); tanpa disusun ulang, semuanya tertelan diam-diam
+            // saat token ditukar sesi. Buang arToken-nya saja, pertahankan sisanya.
+            $query = $request->except('arToken');
+
+            return redirect()->to(
+                url()->current().($query ? '?'.http_build_query($query) : '')
+            );
         } catch (Exception $e) {
             Log::error('AR Token validation failed: '.$e->getMessage(), [
                 'exception' => get_class($e),

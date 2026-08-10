@@ -62,6 +62,67 @@ function showElement(id) {
     el.style.pointerEvents = "auto";
 }
 
+/**
+ * Buffers runtime events and ships them in batches.
+ *
+ * Timing comes from performance.now(), not the wall clock and not the server: events
+ * are sent in batches, so a server timestamp would stamp a whole batch with the same
+ * instant and destroy time-on-task. performance.now() is also monotonic, so an NTP
+ * correction mid-session can't produce a negative duration.
+ */
+class EventLogger {
+    static FLUSH_INTERVAL_MS = 15000;
+    static FLUSH_SIZE = 20;
+
+    constructor({ url, token, museumId, kodeResponden }) {
+        this.url = url;
+        this.token = token;
+        this.museumId = museumId;
+        this.kodeResponden = kodeResponden || null;
+        this.sesiId = crypto.randomUUID();
+        this.startedAt = performance.now();
+        this.buffer = [];
+
+        setInterval(() => this.flush(), EventLogger.FLUSH_INTERVAL_MS);
+
+        // pagehide, not unload: a plain fetch() gets cancelled when the page goes away,
+        // which would drop the session-closing events exactly when they matter most.
+        window.addEventListener("pagehide", () => {
+            this.log("sesi_selesai");
+            this.flush();
+        });
+    }
+
+    log(jenis, meshName = null, detail = null) {
+        this.buffer.push({
+            jenis,
+            mesh_name: meshName,
+            detail,
+            offset_ms: Math.round(performance.now() - this.startedAt),
+        });
+        if (this.buffer.length >= EventLogger.FLUSH_SIZE) this.flush();
+    }
+
+    flush() {
+        if (!this.buffer.length) return;
+        const events = this.buffer.splice(0, EventLogger.FLUSH_SIZE * 10);
+        const payload = JSON.stringify({
+            _token: this.token,
+            sesi_id: this.sesiId,
+            museum_id: this.museumId,
+            kode_responden: this.kodeResponden,
+            events,
+        });
+
+        // sendBeacon survives page teardown, but cannot set headers — hence _token in
+        // the body, which Laravel checks just like the header. No CSRF exemption needed.
+        navigator.sendBeacon(
+            this.url,
+            new Blob([payload], { type: "application/json" }),
+        );
+    }
+}
+
 /** Short vibration on the controller that triggered the action; no-op without haptics. */
 function pulse(controller, intensity, milliseconds) {
     controller?.userData.gamepad?.hapticActuators?.[0]?.pulse(intensity, milliseconds);
@@ -139,6 +200,8 @@ class TeleportControls {
     static UP = new THREE.Vector3(0, 1, 0);
     static tempMatrix = new THREE.Matrix4();
     static tempVector = new THREE.Vector3();
+    /** Gaze must rest this long before it counts as looking at something, not sweeping past. */
+    static GAZE_DWELL_MS = 500;
     static outlineMaterial = new THREE.MeshBasicMaterial({
         color: 0xfbbf24,
         side: THREE.BackSide,
@@ -159,6 +222,11 @@ class TeleportControls {
         this.solvedCount = 0;
         this.interactiveMeshes = [];
         this.outlinedNode = null;
+        this.logger = null;
+        this.gazeNode = null;
+        this.gazeSince = 0;
+        this.gazeLogged = false;
+        this.panelDibukaUntuk = null;
 
         this.reticle = new THREE.Mesh(
             new THREE.RingGeometry(0.15, 0.25, 32).rotateX(-Math.PI / 2),
@@ -214,6 +282,7 @@ class TeleportControls {
 
         this.setOutline(this.hoverInfo ? this.hoverNode : null);
         this.cursor.material.color.setHex(this.hoverInfo ? 0xfbbf24 : 0xffffff);
+        this.trackGaze();
 
         if (this.hoverInfo) {
             this.reticle.visible = false;
@@ -235,6 +304,23 @@ class TeleportControls {
             this.reticle.position.copy(hit.point);
             this.reticle.position.y += 0.01;
             this.reticle.scale.setScalar(Math.max(1, hit.distance / 6));
+        }
+    }
+
+    /** Log an object as "looked at" once the gaze has rested on it, not every frame. */
+    trackGaze() {
+        if (this.hoverNode !== this.gazeNode) {
+            this.gazeNode = this.hoverNode;
+            this.gazeSince = performance.now();
+            this.gazeLogged = false;
+        }
+        if (
+            !this.gazeLogged &&
+            this.hoverInfo &&
+            performance.now() - this.gazeSince >= TeleportControls.GAZE_DWELL_MS
+        ) {
+            this.gazeLogged = true;
+            this.logger?.log("objek_dilihat", this.hoverNode.name);
         }
     }
 
@@ -307,6 +393,7 @@ class TeleportControls {
         controller.userData.grabbedParent = this.hoverNode.parent;
         controller.attach(this.hoverNode);
         pulse(controller, 0.4, 40);
+        this.logger?.log("objek_digenggam", this.hoverNode.name);
     }
 
     grabEnd(controller) {
@@ -315,18 +402,21 @@ class TeleportControls {
         controller.userData.grabbedParent.attach(node);
         controller.userData.grabbedNode = null;
         controller.userData.grabbedParent = null;
-        this.checkSlot(node, controller);
+        // A release that misses the slot is one failed attempt — that's the "jumlah
+        // percobaan" metric, so the outcome has to ride along with the event.
+        const berhasil = this.checkSlot(node, controller);
+        this.logger?.log("objek_dilepas", node.name, { berhasil });
     }
 
     /** Puzzle: released piece within reach of its slot snaps in place and counts as solved. */
     checkSlot(node, controller) {
         const slot = this.slots.get(node.userData.vrObject?.slot_mesh_name);
-        if (!slot || node.userData.solved) return;
+        if (!slot || node.userData.solved) return false;
 
         const nodePos = node.getWorldPosition(new THREE.Vector3());
         const slotPos = slot.getWorldPosition(new THREE.Vector3());
         // ponytail: 0.5m snap radius, single knob; make per-object if pieces vary wildly in size.
-        if (nodePos.distanceTo(slotPos) > 0.5) return;
+        if (nodePos.distanceTo(slotPos) > 0.5) return false;
 
         slot.parent.attach(node);
         node.position.copy(slot.position);
@@ -334,6 +424,7 @@ class TeleportControls {
         node.userData.solved = true;
         this.solvedCount++;
         pulse(controller, 1, 120);
+        this.logger?.log("puzzle_benar", node.name, { urutan: this.solvedCount });
 
         const done = this.solvedCount >= this.slots.size;
         this.panel?.show({
@@ -342,16 +433,26 @@ class TeleportControls {
                 ? "Semua objek sudah kembali ke tempat yang benar. Kerja bagus!"
                 : `${node.userData.vrObject.nama} sudah di tempat yang benar. (${this.solvedCount}/${this.slots.size})`,
         }, slotPos);
+
+        return true;
     }
 
     /** Single entry point for trigger/tap: close panel > open panel > teleport. */
     trigger() {
         if (this.panel?.mesh.visible) {
             this.panel.hide();
+            // Only pair a close with an open the student actually made — the puzzle
+            // success panel opens by itself and would otherwise skew reading time.
+            if (this.panelDibukaUntuk) {
+                this.logger?.log("panel_ditutup", this.panelDibukaUntuk);
+                this.panelDibukaUntuk = null;
+            }
             return;
         }
         if (this.hoverInfo && this.hoverPoint) {
             this.panel?.show(this.hoverInfo, this.hoverPoint);
+            this.panelDibukaUntuk = this.hoverNode.name;
+            this.logger?.log("panel_dibuka", this.panelDibukaUntuk);
             return;
         }
         this.teleport();
@@ -363,6 +464,12 @@ class TeleportControls {
         this.rig.position.x += this.reticle.position.x - cameraWorld.x;
         this.rig.position.z += this.reticle.position.z - cameraWorld.z;
         this.rig.position.y = this.reticle.position.y - 0.01;
+        // Destination is logged too: hal. 19 wants evidence on navigation stability,
+        // and where students actually go is that evidence.
+        this.logger?.log("teleport", null, {
+            x: Math.round(this.reticle.position.x * 100) / 100,
+            z: Math.round(this.reticle.position.z * 100) / 100,
+        });
     }
 }
 
@@ -736,6 +843,18 @@ async function main() {
 
     const headsetSupported = "xr" in navigator &&
         (await navigator.xr.isSessionSupported("immersive-vr").catch(() => false));
+
+    teleport.logger = new EventLogger({
+        url: vrEventsUrl,
+        token: csrfToken,
+        museumId: museum.museum_id,
+        kodeResponden: new URLSearchParams(location.search).get("kode"),
+    });
+    teleport.logger.log("sesi_mulai", null, {
+        perangkat: headsetSupported ? "headset" : "hp",
+        objek_interaktif: teleport.interactiveMeshes.length,
+        slot: teleport.slots.size,
+    });
 
     if (headsetSupported) {
         await startHeadsetSession(renderer, scene, camera, rig, teleport);

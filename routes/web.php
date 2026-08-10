@@ -10,6 +10,7 @@ use App\Http\Controllers\KritikSaranController;
 use App\Http\Controllers\LanguageController;
 use App\Http\Controllers\LaporanPeninggalanController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\VrEventController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -75,6 +76,10 @@ Route::group(['middleware' => ['auth', 'user']], function () {
 
 // VR routes - Using token-based authentication (cross-device handoff via QR)
 Route::middleware('ar.token')->get('/situs/{situs_id}/vr/{museum_id}', [HomeController::class, 'vrMuseum'])->name('vr.museum');
+
+// Runtime event batches dari dalam scene VR. Sesi login sudah dibuat ar.token saat
+// halaman VR dibuka, jadi cukup 'auth' di sini.
+Route::middleware('auth')->post('/vr/events', [VrEventController::class, 'store'])->name('vr.events.store');
 
 // Public 360 Panorama Viewer routes (no auth required)
 Route::get('/panorama/{situsId}', [HomeController::class, 'panoramaViewer'])->name('panorama.viewer');
@@ -142,6 +147,7 @@ Route::group(['middleware' => ['auth', 'admin']], function () {
     Route::get('/admin/virtual-living-museum/{museum_id}/edit', [AdminController::class, 'editVirtualMuseum'])->name('admin.virtual-museum.edit');
     Route::put('/admin/virtual-living-museum/{museum_id}', [AdminController::class, 'updateVirtualMuseum'])->name('admin.virtual-museum.update');
     Route::delete('/admin/virtual-living-museum/{museum_id}', [AdminController::class, 'destroyVirtualMuseum'])->name('admin.virtual-museum.destroy');
+    Route::get('/admin/vr-events/export', [VrEventController::class, 'export'])->name('admin.vr-events.export');
     Route::get('/admin/virtual-museum/{museum_id}/editor', [AdminController::class, 'editorVirtualMuseum'])->name('admin.virtual-museum.editor');
     Route::post('/admin/virtual-museum/{museum_id}/editor/objects', [AdminController::class, 'editorSaveObject'])->name('admin.virtual-museum.editor.save');
 
