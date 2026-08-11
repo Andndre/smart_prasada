@@ -122,36 +122,44 @@ Aturan:
 5. Sertakan **daftar nama node final dalam bentuk teks** bersama file GLB
    (perbarui `daftar-objek.txt`). Admin akan mengetik ulang dari daftar itu.
 
-### Mesh penanda slot (untuk aktivitas pemasangan objek)
+### Aktivitas pemasangan objek — kirim model UTUH
 
-Ini yang **hilang total** dari aset sekarang, dan sebabnya fitur manipulasi objek
-belum pernah bisa dijalankan.
+Aturannya satu kalimat: **model selalu diserahkan dalam keadaan sudah terpasang.**
 
-Untuk setiap objek yang akan dipasang kembali oleh siswa, buat **dua** node:
+Jangan melepas apa pun. Jangan membuat mesh penanda slot. Punden dipahat lengkap
+dengan motif masih menempel di sudut alasnya, seperti aslinya di lapangan.
 
-| Node | Isi | Contoh nama |
-|---|---|---|
-| Objek yang dipegang | Geometri asli, diletakkan **terlepas** dari posisi seharusnya | `Motif_Ceplok_Bunga_A` |
-| Penanda slot | Geometri sangat sederhana (kubus kecil / plane), diletakkan **tepat di posisi dan rotasi yang benar** | `Slot_Motif_Ceplok_Bunga_A` |
+Editor visual yang melepas potongan saat runtime, dan posisi lepasnya ditetapkan
+admin dengan menyeret panah di kanvas editor. Tempat kembalinya adalah posisi asli
+objek itu di model — tidak perlu disimpan, tidak perlu ditandai, tidak bisa
+meleset. Rotasinya juga mengikuti rotasi asli.
 
-Catatan penting:
+Konsekuensinya untuk pemodel: satu aset melayani tampilan utuh **sekaligus**
+aktivitas puzzle, dan koreksi posisi tidak lagi berarti ekspor ulang.
 
-- Penanda slot **otomatis disembunyikan** aplikasi saat scene dimuat dan tidak
-  bisa disentuh. Ia murni titik acuan koordinat — bentuknya tidak akan terlihat
-  siapa pun, jadi buat sesederhana mungkin.
-- Rotasi penanda slot ikut dipakai. Objek yang terpasang akan mengambil posisi
-  **dan** rotasi penanda, jadi orientasi penanda harus benar.
-- Toleransi pemasangan **0,5 meter**. Objek yang dilepas dalam radius itu akan
-  terkunci ke slot. Karena itu jangan menempatkan dua slot lebih dekat dari 1 m
-  satu sama lain — siswa akan kesulitan membedakan.
-- Objek yang dipegang harus diletakkan cukup jauh dari slotnya (≥ 1,5 m) agar
-  tidak langsung terpasang begitu disentuh, tapi masih dalam jangkauan berjalan.
+Yang **tetap wajib** dan tidak bisa dipindahkan ke editor:
+
+- **Pemisahan node.** Tiap objek yang akan dilepas harus jadi objek tersendiri di
+  Blender. Editor tidak bisa memecah mesh yang sudah menyatu. Kalau empat motif
+  ceplok bunga tergabung dalam satu mesh alas, aktivitasnya mustahil.
+- Semua aturan penamaan di atas — sambungan tetap lewat nama node.
+
+Angka yang masih berlaku:
+
+- Toleransi pemasangan **0,5 meter**. Jangan menempatkan dua objek yang bisa
+  dilepas lebih dekat dari 1 m satu sama lain — siswa akan kesulitan membedakan.
+- Objek yang bisa dilepas harus punya lantai yang bisa dipijak di sekitarnya
+  dalam radius berjalan, karena siswa harus teleport mendekat untuk
+  menggenggamnya.
 
 **Usulan aktivitas untuk situs ini** (perlu persetujuan tim materi): empat motif
 ceplok bunga di sudut alas punden dilepas dan diletakkan tersebar di pelataran.
 Siswa mengamati pola sudut, lalu mengembalikan tiap motif ke sudut yang benar.
 Aktivitas ini menuntut pengamatan terarah, bukan sekadar melihat — sesuai
 kebaruan yang diklaim proposal.
+
+Untuk pemodel, permintaannya sekarang hanya: **pastikan keempat motif itu objek
+terpisah**, dan biarkan di tempatnya.
 
 ## 5. Lingkungan situs
 
@@ -199,8 +207,7 @@ Yang diminta:
   geometri ke panorama tidak terlihat memotong.
 - Vegetasi cukup *billboard* atau bidang bersilang bertekstur alpha. Jangan
   memodelkan daun satu per satu — budget segitiga di §6 mencakup lingkungan juga.
-- Lingkungan **tidak** boleh diberi nama node yang menyerupai objek interaktif, dan
-  tidak perlu penanda slot.
+- Lingkungan **tidak** boleh diberi nama node yang menyerupai objek interaktif.
 
 Kalau anggaran atau waktu memaksa memilih, prioritaskan panorama langit dan cincin
 lingkungan terdekat; latar jauh boleh menyusul.
@@ -249,15 +256,19 @@ mendengarnya lewat speaker headset di ruang kelas yang ramai.
 ## 8. Daftar objek interaktif
 
 Diambil dari `daftar-objek.txt` yang ada, ditambah kolom yang sebelumnya kosong.
-Kolom nilai karakter dan pembagian slot **perlu dikonfirmasi tim materi** sebelum
-produksi dimulai.
+Kolom nilai karakter dan pemilihan objek yang dilepas **perlu dikonfirmasi tim
+materi** sebelum produksi dimulai.
 
-| Nama node | Nama tampilan | Jenis | Slot |
-|---|---|---|---|
-| `Punden_Berundak_Utama` | Punden Berundak Utama | Informatif | — |
-| `Padma_Kurung` | Padma Kurung | Informatif | — |
-| `Area_Persembahyangan` | Area Persembahyangan | Informatif | — |
-| `Motif_Ceplok_Bunga_A` … `_D` | Motif Ceplok Bunga | Dipasang siswa | `Slot_Motif_Ceplok_Bunga_A` … `_D` |
+Kolom "Jenis" tidak mengubah apa pun yang dikerjakan pemodel — semuanya dipahat
+di tempatnya. Ia hanya memberi tahu objek mana yang nanti dijadikan potongan
+lepas lewat editor, dan karena itu **harus jadi node terpisah**.
+
+| Nama node | Nama tampilan | Jenis |
+|---|---|---|
+| `Punden_Berundak_Utama` | Punden Berundak Utama | Informatif |
+| `Padma_Kurung` | Padma Kurung | Informatif |
+| `Area_Persembahyangan` | Area Persembahyangan | Informatif |
+| `Motif_Ceplok_Bunga_A` … `_D` | Motif Ceplok Bunga | Dilepas lewat editor — wajib node terpisah |
 
 Deskripsi tiap objek sudah tersedia di `daftar-objek.txt` dan dipakai apa adanya.
 
@@ -272,9 +283,9 @@ kurang rapi.
 - [ ] Struktur utama ±4 m di arah −Z dari titik (0,0,0)
 - [ ] Semua nama node unik, tanpa sufiks `.001`
 - [ ] Nama node cocok persis dengan daftar teks yang diserahkan
-- [ ] Setiap objek yang dipasang siswa punya pasangan node `Slot_…`
-- [ ] Penanda slot berada di posisi **dan rotasi** akhir yang benar
-- [ ] Jarak antar slot ≥ 1 m; jarak objek ke slotnya ≥ 1,5 m
+- [ ] Model diserahkan **utuh** — tidak ada objek yang sengaja dilepas
+- [ ] Objek yang akan dilepas lewat editor adalah node terpisah, bukan bagian dari mesh gabungan
+- [ ] Jarak antar objek yang bisa dilepas ≥ 1 m
 - [ ] Permukaan pijak punya normal menghadap ke atas
 - [ ] Semua material Principled BSDF, tidak ada emissive terpakai
 - [ ] Tidak ada pencahayaan/bayangan/AO yang dipanggang ke base color

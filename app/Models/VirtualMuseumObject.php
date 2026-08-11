@@ -25,7 +25,8 @@ class VirtualMuseumObject extends Model
         'museum_id',
         'nama',
         'mesh_name',
-        'slot_mesh_name',
+        'posisi_awal',
+        'model_mtime',
         'gambar_real',
         'path_obj',
         'deskripsi',
@@ -37,6 +38,8 @@ class VirtualMuseumObject extends Model
         'situs_id' => 'integer',
         'museum_id' => 'integer',
         'nilai_karakter' => 'array',
+        'posisi_awal' => 'array',
+        'model_mtime' => 'integer',
     ];
 
     // Relationships

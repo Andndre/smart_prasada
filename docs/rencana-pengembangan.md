@@ -74,7 +74,7 @@ Ini temuan terpenting dari audit, dan ia menggeser prioritas seluruh rencana.
 
     virtual_museum_object  : 30 baris
     punya mesh_name        : 4
-    punya slot_mesh_name   : 0
+    punya slot_mesh_name   : 0   (kolom ini kemudian dihapus, lihat Fase 2c)
     punya path_audio       : 0
     file GLB di repo       : 1
 
@@ -106,8 +106,11 @@ scene ini (semua objek statis/informatif, bukan piece yang perlu dipasangkan)"*.
 
 Jadi 0/30 `slot_mesh_name` **bukan data yang belum diisi** — asetnya memang tidak
 dirancang untuk puzzle. Mekanik grab/snap yang sudah ditulis di
-`vr-museum.js` tidak punya konten untuk dijalankan, dan tidak akan punya sampai
-ada aset baru yang memodelkan marker slot.
+`vr-museum.js` tidak punya konten untuk dijalankan.
+
+*(Fase 2c kemudian membalik kesimpulan operasionalnya: aset tidak lagi perlu
+memodelkan marker slot sama sekali. Yang tetap benar adalah temuan intinya —
+tidak ada konten puzzle, dan objeknya harus jadi node terpisah agar bisa ada.)*
 
 Karena "manipulasi artefak" wajib per hal. 19 ("modul interaksi pengguna berbasis
 *motion controller*") dan hal. 22, ini bukan fitur opsional yang bisa
@@ -222,9 +225,10 @@ tim sebelum produksi bisa dipesan.
 | 3 | ~~**Fase 3** — State machine 4 fase~~ *selesai* | Alur wajib hal. 22 |
 | 4 | ~~**Fase 4** — Modul refleksi~~ *selesai* | Modul ke-5 blueprint |
 | 5 | ~~**Fase 6** — Capability gating & mode kiosk~~ *selesai* | Wajib untuk "tanpa intervensi pengembang" |
-| 6 | **Fase 2b** — Pengisian konten museum uji | Menunggu aset dari jalur paralel |
-| 7 | **Fase 1** — Pembersihan fitur mati | Tidak menghasilkan bukti TKT; kerapian saja |
-| 8 | **Fase 7** — Kesiapan uji TKT 5/6 | Penutup |
+| 6 | ~~**Fase 2c** — Puzzle pindah ke data editor~~ *selesai* | Menyisipkan diri sebelum Fase 2b: melepas Fase 2b dari siklus ekspor ulang Blender |
+| 7 | **Fase 2b** — Pengisian konten museum uji | Menunggu aset dari jalur paralel |
+| 8 | **Fase 1** — Pembersihan fitur mati | Tidak menghasilkan bukti TKT; kerapian saja |
+| 9 | **Fase 7** — Kesiapan uji TKT 5/6 | Penutup |
 
 ---
 
@@ -252,9 +256,10 @@ Dokumen spesifikasi untuk pemodel 3D: `docs/brief-produksi-aset.md`. Memuat:
 
 - **Konvensi penamaan mesh.** `mesh_name` harus persis sama dengan nama node di
   GLB — ini yang menyambungkan baris database ke objek 3D.
-- **Marker slot untuk puzzle.** Setiap piece butuh mesh penanda tak terlihat di
-  posisi target, namanya diisi ke `slot_mesh_name`. Inilah yang hilang dari aset
-  sekarang dan yang membuat "manipulasi artefak" mustahil.
+- **Model diserahkan utuh.** Tidak ada marker slot, tidak ada objek yang dilepas
+  di Blender — editor visual yang melepas saat runtime (lihat Fase 2c). Yang
+  tersisa sebagai syarat mengikat: objek yang akan dilepas harus jadi **node
+  terpisah**, karena editor tidak bisa memecah mesh yang sudah menyatu.
 - Skala dunia nyata, Y-up, origin di titik spawn, model 4 m di depan pengguna.
 - Draco compression, budget poligon dan tekstur untuk standalone headset.
 - Daftar objek interaktif per situs beserta nilai karakter yang melekat.
@@ -302,11 +307,11 @@ Rincian di CLAUDE.md; logika di `public/assets/js/vr-phases.js`, diuji
 fase ini. Fase yang mengunci mengubah tiap pemicu transisi jadi titik macet
 permanen, dan siswa macet memanggil fasilitator, yang dilarang kriteria TKT 6.
 
-Fase interaksi baru punya isi setelah model disunting: melepas empat motif ceplok
-bunga dari sudut alas dan menambah empat penanda `Slot_`, sesuai
-`docs/brief-produksi-aset.md` §4. Sampai itu ada, setiap sesi Quest akan mencatat
-`dilewati_tanpa_slot` — jaring pengamannya berfungsi, tapi itu bukan kondisi yang
-diinginkan.
+Fase interaksi baru punya isi setelah ada objek ber-`posisi_awal`. Sejak Fase 2c
+itu tidak lagi menuntut sunting Blender: cukup pastikan keempat motif ceplok bunga
+adalah node terpisah, lalu tetapkan posisi lepasnya di editor visual. Sampai itu
+ada, setiap sesi Quest akan mencatat `dilewati_tanpa_slot` — jaring pengamannya
+berfungsi, tapi itu bukan kondisi yang diinginkan.
 
 ### Fase 4 — Modul refleksi *(selesai)*
 
@@ -338,17 +343,38 @@ bukan sekadar terlihat.
 **Afordansi yang berbohong** — kedipan objek puzzle di HP sengaja **tidak** dimatikan:
 objeknya memang tetap interaktif di sana (nama, deskripsi, audio), dan mematikannya
 justru menyembunyikan konten yang sah. Yang ditambahkan adalah satu baris di panel
-info — "Pemasangan objek ini tersedia di headset VR" — plus deskripsi fase refleksi
-yang menyebut alasan pelewatan.
+info — "Objek ini bisa dilepas dan dipasang kembali di headset VR" — plus deskripsi
+fase refleksi yang menyebut alasan pelewatan.
 
 **Mode kiosk** — `?kiosk=1` menyembunyikan navigasi aplikasi. Perlu diingat ia
 pengurang kesasar, bukan kunci; pengamanan sebenarnya adalah akun kiosk khusus, yang
 jadi syarat operasional Fase 7.
 
+### Fase 2c — Definisi puzzle pindah dari GLB ke data editor *(selesai)*
+
+Rincian di CLAUDE.md. Alasannya kondisi lapangan: pemodel 3D-nya adalah pengembang
+sendiri, jadi setiap koreksi posisi sekecil apa pun berarti buka Blender, geser
+penanda, ekspor GLB, unggah ulang, sambungkan ulang. Ketergantungan teknis yang
+sama jenisnya dengan yang dihindari di tempat lain, hanya di sisi penyusun konten.
+
+`slot_mesh_name` diganti `posisi_awal` — dihapus, tidak dibiarkan berdampingan,
+karena nol dari 30 baris memakainya. Inversi yang membuatnya murah: kalau model
+diekspor **utuh**, posisi terpasang sebuah potongan adalah transform bawaannya di
+GLB, jadi yang perlu disimpan hanya posisi lepasnya. Satu kolom, bukan dua, dan
+tidak ada kolom rotasi sama sekali.
+
+Konsekuensi kerja untuk pemodel: **selalu pahat dalam keadaan sudah terpasang.**
+`docs/brief-produksi-aset.md` §4 ditulis ulang mengikuti ini; yang tersisa sebagai
+syarat mengikat hanya pemisahan node.
+
+Dua peringatan data basi ditambahkan di editor (node hilang, model berubah setelah
+posisi disimpan) dan dua peringatan jarak seret, karena mata manusia di Blender
+tidak lagi jadi penjaga jarak.
+
 ### Fase 2b — Pengisian konten museum uji
 
-`mesh_name`, audio, nilai karakter untuk museum yang dipakai uji. Editor visual
-3D sudah ada untuk mempercepatnya.
+`mesh_name`, audio, nilai karakter, dan posisi lepas puzzle untuk museum yang
+dipakai uji. Editor visual 3D sudah ada untuk mempercepatnya.
 
 Catatan: audio **bukan** celah fitur — form admin sudah menerima `audio_file`
 (mp3/wav/ogg/aac, maks 10MB) dan `InfoPanel.show()` sudah memutarnya. Murni

@@ -624,7 +624,6 @@ class AdminController extends Controller
         $request->validate([
             'nama' => 'required|string|max:255',
             'mesh_name' => 'nullable|string|max:255',
-            'slot_mesh_name' => 'nullable|string|max:255',
             'deskripsi' => 'nullable|string',
             'nilai_karakter' => 'nullable|array',
             'nilai_karakter.*' => [Rule::enum(NilaiKarakter::class)],
@@ -638,7 +637,6 @@ class AdminController extends Controller
             'museum_id' => $museum_id,
             'nama' => $request->nama,
             'mesh_name' => $request->mesh_name,
-            'slot_mesh_name' => $request->slot_mesh_name,
             'deskripsi' => $request->input('deskripsi', ''),
             'nilai_karakter' => $request->input('nilai_karakter', []),
         ];
@@ -703,7 +701,6 @@ class AdminController extends Controller
         $request->validate([
             'nama' => 'required|string|max:255',
             'mesh_name' => 'nullable|string|max:255',
-            'slot_mesh_name' => 'nullable|string|max:255',
             'deskripsi' => 'nullable|string',
             'nilai_karakter' => 'nullable|array',
             'nilai_karakter.*' => [Rule::enum(NilaiKarakter::class)],
@@ -715,7 +712,6 @@ class AdminController extends Controller
         $data = [
             'nama' => $request->nama,
             'mesh_name' => $request->mesh_name,
-            'slot_mesh_name' => $request->slot_mesh_name,
             'deskripsi' => $request->input('deskripsi', ''),
             'nilai_karakter' => $request->input('nilai_karakter', []),
         ];
@@ -798,8 +794,21 @@ class AdminController extends Controller
     {
         $museum = VirtualMuseum::with('situsPeninggalan')->findOrFail($museum_id);
         $objects = VirtualMuseumObject::where('museum_id', $museum_id)->get();
+        $modelMtime = $this->modelMtime($museum);
 
-        return view('admin.virtual-museum.editor', compact('museum', 'objects'));
+        return view('admin.virtual-museum.editor', compact('museum', 'objects', 'modelMtime'));
+    }
+
+    /**
+     * Waktu ubah terakhir berkas GLB museum, untuk mendeteksi posisi puzzle yang basi.
+     */
+    private function modelMtime(VirtualMuseum $museum): ?int
+    {
+        if (! $museum->path_obj || ! Storage::disk('public')->exists($museum->path_obj)) {
+            return null;
+        }
+
+        return Storage::disk('public')->lastModified($museum->path_obj);
     }
 
     /**
@@ -812,11 +821,14 @@ class AdminController extends Controller
         $validated = $request->validate([
             'nama' => 'required|string|max:255',
             'mesh_name' => 'required|string|max:255',
-            'slot_mesh_name' => 'nullable|string|max:255',
+            'posisi_awal' => 'nullable|array|size:3',
+            'posisi_awal.*' => 'numeric',
             'deskripsi' => 'nullable|string',
             'nilai_karakter' => 'nullable|array',
             'nilai_karakter.*' => [Rule::enum(NilaiKarakter::class)],
         ]);
+
+        $posisiAwal = $validated['posisi_awal'] ?? null;
 
         $object = VirtualMuseumObject::updateOrCreate(
             [
@@ -826,7 +838,10 @@ class AdminController extends Controller
             [
                 'situs_id' => $museum->situs_id,
                 'nama' => $validated['nama'],
-                'slot_mesh_name' => $validated['slot_mesh_name'] ?? null,
+                'posisi_awal' => $posisiAwal,
+                // Dicatat hanya kalau ada posisi yang bisa jadi basi. Objek info biasa
+                // tidak menyimpan koordinat, jadi tidak ada yang perlu diperingatkan.
+                'model_mtime' => $posisiAwal ? $this->modelMtime($museum) : null,
                 'deskripsi' => $validated['deskripsi'] ?? '',
                 'nilai_karakter' => $validated['nilai_karakter'] ?? [],
             ],

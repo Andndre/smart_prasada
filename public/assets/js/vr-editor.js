@@ -2,22 +2,35 @@ import * as THREE from "three";
 import { GLTFLoader } from "three/jsm/loaders/GLTFLoader.js";
 import { DRACOLoader } from "three/jsm/loaders/DRACOLoader.js";
 import { OrbitControls } from "three/jsm/controls/OrbitControls.js";
+import { TransformControls } from "three/jsm/controls/TransformControls.js";
 
-const { museum, objects, saveUrl, deleteUrlTemplate, editUrlTemplate, csrf } =
-    window.editorData;
+const {
+    museum,
+    objects,
+    saveUrl,
+    deleteUrlTemplate,
+    editUrlTemplate,
+    csrf,
+    modelMtime,
+} = window.editorData;
 
 // mesh_name -> object record from DB; kept in sync after every save/delete.
 const objectsByMesh = new Map(objects.map((o) => [o.mesh_name, o]));
-const slotMeshNames = () =>
-    new Set(
-        [...objectsByMesh.values()]
-            .map((o) => o.slot_mesh_name)
-            .filter(Boolean),
-    );
+
+/**
+ * Ambang peringatan jarak seret. Bukan pembatas — admin tetap boleh melewatinya,
+ * tapi keduanya menandai potongan yang di lapangan sulit atau mustahil dipasang.
+ *
+ * `grabStart` di runtime memakai `controller.attach()`, yang mempertahankan transform
+ * dunia: potongan yang mulai 30 m jauhnya tetap 30 m saat digenggam, jadi siswa harus
+ * teleport ke sana dulu. Dan teleport butuh lantai — potongan yang melayang di atas
+ * jangkauan tangan tidak akan pernah bisa dibawa masuk ke radius snap 0,5 m.
+ */
+const JARAK_PERINGATAN = 8; // meter, mendatar
+const TINGGI_JANGKAUAN = 2.2; // meter di atas lantai model
 
 const state = {
     selectedNode: null,
-    pickingSlot: false,
     highlighted: [],
 };
 
@@ -77,6 +90,19 @@ renderer.domElement.classList.add("absolute", "inset-0");
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
 
+// Gizmo geser untuk posisi lepas potongan puzzle. Translate saja: rotasi terpasang
+// selalu rotasi asli objek, dan rotasi saat melayang tidak berpengaruh apa pun secara
+// pedagogis. Kalau suatu saat perlu, setMode("rotate") satu baris.
+const gizmo = new TransformControls(camera, renderer.domElement);
+gizmo.setMode("translate");
+gizmo.setSize(0.8);
+// Tanpa ini, menyeret panah ikut memutar kamera.
+gizmo.addEventListener("dragging-changed", (e) => {
+    controls.enabled = !e.value;
+});
+gizmo.addEventListener("objectChange", refreshPuzzleReadout);
+scene.add(gizmo);
+
 function resize() {
     const { clientWidth: w, clientHeight: h } = container;
     camera.aspect = w / h;
@@ -125,10 +151,9 @@ function focusCamera(node) {
 }
 
 function selectNode(node) {
-    if (state.pickingSlot) {
-        finishSlotPick(node.name);
-        return;
-    }
+    // Lepas gizmo dari objek sebelumnya sebelum pilihan berpindah, supaya panahnya
+    // tidak tertinggal menempel di objek yang tidak lagi dipilih.
+    gizmo.detach();
     state.selectedNode = node;
     highlightNode(node);
     renderTree();
@@ -159,8 +184,8 @@ function showPanel(node) {
     el("field-mesh-name").value = node.name;
     el("field-nama").value = record?.nama ?? node.name.replaceAll("_", " ");
     el("field-deskripsi").value = record?.deskripsi ?? "";
-    el("field-slot").value = record?.slot_mesh_name ?? "";
     writeNilaiKarakter(record?.nilai_karakter ?? []);
+    setPuzzle(Boolean(record?.posisi_awal));
     el("btn-delete").classList.toggle("hidden", !record);
     const fullEdit = el("link-full-edit");
     fullEdit.classList.toggle("hidden", !record);
@@ -168,32 +193,77 @@ function showPanel(node) {
         fullEdit.href = editUrlTemplate.replace("__ID__", record.object_id);
 }
 
-function startSlotPick() {
-    state.pickingSlot = true;
-    el("pick-slot-banner").classList.remove("hidden");
+// ---------- Puzzle: posisi lepas ----------
+
+/**
+ * Selisih posisi sekarang terhadap posisi bawaan mesh di GLB, di ruang parent-local.
+ * Inilah satu-satunya angka yang disimpan — posisi terpasangnya tidak perlu disimpan
+ * karena ia memang transform bawaan model.
+ */
+function deltaOf(node) {
+    return node.position.clone().sub(node.userData.posisiBawaan);
 }
 
-function finishSlotPick(meshName) {
-    state.pickingSlot = false;
-    el("pick-slot-banner").classList.add("hidden");
-    if (meshName && meshName !== state.selectedNode?.name) {
-        el("field-slot").value = meshName;
+function isPuzzleAktif() {
+    return el("field-puzzle").checked;
+}
+
+function refreshPuzzleReadout() {
+    const node = state.selectedNode;
+    if (!node || !node.userData.posisiBawaan) return;
+
+    const d = deltaOf(node);
+    el("puzzle-readout").textContent =
+        `Δ ${d.length().toFixed(2)} m  (x ${d.x.toFixed(2)}, y ${d.y.toFixed(2)}, z ${d.z.toFixed(2)})`;
+
+    const peringatan = [];
+    if (Math.hypot(d.x, d.z) > JARAK_PERINGATAN) {
+        peringatan.push(
+            `Lebih dari ${JARAK_PERINGATAN} m mendatar — siswa harus teleport ke sana dulu untuk menggenggamnya.`,
+        );
+    }
+    // Lantai model ada di y = 0 dunia: modelRoot digeser naik sebesar box.min.y saat
+    // dimuat, sama seperti yang dilakukan runtime.
+    const dasar = new THREE.Box3().setFromObject(node).min.y;
+    if (dasar > TINGGI_JANGKAUAN) {
+        peringatan.push(
+            `${dasar.toFixed(1)} m di atas lantai — di luar jangkauan tangan orang berdiri, tidak akan pernah bisa dipasang.`,
+        );
+    }
+    el("puzzle-warning").textContent = peringatan.join(" ");
+}
+
+function setPuzzle(aktif) {
+    const node = state.selectedNode;
+    el("field-puzzle").checked = aktif;
+    el("puzzle-controls").classList.toggle("hidden", !aktif);
+    el("drag-banner").classList.toggle("hidden", !aktif);
+
+    if (!node) return;
+    if (aktif) {
+        gizmo.attach(node);
+        refreshPuzzleReadout();
+    } else {
+        gizmo.detach();
+        node.position.copy(node.userData.posisiBawaan);
     }
 }
 
-el("btn-pick-slot").addEventListener("click", startSlotPick);
-el("btn-clear-slot").addEventListener(
-    "click",
-    () => (el("field-slot").value = ""),
+el("field-puzzle").addEventListener("change", (e) =>
+    setPuzzle(e.target.checked),
 );
-window.addEventListener("keydown", (e) => {
-    if (e.key === "Escape" && state.pickingSlot) finishSlotPick(null);
+el("btn-reset-puzzle").addEventListener("click", () => {
+    state.selectedNode?.position.copy(state.selectedNode.userData.posisiBawaan);
+    refreshPuzzleReadout();
 });
 
 el("panel-form").addEventListener("submit", async (e) => {
     e.preventDefault();
     if (!state.selectedNode) return;
     const saveBtn = el("btn-save");
+    const posisiAwal = isPuzzleAktif()
+        ? deltaOf(state.selectedNode).toArray()
+        : null;
     setStatus("Menyimpan…");
     const response = await fetch(saveUrl, {
         method: "POST",
@@ -202,7 +272,7 @@ el("panel-form").addEventListener("submit", async (e) => {
             mesh_name: state.selectedNode.name,
             nama: el("field-nama").value,
             deskripsi: el("field-deskripsi").value || null,
-            slot_mesh_name: el("field-slot").value || null,
+            posisi_awal: posisiAwal,
             nilai_karakter: readNilaiKarakter(),
         }),
     });
@@ -217,12 +287,14 @@ el("panel-form").addEventListener("submit", async (e) => {
         mesh_name: saved.mesh_name,
         nama: el("field-nama").value,
         deskripsi: el("field-deskripsi").value || null,
-        slot_mesh_name: el("field-slot").value || null,
+        posisi_awal: posisiAwal,
+        model_mtime: posisiAwal ? modelMtime : null,
         nilai_karakter: readNilaiKarakter(),
     });
     setStatus("Tersimpan ✓", "success");
     flashButton(saveBtn, "Tersimpan ✓", "success");
     renderTree();
+    renderWarnings();
     showPanel(state.selectedNode);
 });
 
@@ -256,13 +328,60 @@ let modelRoot = null;
 
 function renderTree() {
     if (!modelRoot) return;
-    const slots = slotMeshNames();
     const treeContainer = el("mesh-tree");
     treeContainer.innerHTML = "";
-    treeContainer.appendChild(buildTreeList(modelRoot.children, slots));
+    treeContainer.appendChild(buildTreeList(modelRoot.children));
 }
 
-function buildTreeList(children, slots) {
+/**
+ * Dua kelas data basi yang hanya bisa dilihat di sini — runtime sengaja diam supaya
+ * siswa tidak pernah melihat pesan admin.
+ *
+ * 1. Node hilang: nama mesh berubah atau objeknya dihapus di Blender (jebakan paling
+ *    sering: sufiks ".001" yang ditambahkan Blender saat menduplikasi).
+ * 2. Model berubah setelah posisi disimpan: nama node yang sama dengan geometri
+ *    berbeda tidak bisa dideteksi secara umum, jadi ini aproksimasinya. Positif palsu
+ *    saat berkas yang sama diunggah ulang tidak apa-apa — itu justru saat yang tepat
+ *    untuk memeriksa.
+ */
+function renderWarnings() {
+    if (!modelRoot) return;
+    const namaNode = new Set();
+    modelRoot.traverse((n) => n.name && namaNode.add(n.name));
+
+    const hilang = [...objectsByMesh.keys()].filter((n) => !namaNode.has(n));
+    const basi = [...objectsByMesh.values()].filter(
+        (o) => o.posisi_awal && o.model_mtime && o.model_mtime !== modelMtime,
+    );
+
+    const box = el("editor-warnings");
+    box.innerHTML = "";
+    if (hilang.length) {
+        box.appendChild(
+            warningRow(
+                "border-red-200 bg-red-50 text-red-700",
+                `${hilang.length} objek menunjuk mesh yang tidak ada di model ini: ${hilang.join(", ")}`,
+            ),
+        );
+    }
+    if (basi.length) {
+        box.appendChild(
+            warningRow(
+                "border-amber-200 bg-amber-50 text-amber-800",
+                `${basi.length} posisi puzzle disimpan sebelum model diganti — periksa: ${basi.map((o) => o.mesh_name).join(", ")}`,
+            ),
+        );
+    }
+}
+
+function warningRow(tone, text) {
+    const p = document.createElement("p");
+    p.className = `rounded-md border px-2 py-1.5 text-xs ${tone}`;
+    p.textContent = text;
+    return p;
+}
+
+function buildTreeList(children) {
     const ul = document.createElement("ul");
     ul.className = "space-y-0.5";
     for (const child of children) {
@@ -276,9 +395,7 @@ function buildTreeList(children, slots) {
             (selected ? "bg-blue-50 font-semibold text-blue-700" : "");
 
         const record = objectsByMesh.get(child.name);
-        let badge = "";
-        if (record) badge = record.slot_mesh_name ? "🧩" : "📄";
-        else if (slots.has(child.name)) badge = "📍";
+        const badge = record ? (record.posisi_awal ? "🧩" : "📄") : "";
 
         row.innerHTML =
             `<span class="text-gray-400">${child.isMesh ? "▪" : "▸"}</span>` +
@@ -291,7 +408,7 @@ function buildTreeList(children, slots) {
         li.appendChild(row);
 
         if (child.children.length) {
-            const sub = buildTreeList(child.children, slots);
+            const sub = buildTreeList(child.children);
             if (sub.childElementCount) {
                 sub.className += " ml-3 border-l border-gray-100 pl-1";
                 li.appendChild(sub);
@@ -312,8 +429,13 @@ renderer.domElement.addEventListener(
     (e) => (downAt = [e.clientX, e.clientY]),
 );
 renderer.domElement.addEventListener("pointerup", (e) => {
-    // Ignore drags (orbit), only treat short clicks as picks.
-    if (!downAt || Math.hypot(e.clientX - downAt[0], e.clientY - downAt[1]) > 5)
+    // Ignore drags (orbit), only treat short clicks as picks. A short nudge on the
+    // gizmo arrow is a move, not a pick.
+    if (
+        gizmo.dragging ||
+        !downAt ||
+        Math.hypot(e.clientX - downAt[0], e.clientY - downAt[1]) > 5
+    )
         return;
     const rect = renderer.domElement.getBoundingClientRect();
     pointer.set(
@@ -347,9 +469,30 @@ async function main() {
     el("loading-container").remove();
 
     modelRoot = gltf.scene;
+
+    // Pergeseran yang sama dengan placeModel() di runtime, supaya lantai ada di y = 0
+    // dan tinggi yang dilihat di sini jujur. Delta memang kebal terhadap ini — ini soal
+    // kenyamanan menempatkan dan supaya peringatan tinggi jangkauan punya acuan.
+    const box = new THREE.Box3().setFromObject(modelRoot);
+    modelRoot.position.y -= box.min.y;
+
+    // Posisi bawaan ditangkap SEBELUM delta tersimpan diterapkan — inilah tempat
+    // terpasang setiap potongan puzzle.
+    modelRoot.traverse((node) => {
+        node.userData.posisiBawaan = node.position.clone();
+    });
+    modelRoot.updateMatrixWorld(true);
+
+    for (const record of objectsByMesh.values()) {
+        if (!Array.isArray(record.posisi_awal)) continue;
+        const node = modelRoot.getObjectByName(record.mesh_name);
+        node?.position.add(new THREE.Vector3().fromArray(record.posisi_awal));
+    }
+
     scene.add(modelRoot);
     focusCamera(modelRoot);
     renderTree();
+    renderWarnings();
     setStatus(`${objectsByMesh.size} objek ter-link`);
 }
 

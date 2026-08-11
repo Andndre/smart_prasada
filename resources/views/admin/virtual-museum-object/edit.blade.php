@@ -108,19 +108,18 @@
                             .glb). Jika diisi, objek ini bisa diklik di mode VR untuk menampilkan info.</p>
                     </div>
 
-                    <!-- Nama Mesh Slot (untuk puzzle VR) -->
-                    <div>
-                        <label for="slot_mesh_name" class="mb-2 block text-sm font-medium text-gray-700">
-                            Nama Mesh Slot (Puzzle VR, opsional)
-                        </label>
-                        <input type="text" id="slot_mesh_name" name="slot_mesh_name"
-                            value="{{ old('slot_mesh_name', $object->slot_mesh_name) }}"
-                            class="block w-full rounded-md border border-gray-300 px-3 py-2 placeholder-gray-500 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            placeholder="Contoh: Slot_Lukisan_Barong">
-                        <p class="mt-1 text-xs text-gray-500">Nama mesh penanda posisi target di Blender. Jika diisi,
-                            objek ini jadi bagian puzzle: user harus memindahkan objek ke posisi slot tersebut di mode
-                            VR. Mesh slot otomatis disembunyikan saat scene dimuat.</p>
-                    </div>
+                    {{-- Posisi puzzle tidak bisa diketik: ia koordinat 3D. Editor visual
+                         satu-satunya jalan masuknya, jadi di sini hanya statusnya. --}}
+                    @if ($object->posisi_awal)
+                        <div class="rounded-md border border-purple-200 bg-purple-50 p-3">
+                            <p class="text-sm font-medium text-purple-800">🧩 Objek ini potongan puzzle</p>
+                            <p class="mt-1 text-xs text-purple-700">
+                                Posisi lepasnya diatur di
+                                <a href="{{ route('admin.virtual-museum.editor', $object->museum_id) }}"
+                                    class="underline">Editor VR</a>, bukan di form ini.
+                            </p>
+                        </div>
+                    @endif
 
                     <!-- Deskripsi -->
                     <div>

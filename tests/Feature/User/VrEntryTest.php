@@ -57,7 +57,7 @@ test('vr museum page exposes only objects with a mesh name', function () {
     VirtualMuseumObject::create($baseAttributes + [
         'nama' => 'Lukisan Barong',
         'mesh_name' => 'Lukisan_Barong',
-        'slot_mesh_name' => 'Slot_Lukisan_Barong',
+        'posisi_awal' => [1.5, 0.0, -2.25],
         'deskripsi' => 'Lukisan klasik Bali.',
     ]);
     VirtualMuseumObject::create($baseAttributes + [
@@ -72,7 +72,8 @@ test('vr museum page exposes only objects with a mesh name', function () {
 
     $response->assertStatus(200);
     $response->assertSee('Lukisan_Barong');
-    $response->assertSee('Slot_Lukisan_Barong');
+    // Posisi lepas potongan puzzle ikut ke klien — runtime tidak punya sumber lain.
+    $response->assertSee('-2.25');
     $response->assertDontSee('Objek Tanpa Mesh');
 });
 

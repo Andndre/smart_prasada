@@ -169,25 +169,98 @@ Three separate bundles in `vite.config.js`:
 
 Built on top of the existing `mesh_name` scene-graph linking (`VirtualMuseumObject.mesh_name` ↔ node name in the GLB). Not yet committed — pending explicit request.
 
-### `slot_mesh_name` (place-object puzzle)
+### `posisi_awal` (place-object puzzle)
 
-`VirtualMuseumObject` has a nullable `slot_mesh_name` column alongside `mesh_name`:
+**Model selalu diekspor dalam keadaan SUDAH TERPASANG.** Editor yang melepas.
 
-- Empty → object behaves as before: tap/trigger shows an info panel (name + description + optional audio).
-- Filled → object becomes a **grabbable puzzle piece**. The value must exactly match another mesh name in the same GLB — an invisible marker mesh authored in Blender at the correct target position. That marker is auto-hidden at load and excluded from raycasts.
-- In VR: squeeze/grip to grab, move, release. If released within 0.5m of its slot, the piece snaps to the slot's position/rotation, locks (`userData.solved = true`, can't be re-grabbed), and increments a solved counter shown via the in-scene info panel ("Tepat! (n/total)" → "Puzzle Selesai! 🎉" when all pieces are done).
-- This is the foundation for future puzzle/game types — no new tables needed for simple variants (matching, category sorting), same column.
+`VirtualMuseumObject.posisi_awal` — kolom JSON nullable, cast `array`, berisi
+`[x, y, z]`:
 
-Runtime logic lives in `public/assets/js/vr-museum.js` (`TeleportControls` class: `grabStart`/`grabEnd`/`checkSlot`).
+- Kosong → objek informatif biasa: tap/trigger membuka panel info.
+- Terisi → objek jadi **potongan puzzle** yang bisa digenggam. Nilainya adalah
+  **selisih** ke tempat potongan itu mulai terlepas.
+
+Tempat terpasangnya adalah **transform bawaan mesh di GLB** — nol data, tidak ada
+mesh penanda, tidak bisa meleset. Rotasi terpasang juga rotasi bawaan, karena itu
+tidak ada kolom rotasi sama sekali.
+
+**Selisih, bukan koordinat absolut — jangan diubah.** `vr-editor.js` dan
+`vr-museum.js` menaruh model pada tinggi berbeda (`placeModel` menggeser
+`position.y -= box.min.y`, editor meniru itu tapi keduanya bisa berubah sendiri).
+Koordinat absolut yang disimpan dari editor akan mendarat meleset di headset tanpa
+error apa pun. Selisih kebal terhadap transform root mana pun, dan tetap benar
+setelah model diekspor ulang dengan origin sama.
+
+Runtime di `TeleportControls`: `registerPuzzle()` menyimpan posisi/rotasi/parent
+bawaan ke `userData` lalu menerapkan selisihnya; `grabStart`/`grabEnd`/`checkSlot`
+sisanya. Snap 0,5 m diukur di ruang dunia.
+
+`slot_mesh_name` **dihapus** — mekanisme lama yang butuh mesh penanda tak terlihat
+di GLB. Nol dari 30 baris memakainya, jadi penggantiannya bersih. Jangan
+menghidupkannya kembali berdampingan.
+
+#### Hitung potongan dari record, bukan dari scene
+
+`TeleportControls.totalPuzzle` naik di `registerPuzzle()`, yang dipanggil untuk
+setiap record ber-`posisi_awal` — termasuk di HP, di mana potongannya sengaja
+**tidak** digeser (punden tampil utuh, bukan motif melayang yang tak terjangkau
+selamanya; panel info menjelaskannya).
+
+Kalau hitungannya ikut nol di HP, alasan fase interaksi terlewat berbalik dari
+`dilewati_perangkat` jadi `dilewati_tanpa_slot`, dan ekspor penelitian berbohong
+soal kenapa responden tidak pernah memasang. Empat tempat memakai angka ini:
+`totalSlot` fase, detail `sesi_mulai`, kondisi "Puzzle Selesai", dan teks
+`(n/total)`.
+
+Potongan di HP sengaja **tidak** ditandai `solved` — kedipannya masih perlu,
+objeknya memang tetap interaktif di sana (nama, deskripsi, audio).
 
 ### Visual 3D Editor
 
-`GET /admin/virtual-museum/{museum_id}/editor` (`AdminController::editorVirtualMuseum`) — an alternative to the plain text-field admin forms for assigning `mesh_name`/`slot_mesh_name`/`nama`/`deskripsi` to GLB nodes.
+`GET /admin/virtual-museum/{museum_id}/editor` (`AdminController::editorVirtualMuseum`) — an alternative to the plain text-field admin forms for assigning `mesh_name`/`posisi_awal`/`nama`/`deskripsi`/`nilai_karakter` to GLB nodes.
 
 - View: `resources/views/admin/virtual-museum/editor.blade.php` — standalone full-screen page (not `x-app-layout`), Three.js via CDN importmap (same pattern as the AR/VR runtime, not bundled through Vite).
-- Logic: `public/assets/js/vr-editor.js` — loads the GLB, renders a mesh tree (left), 3D canvas with click-to-select + orbit controls (middle), property panel (right). "Pilih" button lets the admin click the target slot mesh directly instead of typing its name.
+- Logic: `public/assets/js/vr-editor.js` — loads the GLB, renders a mesh tree (left), 3D canvas with click-to-select + orbit controls (middle), property panel (right).
 - Save endpoint: `POST /admin/virtual-museum/{museum_id}/editor/objects` (`AdminController::editorSaveObject`) — `updateOrCreate` keyed by `(museum_id, mesh_name)`, so re-saving the same mesh never duplicates rows.
 - Entry point: purple "Editor VR" button on `resources/views/admin/virtual-museum/show.blade.php`.
+
+#### Menetapkan posisi lepas
+
+`TransformControls` mode translate saja, dari prefix `three/jsm/` yang sudah ada
+di importmap. `dragging-changed` mematikan OrbitControls selama menyeret, dan
+`gizmo.dragging` menahan raycast pilih supaya sentakan pendek di panah tidak
+terbaca sebagai klik.
+
+Rotasi sengaja tidak bisa diatur — lihat di atas. Kalau suatu saat perlu,
+`setMode("rotate")` satu baris dan satu kunci JSON tambahan.
+
+Editor meniru pergeseran `y -= box.min.y` milik runtime supaya lantai ada di
+`y = 0`. Selisihnya memang kebal terhadap ini; yang butuh acuan itu adalah
+peringatan tinggi jangkauan.
+
+**Dua peringatan jarak** (`JARAK_PERINGATAN` 8 m mendatar, `TINGGI_JANGKAUAN`
+2,2 m di atas lantai). Bukan pembatas. Alasannya: `grabStart` memakai
+`controller.attach()` yang mempertahankan transform dunia, jadi potongan yang
+mulai jauh tetap jauh saat digenggam — siswa harus teleport ke sana dulu, dan
+teleport butuh lantai. Potongan di atas jangkauan tangan tidak akan pernah bisa
+dibawa masuk ke radius snap. Dulu jarak ini dijaga mata manusia di Blender;
+sekarang kanvas editor satu-satunya penjaga.
+
+#### Dua peringatan data basi
+
+Keduanya **hanya di editor** — runtime sengaja diam supaya siswa tidak pernah
+melihat pesan admin, dan record yang mesh-nya hilang cukup diabaikan.
+
+1. **Node hilang** — `mesh_name` di DB tidak ada di GLB. Menangkap rename, hapus,
+   dan jebakan sufiks `.001` Blender.
+2. **Model berubah setelah posisi disimpan** — `model_mtime` (filemtime GLB saat
+   menyimpan) dibandingkan dengan filemtime sekarang. Nama node sama dengan
+   geometri berbeda tidak bisa dideteksi umum; ini aproksimasinya. Positif palsu
+   saat berkas sama diunggah ulang tidak apa-apa — itu justru saat yang tepat
+   untuk memeriksa.
+
+`model_mtime` hanya diisi kalau `posisi_awal` ada. Objek informatif tidak
+menyimpan koordinat, jadi tidak ada yang bisa basi.
 
 ### VR interaction affordances (public/assets/js/vr-museum.js)
 

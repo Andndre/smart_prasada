@@ -124,7 +124,6 @@ describe('VR Editor', function () {
             $response = $this->actingAs($admin)->postJson(route('admin.virtual-museum.editor.save', $museum->museum_id), [
                 'nama' => 'Arca Baru',
                 'mesh_name' => 'Arca_Baru',
-                'slot_mesh_name' => 'Slot_Arca_Baru',
                 'deskripsi' => 'Dibuat dari editor.',
             ]);
 
@@ -133,7 +132,6 @@ describe('VR Editor', function () {
                 'museum_id' => $museum->museum_id,
                 'situs_id' => $museum->situs_id,
                 'mesh_name' => 'Arca_Baru',
-                'slot_mesh_name' => 'Slot_Arca_Baru',
             ]);
         });
 
@@ -168,6 +166,60 @@ describe('VR Editor', function () {
                 ->postJson(route('admin.virtual-museum.editor.save', $museum->museum_id), [])
                 ->assertUnprocessable()
                 ->assertJsonValidationErrors(['nama', 'mesh_name']);
+        });
+
+        it('stores posisi_awal as a three-number vector', function () {
+            $admin = User::factory()->create(['role' => 'admin']);
+            $museum = VirtualMuseum::factory()->create();
+
+            $this->actingAs($admin)
+                ->postJson(route('admin.virtual-museum.editor.save', $museum->museum_id), [
+                    'nama' => 'Ceplok Bunga Sudut Barat',
+                    'mesh_name' => 'Ceplok_Bunga_01',
+                    'posisi_awal' => [1.25, 0.5, -3],
+                ])
+                ->assertSuccessful();
+
+            $object = VirtualMuseumObject::where('mesh_name', 'Ceplok_Bunga_01')->sole();
+            expect($object->posisi_awal)->toBe([1.25, 0.5, -3]);
+        });
+
+        it('rejects a posisi_awal that is not three numbers', function () {
+            $admin = User::factory()->create(['role' => 'admin']);
+            $museum = VirtualMuseum::factory()->create();
+
+            $this->actingAs($admin)
+                ->postJson(route('admin.virtual-museum.editor.save', $museum->museum_id), [
+                    'nama' => 'Ceplok Bunga',
+                    'mesh_name' => 'Ceplok_Bunga_02',
+                    'posisi_awal' => [1.25, 'kiri'],
+                ])
+                ->assertUnprocessable()
+                ->assertJsonValidationErrors(['posisi_awal']);
+        });
+
+        it('clears posisi_awal when the object stops being a puzzle piece', function () {
+            $admin = User::factory()->create(['role' => 'admin']);
+            $museum = VirtualMuseum::factory()->create();
+            VirtualMuseumObject::factory()->create([
+                'museum_id' => $museum->museum_id,
+                'situs_id' => $museum->situs_id,
+                'mesh_name' => 'Arca_Lama',
+                'posisi_awal' => [3, 0, 3],
+                'model_mtime' => 1700000000,
+            ]);
+
+            $this->actingAs($admin)
+                ->postJson(route('admin.virtual-museum.editor.save', $museum->museum_id), [
+                    'nama' => 'Arca Lama',
+                    'mesh_name' => 'Arca_Lama',
+                ])
+                ->assertSuccessful();
+
+            $object = VirtualMuseumObject::where('mesh_name', 'Arca_Lama')->sole();
+            expect($object->posisi_awal)->toBeNull();
+            // Tidak ada posisi lagi, jadi tidak ada yang bisa jadi basi.
+            expect($object->model_mtime)->toBeNull();
         });
     });
 });

@@ -33,6 +33,7 @@
             deleteUrlTemplate: @json(route('admin.virtual-museum-object.destroy', ['object_id' => '__ID__'])),
             editUrlTemplate: @json(route('admin.virtual-museum-object.edit', ['object_id' => '__ID__'])),
             csrf: @json(csrf_token()),
+            modelMtime: @json($modelMtime),
         };
     </script>
 
@@ -58,6 +59,7 @@
                 <div class="border-b border-gray-100 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-gray-500">
                     Struktur Scene
                 </div>
+                <div id="editor-warnings" class="empty:hidden space-y-1 p-2"></div>
                 <div id="mesh-tree" class="p-2 text-sm text-gray-700">
                     <p class="p-2 text-xs text-gray-400">Memuat model…</p>
                 </div>
@@ -71,9 +73,9 @@
                     </div>
                     <p class="mt-2 text-center text-sm text-gray-400">Memuat model 3D…</p>
                 </div>
-                <div id="pick-slot-banner"
-                    class="absolute left-1/2 top-4 z-10 hidden -translate-x-1/2 rounded-full bg-amber-500 px-4 py-1.5 text-xs font-semibold text-white shadow">
-                    Mode pilih slot: klik mesh target di canvas atau tree (Esc untuk batal)
+                <div id="drag-banner"
+                    class="absolute left-1/2 top-4 z-10 hidden -translate-x-1/2 rounded-full bg-purple-600 px-4 py-1.5 text-xs font-semibold text-white shadow">
+                    Seret panah untuk menetapkan posisi lepas. Tempat terpasangnya adalah posisi asli di model.
                 </div>
             </div>
 
@@ -116,22 +118,24 @@
                         </div>
                         <p class="mt-1 text-xs text-gray-400">Tampil sebagai chip di panel info VR.</p>
                     </div>
-                    <div>
-                        <label class="mb-1 block text-xs font-medium text-gray-500">Slot Puzzle (opsional)</label>
-                        <div class="flex gap-2">
-                            <input type="text" id="field-slot" readonly
-                                class="block w-full rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-700"
-                                placeholder="Belum ada slot">
-                            <button type="button" id="btn-pick-slot"
-                                class="shrink-0 rounded-md bg-amber-500 px-3 py-2 text-xs font-semibold text-white hover:bg-amber-600">
-                                Pilih
-                            </button>
-                            <button type="button" id="btn-clear-slot"
-                                class="shrink-0 rounded-md border border-gray-300 px-3 py-2 text-xs text-gray-600 hover:bg-gray-50">
-                                ✕
+                    <div class="rounded-md border border-gray-200 p-3">
+                        <label class="flex items-center gap-2 text-xs font-medium text-gray-700">
+                            <input type="checkbox" id="field-puzzle"
+                                class="rounded border-gray-300 text-purple-600 focus:ring-purple-500">
+                            🧩 Objek ini potongan puzzle
+                        </label>
+                        <p class="mt-1 text-xs text-gray-400">
+                            Tempat terpasangnya adalah posisi asli objek di model — model dikirim
+                            dalam keadaan sudah terpasang. Yang diatur di sini posisi lepasnya.
+                        </p>
+                        <div id="puzzle-controls" class="mt-2 hidden">
+                            <p id="puzzle-readout" class="font-mono text-xs text-gray-600">Δ 0.00 m</p>
+                            <p id="puzzle-warning" class="empty:hidden mt-1 text-xs font-semibold text-amber-600"></p>
+                            <button type="button" id="btn-reset-puzzle"
+                                class="mt-2 rounded-md border border-gray-300 px-2 py-1 text-xs text-gray-600 hover:bg-gray-50">
+                                Kembalikan ke tempatnya
                             </button>
                         </div>
-                        <p class="mt-1 text-xs text-gray-400">Jika diisi, objek jadi puzzle: user harus memindahkannya ke posisi slot di VR.</p>
                     </div>
                     <div class="flex gap-2 pt-2">
                         <button type="submit" id="btn-save"

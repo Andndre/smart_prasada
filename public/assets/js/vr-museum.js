@@ -228,7 +228,12 @@ class TeleportControls {
         this.hoverInfo = null;
         this.hoverPoint = null;
         this.raycaster = new THREE.Raycaster();
-        this.slots = new Map();
+        // Jumlah potongan puzzle dihitung dari record DB lewat registerPuzzle(), bukan
+        // dari mesh penanda yang terpasang di scene. Di HP potongan sengaja tidak
+        // dilepas, dan kalau hitungannya ikut nol, alasan fase interaksi terlewat akan
+        // berbalik dari "dilewati_perangkat" jadi "dilewati_tanpa_slot" — ekspor
+        // penelitiannya jadi berbohong soal kenapa responden tidak pernah memasang.
+        this.totalPuzzle = 0;
         this.solvedCount = 0;
         this.interactiveMeshes = [];
         this.outlinedNode = null;
@@ -423,31 +428,60 @@ class TeleportControls {
         this.logger?.log("objek_dilepas", node.name, { berhasil });
     }
 
+    /**
+     * Daftarkan sebuah mesh sebagai potongan puzzle.
+     *
+     * Posisi terpasangnya adalah transform bawaannya di GLB — model selalu diekspor
+     * dalam keadaan SUDAH TERPASANG, jadi tidak ada mesh penanda dan tidak ada
+     * koordinat target yang perlu disimpan. Yang datang dari DB hanya `delta`:
+     * selisih ke tempat potongan itu mulai terlepas.
+     *
+     * @param {THREE.Object3D} node
+     * @param {number[]} delta [x, y, z] di ruang parent-local mesh
+     * @param {boolean} bolehDilepas false di perangkat yang tidak bisa menggenggam
+     */
+    registerPuzzle(node, delta, bolehDilepas) {
+        node.userData.slotPosition = node.position.clone();
+        node.userData.slotQuaternion = node.quaternion.clone();
+        node.userData.slotParent = node.parent;
+        this.totalPuzzle++;
+
+        // Perangkat tanpa genggam tidak akan pernah bisa memasangnya kembali. Biarkan
+        // terpasang supaya punden tampil utuh, bukan potongan melayang yang tak
+        // terjangkau selamanya. Sengaja TIDAK ditandai solved: kedipannya tetap perlu,
+        // objeknya memang masih interaktif di HP (nama, deskripsi, audio).
+        if (bolehDilepas) {
+            node.position.add(new THREE.Vector3().fromArray(delta));
+        }
+    }
+
     /** Puzzle: released piece within reach of its slot snaps in place and counts as solved. */
     checkSlot(node, controller) {
-        const slot = this.slots.get(node.userData.vrObject?.slot_mesh_name);
-        if (!slot || node.userData.solved) return false;
+        const slotParent = node.userData.slotParent;
+        if (!slotParent || node.userData.solved) return false;
 
         const nodePos = node.getWorldPosition(new THREE.Vector3());
-        const slotPos = slot.getWorldPosition(new THREE.Vector3());
+        // Jarak diukur di ruang dunia supaya 0,5 m tetap berarti 0,5 m walau rantai
+        // parent-nya berskala.
+        const slotPos = slotParent.localToWorld(node.userData.slotPosition.clone());
         // ponytail: 0.5m snap radius, single knob; make per-object if pieces vary wildly in size.
         if (nodePos.distanceTo(slotPos) > 0.5) return false;
 
-        slot.parent.attach(node);
-        node.position.copy(slot.position);
-        node.quaternion.copy(slot.quaternion);
+        slotParent.attach(node);
+        node.position.copy(node.userData.slotPosition);
+        node.quaternion.copy(node.userData.slotQuaternion);
         node.userData.solved = true;
         this.solvedCount++;
         pulse(controller, 1, 120);
         this.logger?.log("puzzle_benar", node.name, { urutan: this.solvedCount });
         this.phases?.catatPemasangan(this.solvedCount);
 
-        const done = this.solvedCount >= this.slots.size;
+        const done = this.solvedCount >= this.totalPuzzle;
         this.panel?.show({
             nama: done ? "Puzzle Selesai! 🎉" : "Tepat!",
             deskripsi: done
                 ? "Semua objek sudah kembali ke tempat yang benar. Kerja bagus!"
-                : `${node.userData.vrObject.nama} sudah di tempat yang benar. (${this.solvedCount}/${this.slots.size})`,
+                : `${node.userData.vrObject.nama} sudah di tempat yang benar. (${this.solvedCount}/${this.totalPuzzle})`,
         }, slotPos);
 
         return true;
@@ -576,10 +610,10 @@ class InfoPanel {
         // Objek puzzle di perangkat tanpa controller: sebutkan alasannya, jangan biarkan
         // buntu diam-diam. Kedipannya sengaja tidak dimatikan — objeknya memang tetap
         // interaktif di HP (nama, deskripsi, audio), yang tidak tersedia hanya pemasangan.
-        if (info.slot_mesh_name && !this.bisaGenggam) {
+        if (info.posisi_awal && !this.bisaGenggam) {
             ctx.font = "italic 26px Inter, sans-serif";
             ctx.fillStyle = "#fbbf24";
-            ctx.fillText("Pemasangan objek ini tersedia di headset VR.", 40, 578);
+            ctx.fillText("Objek ini bisa dilepas dan dipasang kembali di headset VR.", 40, 578);
         }
 
         ctx.font = "28px Inter, sans-serif";
@@ -1055,6 +1089,11 @@ async function main() {
         renderer.setSize(window.innerWidth, window.innerHeight);
     });
 
+    // Ditanyakan sebelum model dipasang: registerPuzzle() perlu tahu apakah perangkat
+    // ini bisa menggenggam sebelum memutuskan melepas potongan atau tidak.
+    const headsetSupported = "xr" in navigator &&
+        (await navigator.xr.isSessionSupported("immersive-vr").catch(() => false));
+
     showElement("loading-container");
     const model = await ModelLoader.loadModel(
         "/storage/" + museum.path_obj,
@@ -1072,24 +1111,16 @@ async function main() {
 
     if (Array.isArray(window.vrObjects) && window.vrObjects.length) {
         const byMeshName = new Map(window.vrObjects.map((o) => [o.mesh_name, o]));
-        const slotNames = new Set(
-            window.vrObjects.map((o) => o.slot_mesh_name).filter(Boolean),
-        );
         model.traverse((node) => {
             const info = byMeshName.get(node.name);
-            if (info) {
-                node.userData.vrObject = info;
-                teleport.markInteractive(node);
-            }
-            if (slotNames.has(node.name)) {
-                node.visible = false;
-                teleport.slots.set(node.name, node);
+            if (!info) return;
+            node.userData.vrObject = info;
+            teleport.markInteractive(node);
+            if (Array.isArray(info.posisi_awal) && info.posisi_awal.length === 3) {
+                teleport.registerPuzzle(node, info.posisi_awal, headsetSupported);
             }
         });
     }
-
-    const headsetSupported = "xr" in navigator &&
-        (await navigator.xr.isSessionSupported("immersive-vr").catch(() => false));
 
     teleport.logger = new EventLogger({
         url: vrEventsUrl,
@@ -1100,14 +1131,14 @@ async function main() {
     teleport.logger.log("sesi_mulai", null, {
         perangkat: headsetSupported ? "headset" : "hp",
         objek_interaktif: teleport.interactiveMeshes.length,
-        slot: teleport.slots.size,
+        slot: teleport.totalPuzzle,
     });
 
     teleport.panel.bisaGenggam = headsetSupported;
     teleport.phasePanel = new PhasePanel(camera);
     teleport.phases = new PhaseManager({
         totalObjek: teleport.interactiveMeshes.length,
-        totalSlot: teleport.slots.size,
+        totalSlot: teleport.totalPuzzle,
         // Kemampuan perangkat, bukan status sambungan controller: controller Quest baru
         // terhubung beberapa saat setelah sesi XR dimulai, dan fase tidak boleh terlanjur
         // menyimpulkan perangkat ini tidak bisa menggenggam.
