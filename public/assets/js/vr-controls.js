@@ -20,6 +20,15 @@ export class TeleportControls {
     /** Gerak bebas thumbstick: m/detik, dan besar satu langkah putar. */
     static KECEPATAN_JALAN = 2;
     static SUDUT_PUTAR = Math.PI / 6;
+    /** Siluet tujuan potongan puzzle. Satu material dipakai bersama — hantunya tidak pernah berbeda. */
+    static GHOST_MATERIAL = new THREE.MeshBasicMaterial({
+        color: 0xfbbf24,
+        transparent: true,
+        opacity: 0.28,
+        depthWrite: false,
+        toneMapped: false,
+        side: THREE.DoubleSide,
+    });
 
     constructor(scene, camera, rig, targets) {
         this.camera = camera;
@@ -225,6 +234,7 @@ export class TeleportControls {
         controller.userData.grabbedNode = this.hoverNode;
         controller.userData.grabbedParent = this.hoverNode.parent;
         controller.attach(this.hoverNode);
+        if (this.hoverNode.userData.ghost) this.hoverNode.userData.ghost.visible = true;
         pulse(controller, 0.4, 40);
         this.logger?.log("objek_digenggam", this.hoverNode.name);
     }
@@ -233,6 +243,7 @@ export class TeleportControls {
         const node = controller.userData.grabbedNode;
         if (!node) return;
         controller.userData.grabbedParent.attach(node);
+        if (node.userData.ghost) node.userData.ghost.visible = false;
         controller.userData.grabbedNode = null;
         controller.userData.grabbedParent = null;
         // A release that misses the slot is one failed attempt — that's the "jumlah
@@ -254,6 +265,10 @@ export class TeleportControls {
      * @param {boolean} bolehDilepas false di perangkat yang tidak bisa menggenggam
      */
     registerPuzzle(node, delta, bolehDilepas) {
+        // Dikloning SEBELUM userData diisi: Object3D.copy() menyalin userData lewat
+        // JSON, dan slotParent adalah referensi Object3D yang membuatnya melingkar.
+        const ghost = bolehDilepas ? TeleportControls.buatHantu(node) : null;
+
         node.userData.slotPosition = node.position.clone();
         node.userData.slotQuaternion = node.quaternion.clone();
         node.userData.slotParent = node.parent;
@@ -264,8 +279,31 @@ export class TeleportControls {
         // terjangkau selamanya. Sengaja TIDAK ditandai solved: kedipannya tetap perlu,
         // objeknya memang masih interaktif di HP (nama, deskripsi, audio).
         if (bolehDilepas) {
+            // Hantu menempati transform bawaan; potongan aslinya yang bergeser.
+            node.userData.ghost = ghost;
+            node.parent.add(ghost);
             node.position.add(new THREE.Vector3().fromArray(delta));
         }
+    }
+
+    /**
+     * Siluet tembus pandang potongan di posisi terpasangnya, muncul hanya selama
+     * digenggam. Tanpanya radius snap 0,5 m tidak terlihat sama sekali dan siswa
+     * memegang batu tanpa tahu ke mana — penyebab macet nomor satu (§8 A1).
+     *
+     * Memandu, tidak mengunci: murni visual, tidak ada aturan yang bergantung padanya.
+     * `raycast` dimatikan di tiap mesh supaya ia tidak pernah jadi hoverNode dan
+     * mencemari event log dengan objek_dilihat / panel_dibuka palsu.
+     */
+    static buatHantu(node) {
+        const ghost = node.clone();
+        ghost.traverse((child) => {
+            if (!child.isMesh) return;
+            child.material = TeleportControls.GHOST_MATERIAL;
+            child.raycast = () => {};
+        });
+        ghost.visible = false;
+        return ghost;
     }
 
     /** Puzzle: released piece within reach of its slot snaps in place and counts as solved. */
