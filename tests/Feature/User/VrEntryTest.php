@@ -42,6 +42,25 @@ test('authenticated user can open vr museum page for a valid museum', function (
     $response->assertSee((string) $museum->museum_id, false);
 });
 
+test('vr museum page ships a valid importmap for every vr module', function () {
+    $user = User::factory()->create(['level_sekarang' => 1, 'progress_level_sekarang' => 1]);
+    $situs = SitusPeninggalan::factory()->create(['user_id' => $user->id]);
+    $museum = VirtualMuseum::factory()->create(['situs_id' => $situs->situs_id]);
+
+    $html = $this->actingAs($user)->get(route('vr.museum', [
+        'situs_id' => $situs->situs_id,
+        'museum_id' => $museum->museum_id,
+    ]))->getContent();
+
+    expect(preg_match('/<script type="importmap">(.*?)<\/script>/s', $html, $matches))->toBe(1);
+
+    $imports = json_decode($matches[1], true, flags: JSON_THROW_ON_ERROR)['imports'];
+
+    foreach (['vr-phases', 'vr-responden', 'vr-events', 'vr-panels', 'vr-controls', 'vr-sesi', 'vr-hp'] as $modul) {
+        expect($imports)->toHaveKey($modul);
+    }
+});
+
 test('vr museum page exposes only objects with a mesh name', function () {
     $user = User::factory()->create(['level_sekarang' => 1, 'progress_level_sekarang' => 1]);
     $situs = SitusPeninggalan::factory()->create(['user_id' => $user->id]);

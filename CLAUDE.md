@@ -262,13 +262,39 @@ melihat pesan admin, dan record yang mesh-nya hilang cukup diabaikan.
 `model_mtime` hanya diisi kalau `posisi_awal` ada. Objek informatif tidak
 menyimpan koordinat, jadi tidak ada yang bisa basi.
 
-### VR interaction affordances (public/assets/js/vr-museum.js)
+### Susunan berkas runtime VR (`public/assets/js/`)
+
+Dulu satu `vr-museum.js` 1200 baris. Sekarang tujuh modul, semuanya tetap di
+`public/assets/js/` dan **didaftarkan di importmap sebagai bare specifier** (blade
+`guest/vr/museum.blade.php` melakukannya lewat satu array `$modulVr`). Jangan
+memindahkannya ke Vite dan jangan mengimpornya lewat path relatif — impor relatif
+tidak ikut cache-busting `?v={filemtime}`, jadi headset menyajikan versi basi setelah
+salah satu modul disunting.
+
+| Berkas           | Isi                                                         | Impor Three? |
+| ---------------- | ----------------------------------------------------------- | ------------ |
+| `vr-museum.js`   | scene, cahaya, model, jalur headset, `main()`                | ya           |
+| `vr-controls.js` | `TeleportControls`, `pulse()`                                | ya           |
+| `vr-panels.js`   | `InfoPanel`, `PhasePanel`, `ExitButton`, `wrapText`          | ya           |
+| `vr-hp.js`       | `DeviceOrientationControls`, jalur stereo HP                 | ya           |
+| `vr-events.js`   | `EventLogger`                                                | **tidak**    |
+| `vr-phases.js`   | `PhaseManager`, state 4 fase                                 | **tidak**    |
+| `vr-responden.js`| deret `kode_responden` mode kiosk                            | **tidak**    |
+| `vr-sesi.js`     | panel penutup sesi, pergantian responden (DOM murni)         | **tidak**    |
+
+Tiga berkas tanpa Three.js diuji `npm run test:js`. `EventLogger` punya `start()`
+terpisah dari constructor justru untuk itu: constructor hanya menyiapkan state,
+`start()` yang memasang `setInterval` dan pengait `pagehide`, jadi tes bisa membuat
+logger tanpa meninggalkan timer hidup yang menahan proses node. `flush()` menerima
+pengirim opsional (`send`) yang di produksi selalu `navigator.sendBeacon`.
+
+### VR interaction affordances
 
 Iterating on "how does the user know what's interactive" — in order of what was tried:
 
-1. **Permanent faint glow** on every mesh with `userData.vrObject` (`TeleportControls.pulseInteractive`) — clones materials per-instance (so the glow doesn't leak onto other meshes sharing the same material) and oscillates `emissiveIntensity` so objects are spottable without pointing at them. Turns off once a puzzle piece is `solved`.
-2. **Hover outline**: back-side shell mesh (duplicate geometry, 4% larger, `BackSide` material, `raycast = () => {}` so it doesn't self-intersect) shown only while a controller ray / gaze is on that node (`setOutline`). Scaled about the geometry's own bounding-box center (not local origin) to avoid drift on meshes authored off-center. Replaced the old "reticle turns yellow" hover feedback — reticle is now purple-only, reserved for teleport-to-floor.
-3. **Gaze cursor for phone/no-controller mode**: a small ring mesh parented to the camera (`this.cursor`, not an HTML overlay — an HTML overlay would sit on the seam between the two stereo eyes on phone VR). Turns yellow when hovering something interactive. Hidden automatically when a tracked XR controller is connected (controller ray + outline take over).
+1. **Sorotan hanya saat ditunjuk** (`TeleportControls.pulseHovered`) — `markInteractive` mengkloning material per-instance (supaya sorotan tidak bocor ke mesh lain yang sematerial) dan menyetel `emissive` kuning dengan `emissiveIntensity = 0`; hanya node yang sedang di-hover yang berdenyut. **Dua pendekatan sebelumnya sudah dicoba dan ditolak di headset nyata, jangan dihidupkan lagi:** (a) glow permanen di semua objek interaktif — seluruh museum bersinar dan sorotan berhenti berarti apa-apa; (b) outline shell (geometri diduplikat, dibesarkan 4%, material `BackSide` kuning) — di aset nyata ia terbaca sebagai model kembar berwarna, bukan garis tepi.
+2. **Gerak bebas thumbstick** (`gerakBebas`), mendampingi teleport bukan menggantikannya. Stik kiri berjalan searah pandangan (`KECEPATAN_JALAN` 2 m/s), stik kanan memutar **per langkah 30°** (`SUDUT_PUTAR`) — bertahap, bukan mulus, karena rotasi mulus adalah penyebab motion sickness nomor satu dan respondennya siswa yang baru pertama pakai headset. `putarRig` memutar mengelilingi posisi kepala, bukan titik asal rig, kalau tidak siswa terlempar menyamping. Handedness dibaca dari `event.data.handedness` di handler `connected`. Tidak ada collision — lantai datar dan museum terbuka.
+3. **Gaze cursor for phone/no-controller mode**: a small ring mesh parented to the camera (`this.cursor`, not an HTML overlay — an HTML overlay would sit on the seam between the two stereo eyes on phone VR). Turns yellow when hovering something interactive. Hidden automatically when a tracked XR controller is connected (controller ray + sorotan hover take over).
 4. **Multi-controller active-switching bug fix**: `TeleportControls.controller` (the one driving hover raycasts) used to lock to whichever controller connected first and never change. Fixed so `select` *and* `squeezestart` from either hand promote it to active, with a forced `teleport.update()` before `grabStart()` so the just-activated hand's own hover state (not the previous hand's) is what gets grabbed.
 
 5. **Controller models**: `XRControllerModelFactory` on `renderer.xr.getControllerGrip(index)` renders the real hardware's controller (Quest Touch, etc.) instead of only a ray line. The factory fetches profiles from `@webxr-input-profiles/assets` on jsDelivr at runtime — allowed by the CSP's `connect-src https:`, so don't be surprised by the network request.
@@ -399,10 +425,29 @@ Sekarang ada tombol "✕ Selesai" di kiri atas (bukan tengah, supaya tidak jatuh
 jahitan dua mata) yang membatalkan RAF, keluar fullscreen, mengembalikan render mono,
 lalu memunculkan `showPostSessionPanel()`.
 
-Di headset, keluar ditangani sistem; panel yang sama muncul lewat event `sessionend`
-milik `renderer.xr`.
+Di headset, jalan keluarnya **`ExitButton`, mesh di dalam scene** (`vr-panels.js`),
+memanggil `renderer.xr.getSession().end()`. Perlu digambar di scene karena `VRButton`
+dan tombol "✕ Selesai" sama-sama DOM, dan DOM tidak dirender di dalam sesi
+`immersive-vr` — tanpa ini satu-satunya jalan keluar adalah tombol sistem Meta, jadi
+fasilitator harus meraih controller siswa tiap pergantian responden, puluhan kali per
+sesi kiosk. Berakhirnya sesi tetap lewat handler `sessionend` milik `renderer.xr`,
+satu muara untuk semua cara keluar.
 
-Panel itu HTML biasa dan itu benar, tapi alasannya bukan yang paling jelas — baca ini
+Dua hal yang menjaga tombol itu tidak merusak apa pun:
+
+- **Tidak boleh tersenggol.** Diletakkan di kanan-bawah, cermin `PhasePanel` di
+  kiri-bawah, jadi harus ditunjuk dengan sengaja — plus konfirmasi tekan-dua-kali
+  dalam 4 detik. Satu siswa yang keluar tak sengaja berarti satu responden hilang
+  datanya, dan itu tidak bisa diulang setelah ia pulang.
+- **Tidak boleh bocor ke event log.** `TeleportControls.update()` menguji tombol lebih
+  dulu; selama ia ditunjuk, raycast target museum dilewati sepenuhnya sehingga
+  `hoverNode` null dan tidak ada `objek_dilihat` / `panel_dibuka` yang tercatat.
+
+Ini **tidak** melanggar "fase tidak pernah mengunci" dan bukan pula pengganti tombol
+DOM di HP: di HP tombol "✕ Selesai" sudah benar, karena mode stereo HP bukan sesi
+WebXR.
+
+Panel penutup itu HTML biasa dan itu benar, tapi alasannya bukan yang paling jelas — baca ini
 sebelum menaruh UI lain di DOM. Panel dibangun di JS, bukan blade, karena `sesi_id`
 lahir dari `crypto.randomUUID()` di klien.
 
@@ -484,9 +529,9 @@ Urutan fase, status modul, dan keputusan desain menuju TKT 6 ada di
   `npm run test:js` (`node --test`, nol dependensi baru) untuk logika JS murni di
   `tests/js/`. Pembatasnya: apa pun yang butuh Three.js, canvas, atau WebXR tidak bisa
   ditest — verifikasi manual di headset. Logika yang bisa dinyatakan sebagai fungsi
-  murni **dipisahkan ke berkas tanpa impor Three.js** supaya bisa ditest; `vr-phases.js`
-  adalah contoh dan polanya. Kalau menambah logika VR yang tidak menggambar apa pun,
-  ikuti pola itu, jangan menaruhnya di `vr-museum.js`.
+  murni **dipisahkan ke berkas tanpa impor Three.js** supaya bisa ditest; `vr-phases.js`,
+  `vr-responden.js`, dan `vr-events.js` adalah contoh dan polanya. Kalau menambah logika
+  VR yang tidak menggambar apa pun, ikuti pola itu, jangan menaruhnya di `vr-museum.js`.
 - **`npm run test:js` wajib dijalankan dari shell WSL dengan node WSL**, sama seperti
   `php`/`composer`/`artisan`. Sebagian terminal di mesin ini mewarisi npm Windows dari
   `/mnt/c/Program Files/nodejs/`, yang berjalan lewat interop dengan cwd berupa path UNC
@@ -497,7 +542,8 @@ Urutan fase, status modul, dan keputusan desain menuju TKT 6 ada di
   lebih berbahaya daripada tidak ada tes sama sekali. Dengan path eksplisit, node yang
   salah gagal keras dengan exit 1. Menambah berkas tes baru berarti menambahkannya ke
   skrip di `package.json`; itu disengaja.
-- Sisa `vr-museum.js` (rendering, raycast, kontrol XR) tidak ditest otomatis — verifikasi manual.
+- Modul VR yang mengimpor Three.js (rendering, raycast, kontrol XR, panel canvas) tidak ditest otomatis — verifikasi manual di headset.
+- `tests/Feature/User/VrEntryTest.php` memeriksa importmap halaman VR benar-benar JSON valid dan memuat ketujuh modul. Importmap rusak = seluruh sesi VR gagal muat, dan itu tidak terlihat dari tes lain mana pun.
 - A real **Meta Quest 2** headset is now available for testing (previously only the Chrome "Immersive Web Emulator" extension, which has known quirks: controller rays don't move until you drag the Pos/Rot sliders in its panel, and select/squeeze must be triggered from its panel buttons, not real hardware). Prefer testing puzzle/outline/controller-switching behavior on the real headset over the emulator going forward.
 
 ===

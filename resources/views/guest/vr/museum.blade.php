@@ -15,17 +15,21 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;600;700&display=swap"
         rel="stylesheet" />
 
-    {{-- Modul JS murni yang dipisahkan dari vr-museum.js didaftarkan di sini, bukan diimpor
-         lewat path relatif. Impor relatif tidak ikut cache-busting ?v= milik berkas induknya,
-         jadi headset akan menyajikan versi basi setelah aturannya disunting — dan hard-refresh
-         di browser Quest bukan hal sepele saat responden sudah antre. --}}
+    {{-- Modul yang dipisahkan dari vr-museum.js didaftarkan di sini, bukan diimpor lewat
+         path relatif. Impor relatif tidak ikut cache-busting ?v= milik berkas induknya,
+         jadi headset akan menyajikan versi basi setelah salah satu modul disunting — dan
+         hard-refresh di browser Quest bukan hal sepele saat responden sudah antre. --}}
+    @php
+        $modulVr = ['vr-phases', 'vr-responden', 'vr-events', 'vr-panels', 'vr-controls', 'vr-sesi', 'vr-hp'];
+    @endphp
     <script type="importmap">
         {
           "imports": {
             "three": "https://cdn.jsdelivr.net/npm/three@v0.153.0/build/three.module.js",
-            "three/jsm/": "https://cdn.jsdelivr.net/npm/three@v0.153.0/examples/jsm/",
-            "vr-phases": "{{ asset('assets/js/vr-phases.js') }}?v={{ filemtime(public_path('assets/js/vr-phases.js')) }}",
-            "vr-responden": "{{ asset('assets/js/vr-responden.js') }}?v={{ filemtime(public_path('assets/js/vr-responden.js')) }}"
+            "three/jsm/": "https://cdn.jsdelivr.net/npm/three@v0.153.0/examples/jsm/"
+            @foreach ($modulVr as $modul)
+                ,"{{ $modul }}": "{{ asset("assets/js/{$modul}.js") }}?v={{ filemtime(public_path("assets/js/{$modul}.js")) }}"
+            @endforeach
           }
         }
     </script>

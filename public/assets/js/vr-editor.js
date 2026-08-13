@@ -119,8 +119,9 @@ renderer.setAnimationLoop(() => {
 
 // ---------- Selection / highlight ----------
 function clearHighlight() {
-    for (const { material, emissive } of state.highlighted) {
-        material.emissive?.setHex(emissive);
+    for (const { mesh, material } of state.highlighted) {
+        mesh.material.dispose();
+        mesh.material = material;
     }
     state.highlighted = [];
 }
@@ -129,10 +130,10 @@ function highlightNode(node) {
     clearHighlight();
     node.traverse((child) => {
         if (child.isMesh && child.material?.emissive) {
-            state.highlighted.push({
-                material: child.material,
-                emissive: child.material.emissive.getHex(),
-            });
+            // material bisa dipakai bersama beberapa mesh — klon dulu, kalau tidak
+            // seluruh mesh yang sematerial ikut menyala (lihat markInteractive di vr-museum.js)
+            state.highlighted.push({ mesh: child, material: child.material });
+            child.material = child.material.clone();
             child.material.emissive.setHex(0xff8800);
         }
     });
