@@ -9,6 +9,37 @@ export function pulse(controller, intensity, milliseconds) {
     controller?.userData.gamepad?.hapticActuators?.[0]?.pulse(intensity, milliseconds);
 }
 
+let audioCtx = null;
+
+/**
+ * "Klik" saat potongan puzzle terpasang — disintesis, nol aset, nol permintaan
+ * jaringan. Kalau nanti ada berkas asli, ganti isi fungsi ini saja.
+ *
+ * AudioContext dibuat malas di pemanggilan pertama: `checkSlot` hanya jalan di
+ * jalur genggam, jadi jalur HP (potongan tidak pernah dilepas) tidak pernah
+ * membuatnya. Sesi VR selalu dimulai dari klik tombol sehingga context-nya sudah
+ * boleh berbunyi, tapi seluruhnya dibungkus try/catch: gagal berbunyi jauh lebih
+ * baik daripada exception yang menghentikan render loop.
+ */
+export function bunyiSnap() {
+    try {
+        audioCtx ??= new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === "suspended") audioCtx.resume();
+        const t = audioCtx.currentTime;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.frequency.setValueAtTime(880, t);
+        osc.frequency.exponentialRampToValueAtTime(330, t + 0.12);
+        gain.gain.setValueAtTime(0.3, t);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.15);
+        osc.connect(gain).connect(audioCtx.destination);
+        osc.start(t);
+        osc.stop(t + 0.16);
+    } catch (e) {
+        console.warn("bunyi snap gagal", e);
+    }
+}
+
 // Point-and-teleport: reticle on the ground, from XR controller ray or gaze center.
 // ponytail: raycasts ground only — reticle can show through the model; add occluder check in Fase 2 if it bothers users.
 export class TeleportControls {
@@ -21,6 +52,8 @@ export class TeleportControls {
     /** Gerak bebas thumbstick: m/detik, dan besar satu langkah putar. */
     static KECEPATAN_JALAN = 2;
     static SUDUT_PUTAR = Math.PI / 6;
+    /** Lama kilau potongan yang baru terpasang, ms. */
+    static DURASI_KILAU = 450;
     /** Siluet tujuan potongan puzzle. Satu material dipakai bersama — hantunya tidak pernah berbeda. */
     static GHOST_MATERIAL = new THREE.MeshBasicMaterial({
         color: 0xfbbf24,
@@ -244,9 +277,15 @@ export class TeleportControls {
      */
     pulseHovered() {
         const aktif = this.hoverInfo && !this.hoverNode.userData.solved ? this.hoverNode : null;
-        const pulse = 0.35 + 0.25 * Math.sin(performance.now() / 300);
+        const now = performance.now();
+        const pulse = 0.35 + 0.25 * Math.sin(now / 300);
         for (const { node, materials } of this.interactiveMeshes) {
-            const intensity = node === aktif ? pulse : 0;
+            // Kilau potongan yang baru terpasang: memakai jalur emissive yang sama,
+            // dan karena intensitasnya dihitung ulang tiap frame dari sisa waktu, ia
+            // padam sendiri tanpa perlu timer atau pembersihan.
+            const sisa = (node.userData.kilauSampai ?? 0) - now;
+            const intensity =
+                sisa > 0 ? (sisa / TeleportControls.DURASI_KILAU) * 1.5 : node === aktif ? pulse : 0;
             for (const material of materials) material.emissiveIntensity = intensity;
         }
     }
@@ -385,6 +424,8 @@ export class TeleportControls {
         node.userData.solved = true;
         this.solvedCount++;
         pulse(controller, 1, 120);
+        bunyiSnap();
+        node.userData.kilauSampai = performance.now() + TeleportControls.DURASI_KILAU;
         this.logger?.log("puzzle_benar", node.name, { urutan: this.solvedCount });
         this.phases?.catatPemasangan(this.solvedCount);
 
