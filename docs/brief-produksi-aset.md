@@ -263,12 +263,45 @@ Kolom "Jenis" tidak mengubah apa pun yang dikerjakan pemodel — semuanya dipaha
 di tempatnya. Ia hanya memberi tahu objek mana yang nanti dijadikan potongan
 lepas lewat editor, dan karena itu **harus jadi node terpisah**.
 
-| Nama node | Nama tampilan | Jenis |
-|---|---|---|
-| `Punden_Berundak_Utama` | Punden Berundak Utama | Informatif |
-| `Padma_Kurung` | Padma Kurung | Informatif |
-| `Area_Persembahyangan` | Area Persembahyangan | Informatif |
-| `Motif_Ceplok_Bunga_A` … `_D` | Motif Ceplok Bunga | Dilepas lewat editor — wajib node terpisah |
+### Yang sudah ada di GLB saat ini
+
+Tujuh node, semuanya sudah terpisah dan sudah punya baris database lengkap dengan
+nilai karakter. Tidak ada yang perlu dipecah lagi untuk membuat potongan lepas —
+mana pun dari tujuh ini bisa dijadikan potongan hanya lewat editor visual.
+
+| Nama node | Jenis |
+|---|---|
+| `Punden_Berundak_Utama` | Informatif |
+| `Punden_Berundak_Kedua` | Informatif |
+| `Padma_Kurung` | Informatif |
+| `Candi_Bentar` | Informatif |
+| `Area_Persembahyangan` | Informatif |
+| `Bale_Pesandekan` | Informatif |
+| `Lingkungan_Situs` | Informatif |
+
+### Potongan lepas yang diminta — artefak kecil, bukan bangunan
+
+Tujuh node di atas semuanya bangunan atau area. Secara teknis bisa dijadikan
+potongan, dan untuk gladi bersih memang itu yang dipakai, tapi mengangkat gapura
+utuh bukan kegiatan yang punya makna arkeologis.
+
+Yang diminta ke pemodel adalah **artefak kecil yang masuk akal diangkat sepasang
+tangan**, dibingkai sebagai **pemugaran**: benda tergeser dari tempatnya, siswa
+mengembalikannya. Empat sampai lima potongan sudah cukup.
+
+| Kandidat | Kenapa cocok |
+|---|---|
+| Lumpang batu / batu dakon | Ikonik prasejarah, jelas berukuran tangan, ceritanya kuat |
+| Umpak (batu alas tiang) | Punya "tempat yang benar" yang tidak perlu dijelaskan |
+| Menhir kecil / batu tegak | Penempatannya justru inti maknanya |
+| Batu pipih penutup / anak tangga punden | Satu keping hilang dari susunan — paling mudah dibaca |
+| `Motif_Ceplok_Bunga_A` … `_D` | Empat potongan sekaligus, sudah disebut di dokumentasi model |
+
+Syaratnya tetap satu dan hanya satu: **node terpisah**. Dipahat di tempatnya,
+model diserahkan utuh, editor yang melepas.
+
+Kalau memecah dari mesh yang sudah ada: Edit Mode → pilih face-nya → `P` →
+*Separate by Selection* → rename object → ekspor. Nama object itulah `mesh_name`.
 
 Deskripsi tiap objek sudah tersedia di `daftar-objek.txt` dan dipakai apa adanya.
 
