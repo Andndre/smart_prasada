@@ -407,7 +407,70 @@ Sekalian: perbaiki alamat "Situs Prasasti Sukuh".
 
 ---
 
-## 8. Perlu keputusan ketua peneliti / tim
+## 8. Roadmap pengalaman VR (kesenangan & keterbacaan)
+
+Rencana di §6–§7 memastikan sistemnya **ada**. Bagian ini soal apakah siswa
+**menikmati** dan **mengerti** — yang di TKT 6 bukan kemewahan, karena skor
+keterpakaian dan jumlah panggilan ke fasilitator adalah datanya.
+
+### Anggaran waktu — pembatas terkeras, baca dulu
+
+Satu headset, 106 responden uji lapangan × 2 kegiatan, plus 56 responden uji produk.
+Pada 6 menit per orang itu sudah **>20 jam** giliran. Jadi anggaran desain adalah
+**sesi 5 menit, sekali jalan, tanpa penjelasan lisan**.
+
+Konsekuensi yang membunuh banyak ide bagus: tidak ada tutorial panjang, tidak ada
+konten bercabang, tidak ada yang perlu diulang. Setiap detik yang dipakai siswa untuk
+kebingungan adalah detik yang dicuri dari data. Fitur yang menambah durasi sesi harus
+membayar dirinya dengan pengurangan kebingungan.
+
+Prioritas seluruh daftar di bawah diurut dengan itu, bukan dengan kekerenan.
+
+### Tahap A — sebelum uji apa pun. Ini penutup celah, bukan hiasan
+
+| # | Item | Ukuran | Kenapa wajib |
+|---|---|---|---|
+| A1 | **Hantu tujuan saat menggenggam** — siluet transparan potongan muncul di posisi terpasangnya selama digenggam, hilang saat terpasang | kecil | Tanpa ini puzzle **tidak terbaca**. Siswa memegang batu dan tidak tahu ke mana. Radius snap 0,5 m tidak terlihat sama sekali. Ini penyebab macet nomor satu yang bisa diramalkan, dan macet = panggil fasilitator = menabrak kriteria hal. 11 |
+| A2 | **Petunjuk arah objek belum dilihat** — panah/titik kecil di tepi kursor menunjuk objek interaktif terdekat yang panelnya belum pernah dibuka | kecil | `AMBANG_PENGAMATAN` = 100%. Satu objek yang terlewat di belakang punden menahan siswa di fase eksplorasi selamanya. Matikan sendiri begitu semua terlihat |
+| A3 | **Onboarding 20 detik** — label melayang menempel di model controller ("Tekan = pilih", "Dorong = jalan"), hilang setelah aksi pertama tiap jenis | kecil | Mayoritas responden belum pernah memakai headset. Label yang menempel di controller dibaca sambil melihat tangan sendiri; panel teks di depan wajah tidak dibaca siapa pun |
+| A4 | **Ambience audio** — satu loop lingkungan (angin, serangga, gamelan sangat pelan) yang menyala saat sesi mulai | sepele (kode), konten | Peningkatan kehadiran per byte tertinggi yang ada. Keheningan total membuat scene terasa seperti model 3D, bukan tempat. Sudah masuk pos anggaran "Aset Digital (3D & **Audio**)" |
+| A5 | **Umpan balik snap yang memuaskan** — bunyi "tuk" + kilau singkat + haptic (haptic sudah ada) | sepele | Puzzle terasa selesai, bukan sekadar berhenti bergerak. Ini yang membuat siswa mau memasang potongan kedua |
+
+A1 dan A2 sebenarnya perbaikan keterpakaian yang menyamar jadi fitur. Kalau waktu
+habis, keduanya tetap dikerjakan; A3–A5 boleh gugur.
+
+### Tahap B — kalau A selesai dan aset sudah datang
+
+| # | Item | Ukuran | Catatan |
+|---|---|---|---|
+| B1 | **Momen penutup** — saat potongan terakhir terpasang: audio menguat, cahaya berubah sebentar, narasi satu kalimat, lalu `PhasePanel` mengantar ke refleksi | kecil | Sesi butuh akhir yang terasa, bukan panel yang tiba-tiba muncul. Ini juga jembatan naratif ke modul refleksi — persis "pemaknaan" hal. 9 |
+| B2 | **Narasi audio per objek** | konten saja | `path_audio` + `InfoPanel.show()` sudah jalan. Suara mengalahkan teks di VR: siswa bisa tetap melihat objek sambil mendengar. Pertimbangkan **memangkas teks panel** begitu ada audio |
+| B3 | **Panorama 360 → modul orientasi** | sedang | Menyelamatkan 27 `adegan` yang sudah ada sekaligus menghapus tuduhan "tur pasif": foto situs asli 15 detik sebagai pembuka konteks sebelum masuk scene 3D, bukan atraksi tersendiri. Perlu keputusan tim (§9 no. 3) |
+| B4 | **Skala & titik pandang pembuka** | sepele | Arahkan pandangan awal ke punden pada jarak yang membuatnya terasa besar. Kesan pertama menentukan seluruh laporan keterpakaian, dan ini gratis |
+
+### Tahap C — sengaja tidak dikerjakan
+
+Ditulis supaya tidak diusulkan ulang tiap bulan.
+
+| Item | Alasan menolak |
+|---|---|
+| **Kuis pilihan ganda di dalam VR** | Alat ukur kognitif sudah tiga: pretest, posttest, refleksi. Kuis keempat menduplikasi sambil menambah risiko titik macet di dalam headset. Nilai pedagogisnya sudah ditutup refleksi, yang jawabannya lebih kaya untuk analisis per nilai karakter |
+| **Skor, bintang, papan peringkat** | Mengubah fokus dari makna ke angka — berlawanan dengan "internalisasi nilai karakter". Juga mendorong siswa buru-buru, merusak data time-on-task |
+| **Physics rigidbody** | Lihat §2. Keputusan yang sudah diambil |
+| **Multiplayer / sesi bersama** | Satu headset. Tidak ada yang bisa diajak |
+| **Hand tracking** | Anggaran menyebut controller, uji terikat motion controller (hal. 19). Menambah jalur input kedua berarti dua jalur yang harus diuji dengan waktu giliran yang sama |
+| **Gerak lokomosi mulus penuh** | Penyebab motion sickness nomor satu. Rotasi per langkah 30° tetap |
+| **Museum kedua** | Satu situs tuntas mengalahkan empat belas situs tipis. Lihat brief aset |
+
+### Urutan eksekusi
+
+    A1 → A2 → A3 → A4/A5 → [aset datang] → B2 → B1 → B4 → (B3 kalau tim setuju)
+
+A1–A3 tidak menunggu aset apa pun; bisa dikerjakan sekarang di GLB yang ada.
+
+---
+
+## 9. Perlu keputusan ketua peneliti / tim
 
 1. **Daftar nilai karakter** dari Pardi dkk. (2017) untuk mengganti placeholder enum.
 2. **Lingkup katalog situs.** 17 situs, hanya 7–9 prasejarah, dan konten paling
