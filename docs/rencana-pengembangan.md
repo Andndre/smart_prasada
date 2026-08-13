@@ -445,8 +445,7 @@ habis, keduanya tetap dikerjakan; A3–A5 boleh gugur.
 |---|---|---|---|
 | B1 | **Momen penutup** — saat potongan terakhir terpasang: audio menguat, cahaya berubah sebentar, narasi satu kalimat, lalu `PhasePanel` mengantar ke refleksi | kecil | Sesi butuh akhir yang terasa, bukan panel yang tiba-tiba muncul. Ini juga jembatan naratif ke modul refleksi — persis "pemaknaan" hal. 9 |
 | B2 | **Narasi audio per objek** | konten saja | `path_audio` + `InfoPanel.show()` sudah jalan. Suara mengalahkan teks di VR: siswa bisa tetap melihat objek sambil mendengar. Pertimbangkan **memangkas teks panel** begitu ada audio |
-| B3 | **Panorama 360 → modul orientasi** | sedang | Menyelamatkan 27 `adegan` yang sudah ada sekaligus menghapus tuduhan "tur pasif": foto situs asli 15 detik sebagai pembuka konteks sebelum masuk scene 3D, bukan atraksi tersendiri. Perlu keputusan tim (§9 no. 3) |
-| B4 | **Skala & titik pandang pembuka** | sepele | Arahkan pandangan awal ke punden pada jarak yang membuatnya terasa besar. Kesan pertama menentukan seluruh laporan keterpakaian, dan ini gratis |
+| B3 | **Skala & titik pandang pembuka** | sepele | Arahkan pandangan awal ke punden pada jarak yang membuatnya terasa besar. Kesan pertama menentukan seluruh laporan keterpakaian, dan ini gratis |
 
 ### Tahap C — sengaja tidak dikerjakan
 
@@ -461,10 +460,33 @@ Ditulis supaya tidak diusulkan ulang tiap bulan.
 | **Hand tracking** | Anggaran menyebut controller, uji terikat motion controller (hal. 19). Menambah jalur input kedua berarti dua jalur yang harus diuji dengan waktu giliran yang sama |
 | **Gerak lokomosi mulus penuh** | Penyebab motion sickness nomor satu. Rotasi per langkah 30° tetap |
 | **Museum kedua** | Satu situs tuntas mengalahkan empat belas situs tipis. Lihat brief aset |
+| **Panorama 360 diangkat jadi modul orientasi** | Sempat diusulkan, lalu ditarik — lihat di bawah |
+
+### Panorama 360: biarkan di tempatnya
+
+Ia **di luar jalur sesi VR**: rute sendiri (`/panorama/{situsId}` dari halaman detail
+situs), stack sendiri (A-Frame), tidak disinggung `guest/vr/museum.blade.php`. Jadi ia
+tidak memakan satu detik pun dari anggaran 5 menit.
+
+**Jangan dihapus.** Biayanya nyata — 2 rute, controller, `Scene` + `Hotspot`, 5 view
+admin, viewer, 2 migration, berkas storage — dan yang dibeli nol perbaikan terukur.
+Risiko "terlihat seperti tur pasif" adalah masalah **presentasi**, bukan kode: cukup
+jangan taruh panorama di skrip demo TKT.
+
+**Jangan pula diintegrasikan.** Menjadikannya modul orientasi menambah durasi sesi *dan*
+memasukkan stack 3D kedua ke jalur VR — dua hal yang dilarang anggaran waktu di atas.
+
+Pemakaian yang benar: tampilkan di **layar laptop fasilitator** sebagai konteks sebelum
+headset dipakai. Nol biaya VR, nol baris kode, dan justru berharga selama GLB-nya masih
+sketsa.
+
+Satu verifikasi tertunda: DB dev berisi **0 adegan**; angka 27 berasal dari audit DB
+produksi. Kalau prod ternyata juga kosong, panorama masuk Fase 1 sebagai fitur mati —
+bukan karena novelty, karena memang tidak ada isinya.
 
 ### Urutan eksekusi
 
-    A1 → A2 → A3 → A4/A5 → [aset datang] → B2 → B1 → B4 → (B3 kalau tim setuju)
+    A1 → A2 → A3 → A4/A5 → [aset datang] → B2 → B1 → B3
 
 A1–A3 tidak menunggu aset apa pun; bisa dikerjakan sekarang di GLB yang ada.
 
@@ -476,9 +498,8 @@ A1–A3 tidak menunggu aset apa pun; bisa dikerjakan sekarang di GLB yang ada.
 2. **Lingkup katalog situs.** 17 situs, hanya 7–9 prasejarah, dan konten paling
    dipakai (Le Mayeur, 94 sesi) di luar lingkup. Dipangkas untuk uji TKT, atau
    dibiarkan? Ini mengubah alur yang dilihat pengguna.
-3. **Panorama 360.** 27 `adegan` berisi data nyata, tapi hal. 10 menegaskan
-   kebaruannya justru "bukan tur virtual pasif" — fitur ini melemahkan klaim
-   novelty utama. Opsi: jadikan modul **orientasi**, atau dilepas.
+3. ~~**Panorama 360.**~~ *Diputuskan: biarkan di tempatnya, di luar jalur VR — §8.*
+   Yang tersisa hanya verifikasi: apakah DB produksi benar berisi 27 `adegan`?
 4. **Klaim AI** (hal. 3). Kata "AI"/"kecerdasan buatan" hanya muncul sekali di
    seluruh 27 halaman, di kolom Bidang Strategis, dan rumusan masalah yang
    dipilih di kolom itu ("6.9 Rendahnya Pengakuan Internasional") bukan tentang
