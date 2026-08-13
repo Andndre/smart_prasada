@@ -15,7 +15,7 @@ import { XRControllerModelFactory } from "three/jsm/webxr/XRControllerModelFacto
 import { PhaseManager } from "vr-phases";
 import { EventLogger } from "vr-events";
 import { TeleportControls } from "vr-controls";
-import { ExitButton, InfoPanel, PhasePanel } from "vr-panels";
+import { ControllerHints, ExitButton, InfoPanel, PhasePanel } from "vr-panels";
 import { showPostSessionPanel } from "vr-sesi";
 import { startPhoneStereoSession } from "vr-hp";
 
@@ -145,6 +145,9 @@ async function startHeadsetSession(renderer, scene, camera, rig, teleport) {
     teleport.exitButton = new ExitButton(camera, () => renderer.xr.getSession()?.end());
 
     const controllerModelFactory = new XRControllerModelFactory();
+    const hints = [];
+    // Aksi dilakukan dengan tangan mana pun menghapus labelnya di kedua tangan.
+    const tandaiHint = (aksi) => hints.forEach((h) => h.tandai(aksi));
 
     for (const index of [0, 1]) {
         const controller = renderer.xr.getController(index);
@@ -166,6 +169,7 @@ async function startHeadsetSession(renderer, scene, camera, rig, teleport) {
             controller.userData.handedness = event.data.handedness;
             ray.visible = tracked;
             if (tracked && !teleport.controller) teleport.controller = controller;
+            if (tracked) hint.pasang(event.data.handedness);
         });
         controller.addEventListener("disconnected", () => {
             controller.userData.connected = false;
@@ -175,10 +179,12 @@ async function startHeadsetSession(renderer, scene, camera, rig, teleport) {
         });
         controller.addEventListener("select", () => {
             if (controller.userData.connected) teleport.controller = controller;
+            tandaiHint("tekan");
             teleport.trigger();
         });
         controller.addEventListener("squeezestart", () => {
             if (controller.userData.connected) teleport.controller = controller;
+            tandaiHint("genggam");
             teleport.update(); // refresh hoverNode for the hand that just squeezed, not the previous one
             teleport.grabStart(controller);
         });
@@ -190,6 +196,10 @@ async function startHeadsetSession(renderer, scene, camera, rig, teleport) {
         const grip = renderer.xr.getControllerGrip(index);
         grip.add(controllerModelFactory.createControllerModel(grip));
         rig.add(grip);
+
+        // Onboarding 20 detik (A3): label menempel di grip, dipasang saat handedness diketahui.
+        const hint = new ControllerHints(grip, controller);
+        hints.push(hint);
     }
 
     // Satu muara untuk semua cara keluar — tombol dalam scene, tombol sistem Meta, atau
@@ -203,6 +213,7 @@ async function startHeadsetSession(renderer, scene, camera, rig, teleport) {
     const clock = new THREE.Clock();
     renderer.setAnimationLoop(() => {
         teleport.gerakBebas(Math.min(clock.getDelta(), 0.1));
+        for (const hint of hints) hint.update();
         teleport.update();
         renderer.render(scene, camera);
     });

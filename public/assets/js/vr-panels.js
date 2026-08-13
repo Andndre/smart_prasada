@@ -346,3 +346,110 @@ export class ExitButton {
         this.texture.needsUpdate = true;
     }
 }
+
+/**
+ * Onboarding 20 detik: label yang MENEMPEL DI MODEL CONTROLLER.
+ *
+ * Mayoritas responden belum pernah memakai headset, dan anggarannya 5 menit per
+ * orang tanpa penjelasan lisan. Label ditempel ke grip karena melihat tangan
+ * sendiri adalah gerakan pertama semua orang saat masuk VR; panel teks di depan
+ * wajah tidak dibaca siapa pun — PhasePanel sudah di sana.
+ *
+ * Memandu, tidak mengunci: tidak ada aturan lain yang boleh bergantung padanya.
+ * Sprite, bukan plane: selalu menghadap kamera, jadi label tetap terbaca berapa
+ * pun tangan diputar. Bukan anggota `targets`, jadi tidak pernah kena raycast
+ * maupun mencemari event log.
+ */
+export class ControllerHints {
+    static UMUR_MS = 20000;
+    static PETUNJUK = {
+        left: [{ aksi: "dorong", teks: "Dorong = jalan" }],
+        right: [
+            { aksi: "tekan", teks: "Tekan = pilih" },
+            { aksi: "genggam", teks: "Genggam = angkat" },
+        ],
+    };
+
+    /** @param {THREE.Object3D} grip @param {THREE.Object3D} controller sumber gamepad */
+    constructor(grip, controller) {
+        this.grip = grip;
+        this.controller = controller;
+        this.sisa = [];
+        this.sprite = null;
+        this.kedaluwarsa = 0;
+    }
+
+    /** Dipanggil dari handler "connected" — handedness baru diketahui di sana. */
+    pasang(handedness) {
+        this.sisa = (ControllerHints.PETUNJUK[handedness] ?? []).slice();
+        if (!this.sisa.length || this.sprite) return;
+
+        this.canvas = document.createElement("canvas");
+        this.canvas.width = 256;
+        this.canvas.height = 128;
+        this.texture = new THREE.CanvasTexture(this.canvas);
+        this.texture.colorSpace = THREE.SRGBColorSpace;
+
+        this.sprite = new THREE.Sprite(
+            new THREE.SpriteMaterial({
+                map: this.texture,
+                transparent: true,
+                toneMapped: false,
+                depthTest: false,
+            }),
+        );
+        this.sprite.scale.set(0.16, 0.08, 1);
+        this.sprite.position.set(0, 0.11, 0);
+        this.sprite.renderOrder = 1003;
+        this.grip.add(this.sprite);
+        this.kedaluwarsa = performance.now() + ControllerHints.UMUR_MS;
+        this.draw();
+    }
+
+    /** Aksi sudah dilakukan sekali — labelnya hilang. */
+    tandai(aksi) {
+        if (!this.sprite) return;
+        const sisa = this.sisa.filter((p) => p.aksi !== aksi);
+        if (sisa.length === this.sisa.length) return;
+        this.sisa = sisa;
+        if (this.sisa.length) this.draw();
+        else this.buang();
+    }
+
+    update() {
+        if (!this.sprite) return;
+        const axes = this.controller.userData.gamepad?.axes;
+        if (axes && Math.hypot(axes[2] ?? axes[0] ?? 0, axes[3] ?? axes[1] ?? 0) > 0.5) {
+            this.tandai("dorong");
+        }
+        // Yang tidak pernah dipakai hilang sendiri; label permanen jadi sampah visual.
+        if (this.sprite && performance.now() > this.kedaluwarsa) this.buang();
+    }
+
+    buang() {
+        this.grip.remove(this.sprite);
+        this.sprite.material.map.dispose();
+        this.sprite.material.dispose();
+        this.sprite = null;
+    }
+
+    draw() {
+        const ctx = this.canvas.getContext("2d");
+        const { width, height } = this.canvas;
+        ctx.clearRect(0, 0, width, height);
+
+        ctx.fillStyle = "rgba(17, 24, 39, 0.85)";
+        ctx.beginPath();
+        ctx.roundRect(0, 0, width, height, 18);
+        ctx.fill();
+
+        ctx.fillStyle = "#ffffff";
+        ctx.font = "600 30px Inter, sans-serif";
+        ctx.textAlign = "center";
+        const y0 = height / 2 - (this.sisa.length - 1) * 20 + 10;
+        this.sisa.forEach((p, i) => ctx.fillText(p.teks, width / 2, y0 + i * 40));
+        ctx.textAlign = "left";
+
+        this.texture.needsUpdate = true;
+    }
+}
