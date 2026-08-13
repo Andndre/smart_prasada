@@ -2,6 +2,7 @@
  * Navigasi dan interaksi di dalam scene: teleport, hover, genggam, gerak bebas.
  */
 import * as THREE from "three";
+import { petunjukLayar, targetTerdekat } from "vr-petunjuk";
 
 /** Short vibration on the controller that triggered the action; no-op without haptics. */
 export function pulse(controller, intensity, milliseconds) {
@@ -92,6 +93,24 @@ export class TeleportControls {
         this.cursor.position.z = -1;
         this.cursor.renderOrder = 1001;
         camera.add(this.cursor);
+
+        // Penanda arah objek belum-diamati (§8 A2). Digambar di dalam scene dan
+        // ditempel ke kamera, sama seperti kursor: DOM hanya terlihat satu mata di
+        // layout stereo HP. Tidak pernah kena raycast — bukan anggota `targets` —
+        // jadi ia tidak bisa mencemari event log.
+        this.petunjuk = new THREE.Mesh(
+            new THREE.ConeGeometry(0.015, 0.03, 3),
+            new THREE.MeshBasicMaterial({
+                color: 0xfbbf24,
+                toneMapped: false,
+                depthTest: false,
+                transparent: true,
+                opacity: 0.85,
+            }),
+        );
+        this.petunjuk.renderOrder = 1001;
+        this.petunjuk.visible = false;
+        camera.add(this.petunjuk);
     }
 
     update() {
@@ -137,6 +156,7 @@ export class TeleportControls {
             this.hoverInfo || this.menunjukKeluar ? 0xfbbf24 : 0xffffff,
         );
         this.trackGaze();
+        this.updatePetunjuk();
         if (this.phases) this.phasePanel?.update(this.phases.deskripsi());
 
         if (this.hoverInfo) {
@@ -181,6 +201,37 @@ export class TeleportControls {
             this.gazeLogged = true;
             this.logger?.log("objek_dilihat", this.hoverNode.name);
         }
+    }
+
+    /**
+     * Panah kecil di tepi kursor menunjuk objek belum-diamati terdekat (§8 A2).
+     *
+     * Mati sendiri begitu `semuaObjekDiamati` — dan karena fase interaksi/refleksi
+     * hanya bisa tercapai setelah ambang itu terlampaui, satu pemeriksaan ini juga
+     * yang membuatnya tidak pernah muncul di dua fase terakhir. Sumber datanya
+     * `PhaseManager` yang sama dengan pemicu transisi, jadi tidak bisa melenceng.
+     */
+    updatePetunjuk() {
+        this.petunjuk.visible = false;
+        if (!this.phases || this.phases.semuaObjekDiamati) return;
+
+        // ponytail: posisi dunia dihitung ulang tiap frame untuk segelintir objek —
+        // ganti jadi cache kalau satu scene pernah punya ratusan objek interaktif.
+        const kandidat = this.interactiveMeshes.map(({ node }) => {
+            const posisi = node.getWorldPosition(new THREE.Vector3());
+            return { nama: node.name, x: posisi.x, y: posisi.y, z: posisi.z };
+        });
+        const kepala = this.camera.getWorldPosition(new THREE.Vector3());
+        const target = targetTerdekat(kandidat, kepala, this.phases.objekDiamati);
+        if (!target) return;
+
+        const lokal = this.camera.worldToLocal(new THREE.Vector3(target.x, target.y, target.z));
+        const { sudut, tampil } = petunjukLayar(lokal.x, lokal.y, lokal.z);
+        if (!tampil) return;
+
+        this.petunjuk.position.set(Math.cos(sudut) * 0.07, Math.sin(sudut) * 0.07, -1);
+        this.petunjuk.rotation.z = sudut - Math.PI / 2;
+        this.petunjuk.visible = true;
     }
 
     /**

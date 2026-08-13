@@ -56,7 +56,7 @@ test('vr museum page ships a valid importmap for every vr module', function () {
 
     $imports = json_decode($matches[1], true, flags: JSON_THROW_ON_ERROR)['imports'];
 
-    foreach (['vr-phases', 'vr-responden', 'vr-events', 'vr-panels', 'vr-controls', 'vr-sesi', 'vr-hp'] as $modul) {
+    foreach (['vr-phases', 'vr-responden', 'vr-events', 'vr-panels', 'vr-controls', 'vr-sesi', 'vr-hp', 'vr-petunjuk'] as $modul) {
         expect($imports)->toHaveKey($modul);
     }
 });

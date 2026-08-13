@@ -280,9 +280,10 @@ salah satu modul disunting.
 | `vr-events.js`   | `EventLogger`                                                | **tidak**    |
 | `vr-phases.js`   | `PhaseManager`, state 4 fase                                 | **tidak**    |
 | `vr-responden.js`| deret `kode_responden` mode kiosk                            | **tidak**    |
+| `vr-petunjuk.js` | pilih objek belum-diamati terdekat + sudut penanda           | **tidak**    |
 | `vr-sesi.js`     | panel penutup sesi, pergantian responden (DOM murni)         | **tidak**    |
 
-Tiga berkas tanpa Three.js diuji `npm run test:js`. `EventLogger` punya `start()`
+Empat berkas tanpa Three.js diuji `npm run test:js`. `EventLogger` punya `start()`
 terpisah dari constructor justru untuk itu: constructor hanya menyiapkan state,
 `start()` yang memasang `setInterval` dan pengait `pagehide`, jadi tes bisa membuat
 logger tanpa meninggalkan timer hidup yang menahan proses node. `flush()` menerima
@@ -294,11 +295,12 @@ Iterating on "how does the user know what's interactive" — in order of what wa
 
 1. **Sorotan hanya saat ditunjuk** (`TeleportControls.pulseHovered`) — `markInteractive` mengkloning material per-instance (supaya sorotan tidak bocor ke mesh lain yang sematerial) dan menyetel `emissive` kuning dengan `emissiveIntensity = 0`; hanya node yang sedang di-hover yang berdenyut. **Dua pendekatan sebelumnya sudah dicoba dan ditolak di headset nyata, jangan dihidupkan lagi:** (a) glow permanen di semua objek interaktif — seluruh museum bersinar dan sorotan berhenti berarti apa-apa; (b) outline shell (geometri diduplikat, dibesarkan 4%, material `BackSide` kuning) — di aset nyata ia terbaca sebagai model kembar berwarna, bukan garis tepi.
 2. **Gerak bebas thumbstick** (`gerakBebas`), mendampingi teleport bukan menggantikannya. Stik kiri berjalan searah pandangan (`KECEPATAN_JALAN` 2 m/s), stik kanan memutar **per langkah 30°** (`SUDUT_PUTAR`) — bertahap, bukan mulus, karena rotasi mulus adalah penyebab motion sickness nomor satu dan respondennya siswa yang baru pertama pakai headset. `putarRig` memutar mengelilingi posisi kepala, bukan titik asal rig, kalau tidak siswa terlempar menyamping. Handedness dibaca dari `event.data.handedness` di handler `connected`. Tidak ada collision — lantai datar dan museum terbuka.
-3. **Gaze cursor for phone/no-controller mode**: a small ring mesh parented to the camera (`this.cursor`, not an HTML overlay — an HTML overlay would sit on the seam between the two stereo eyes on phone VR). Turns yellow when hovering something interactive. Hidden automatically when a tracked XR controller is connected (controller ray + sorotan hover take over).
-4. **Multi-controller active-switching bug fix**: `TeleportControls.controller` (the one driving hover raycasts) used to lock to whichever controller connected first and never change. Fixed so `select` *and* `squeezestart` from either hand promote it to active, with a forced `teleport.update()` before `grabStart()` so the just-activated hand's own hover state (not the previous hand's) is what gets grabbed.
+3. **Penanda arah objek belum diamati** (`TeleportControls.updatePetunjuk`, logika murni di `vr-petunjuk.js`) — panah kecil di tepi kursor menunjuk objek belum-diamati **terdekat**, muncul hanya kalau simpangannya dari pusat pandangan > 18°. Perlu karena `AMBANG_PENGAMATAN` = 100%: satu objek terlewat di balik punden menahan siswa di eksplorasi selamanya tanpa error apa pun. Sumber "sudah diamati" adalah `PhaseManager.objekDiamati` yang sama dengan pemicu transisi — jangan membuat pelacakan kedua. Mati sendiri saat `semuaObjekDiamati`, dan karena fase interaksi/refleksi hanya tercapai setelah ambang itu, satu pemeriksaan itu juga yang menahannya muncul di dua fase terakhir. Ditempel ke kamera (bukan DOM: stereo HP hanya memperlihatkannya ke satu mata) dan bukan anggota `targets`, jadi tidak pernah kena raycast atau mencemari event log.
+4. **Gaze cursor for phone/no-controller mode**: a small ring mesh parented to the camera (`this.cursor`, not an HTML overlay — an HTML overlay would sit on the seam between the two stereo eyes on phone VR). Turns yellow when hovering something interactive. Hidden automatically when a tracked XR controller is connected (controller ray + sorotan hover take over).
+5. **Multi-controller active-switching bug fix**: `TeleportControls.controller` (the one driving hover raycasts) used to lock to whichever controller connected first and never change. Fixed so `select` *and* `squeezestart` from either hand promote it to active, with a forced `teleport.update()` before `grabStart()` so the just-activated hand's own hover state (not the previous hand's) is what gets grabbed.
 
-5. **Controller models**: `XRControllerModelFactory` on `renderer.xr.getControllerGrip(index)` renders the real hardware's controller (Quest Touch, etc.) instead of only a ray line. The factory fetches profiles from `@webxr-input-profiles/assets` on jsDelivr at runtime — allowed by the CSP's `connect-src https:`, so don't be surprised by the network request.
-6. **Haptics**: `controller.userData.gamepad` is captured in the `connected` handler; the `pulse()` helper fires a short vibration on grab (0.4 / 40ms) and a stronger one on a correct puzzle snap (1.0 / 120ms). No-op on devices without haptic actuators.
+6. **Controller models**: `XRControllerModelFactory` on `renderer.xr.getControllerGrip(index)` renders the real hardware's controller (Quest Touch, etc.) instead of only a ray line. The factory fetches profiles from `@webxr-input-profiles/assets` on jsDelivr at runtime — allowed by the CSP's `connect-src https:`, so don't be surprised by the network request.
+7. **Haptics**: `controller.userData.gamepad` is captured in the `connected` handler; the `pulse()` helper fires a short vibration on grab (0.4 / 40ms) and a stronger one on a correct puzzle snap (1.0 / 120ms). No-op on devices without haptic actuators.
 
 The on-screen debug surfaces (load banner, fullscreen error box, gyro readout) were removed once a real headset was available — a load failure now logs to the console and shows a message in `#loading-container`.
 
@@ -543,7 +545,7 @@ Urutan fase, status modul, dan keputusan desain menuju TKT 6 ada di
   salah gagal keras dengan exit 1. Menambah berkas tes baru berarti menambahkannya ke
   skrip di `package.json`; itu disengaja.
 - Modul VR yang mengimpor Three.js (rendering, raycast, kontrol XR, panel canvas) tidak ditest otomatis — verifikasi manual di headset.
-- `tests/Feature/User/VrEntryTest.php` memeriksa importmap halaman VR benar-benar JSON valid dan memuat ketujuh modul. Importmap rusak = seluruh sesi VR gagal muat, dan itu tidak terlihat dari tes lain mana pun.
+- `tests/Feature/User/VrEntryTest.php` memeriksa importmap halaman VR benar-benar JSON valid dan memuat seluruh modul. Importmap rusak = seluruh sesi VR gagal muat, dan itu tidak terlihat dari tes lain mana pun.
 - A real **Meta Quest 2** headset is now available for testing (previously only the Chrome "Immersive Web Emulator" extension, which has known quirks: controller rays don't move until you drag the Pos/Rot sliders in its panel, and select/squeeze must be triggered from its panel buttons, not real hardware). Prefer testing puzzle/outline/controller-switching behavior on the real headset over the emulator going forward.
 
 ===
