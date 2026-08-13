@@ -228,9 +228,19 @@ export class TeleportControls {
         return null;
     }
 
-    /** Squeeze/grip: pick up the hovered object; release puts it back in the scene graph. */
+    /**
+     * Squeeze/grip: pick up the hovered object; release puts it back in the scene graph.
+     *
+     * Hanya potongan puzzle (`slotParent`, dipasang oleh registerPuzzle) yang bisa
+     * digenggam. Objek informatif tidak punya tempat kembali — `checkSlot` selalu
+     * false untuknya, jadi ia tergeletak permanen di mana pun siswa melepasnya, dan
+     * objek_digenggam/objek_dilepas-nya menggelembungkan metrik "jumlah percobaan"
+     * fase interaksi. Tap/trigger untuk membuka panel info tetap terbuka untuk semua
+     * objek — ini bukan penguncian fase.
+     */
     grabStart(controller) {
-        if (!this.hoverNode || this.hoverNode.userData.solved || controller.userData.grabbedNode) return;
+        if (!this.hoverNode?.userData.slotParent) return;
+        if (this.hoverNode.userData.solved || controller.userData.grabbedNode) return;
         controller.userData.grabbedNode = this.hoverNode;
         controller.userData.grabbedParent = this.hoverNode.parent;
         controller.attach(this.hoverNode);
