@@ -430,11 +430,11 @@ Prioritas seluruh daftar di bawah diurut dengan itu, bukan dengan kekerenan.
 
 | # | Item | Ukuran | Kenapa wajib |
 |---|---|---|---|
-| A1 | **Hantu tujuan saat menggenggam** — siluet transparan potongan muncul di posisi terpasangnya selama digenggam, hilang saat terpasang | kecil | Tanpa ini puzzle **tidak terbaca**. Siswa memegang batu dan tidak tahu ke mana. Radius snap 0,5 m tidak terlihat sama sekali. Ini penyebab macet nomor satu yang bisa diramalkan, dan macet = panggil fasilitator = menabrak kriteria hal. 11 |
+| A1 | ~~**Hantu tujuan saat menggenggam**~~ *(selesai)* — siluet transparan potongan muncul di posisi terpasangnya selama digenggam, hilang saat terpasang | kecil | Tanpa ini puzzle **tidak terbaca**. Siswa memegang batu dan tidak tahu ke mana. Radius snap 0,5 m tidak terlihat sama sekali. Ini penyebab macet nomor satu yang bisa diramalkan, dan macet = panggil fasilitator = menabrak kriteria hal. 11 |
 | A2 | ~~**Petunjuk arah objek belum dilihat**~~ *(selesai — `vr-petunjuk.js`)* — panah/titik kecil di tepi kursor menunjuk objek interaktif terdekat yang panelnya belum pernah dibuka | kecil | `AMBANG_PENGAMATAN` = 100%. Satu objek yang terlewat di belakang punden menahan siswa di fase eksplorasi selamanya. Matikan sendiri begitu semua terlihat |
-| A3 | **Onboarding 20 detik** — label melayang menempel di model controller ("Tekan = pilih", "Dorong = jalan"), hilang setelah aksi pertama tiap jenis | kecil | Mayoritas responden belum pernah memakai headset. Label yang menempel di controller dibaca sambil melihat tangan sendiri; panel teks di depan wajah tidak dibaca siapa pun |
+| A3 | ~~**Onboarding 20 detik**~~ *(selesai — `ControllerHints`)* — label melayang menempel di model controller ("Tekan = pilih", "Dorong = jalan"), hilang setelah aksi pertama tiap jenis | kecil | Mayoritas responden belum pernah memakai headset. Label yang menempel di controller dibaca sambil melihat tangan sendiri; panel teks di depan wajah tidak dibaca siapa pun |
 | A4 | **Ambience audio** — satu loop lingkungan (angin, serangga, gamelan sangat pelan) yang menyala saat sesi mulai | sepele (kode), konten | Peningkatan kehadiran per byte tertinggi yang ada. Keheningan total membuat scene terasa seperti model 3D, bukan tempat. Sudah masuk pos anggaran "Aset Digital (3D & **Audio**)" |
-| A5 | **Umpan balik snap yang memuaskan** — bunyi "tuk" + kilau singkat + haptic (haptic sudah ada) | sepele | Puzzle terasa selesai, bukan sekadar berhenti bergerak. Ini yang membuat siswa mau memasang potongan kedua |
+| A5 | ~~**Umpan balik snap yang memuaskan**~~ *(selesai)* — bunyi "tuk" + kilau singkat + haptic (haptic sudah ada) | sepele | Puzzle terasa selesai, bukan sekadar berhenti bergerak. Ini yang membuat siswa mau memasang potongan kedua |
 
 A1 dan A2 sebenarnya perbaikan keterpakaian yang menyamar jadi fitur. Kalau waktu
 habis, keduanya tetap dikerjakan; A3–A5 boleh gugur.
@@ -486,7 +486,10 @@ bukan karena novelty, karena memang tidak ada isinya.
 
 ### Urutan eksekusi
 
-    A1 → A2 → A3 → A4/A5 → [aset datang] → B2 → B1 → B3
+    ~~A1 → A2 → A3 → A5 → B3~~ selesai → **[menunggu aset]** → A4 → B2 → B1
+
+Semua yang bisa dikerjakan tanpa aset sudah selesai. Sisa daftar ini menunggu
+satu loop ambience dan narasi audio per objek — bukan menunggu pemrograman.
 
 A1–A3 tidak menunggu aset apa pun; bisa dikerjakan sekarang di GLB yang ada.
 
