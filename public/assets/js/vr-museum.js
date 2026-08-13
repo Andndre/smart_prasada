@@ -17,6 +17,7 @@ import { EventLogger } from "vr-events";
 import { TeleportControls } from "vr-controls";
 import { ControllerHints, ExitButton, InfoPanel, PhasePanel } from "vr-panels";
 import { showPostSessionPanel } from "vr-sesi";
+import { titikPandangAwal } from "vr-pandangan";
 import { startPhoneStereoSession } from "vr-hp";
 
 function hideElement(id) {
@@ -99,16 +100,33 @@ function createScene() {
 }
 
 // Drop the model onto the ground; X/Z position is authored in Blender and respected as-is
-// so the artist controls how far the spawn point is from the model.
-function placeModel(model, camera, ground) {
+// so the artist controls which side the model is approached from.
+//
+// Titik pandang pembuka (§8 B3) dipasang ke RIG, bukan ke kamera: di WebXR pose kepala
+// milik tracking dan camera.rotation apa pun akan tertimpa pada frame pertama. Rig hanya
+// menempatkan; setelah itu siswa bebas menoleh, teleport, dan berjalan.
+function placeModel(model, camera, rig, ground) {
     const box = new THREE.Box3().setFromObject(model);
     model.position.y -= box.min.y;
 
+    const awal = titikPandangAwal(
+        {
+            minX: box.min.x, maxX: box.max.x,
+            minY: 0, maxY: box.max.y - box.min.y,
+            minZ: box.min.z, maxZ: box.max.z,
+        },
+        camera.fov,
+        camera.aspect,
+    );
+
     camera.position.set(0, 1.6, 0);
+    rig.position.set(awal.x, 0, awal.z);
+    rig.rotation.y = awal.yaw;
 
     const farthestCorner = Math.max(
         Math.abs(box.min.x), Math.abs(box.max.x),
         Math.abs(box.min.z), Math.abs(box.max.z),
+        Math.hypot(awal.x, awal.z), // lantai harus sampai ke titik berdiri, bukan cuma ke model
     );
     ground.scale.setScalar(Math.max(1, (farthestCorner + 5) / 20));
 }
@@ -265,7 +283,7 @@ async function main() {
     );
     hideElement("loading-container");
 
-    placeModel(model, camera, ground);
+    placeModel(model, camera, rig, ground);
     scene.add(model);
     teleport.targets.push(model);
 

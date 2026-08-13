@@ -275,15 +275,16 @@ salah satu modul disunting.
 | ---------------- | ----------------------------------------------------------- | ------------ |
 | `vr-museum.js`   | scene, cahaya, model, jalur headset, `main()`                | ya           |
 | `vr-controls.js` | `TeleportControls`, `pulse()`                                | ya           |
-| `vr-panels.js`   | `InfoPanel`, `PhasePanel`, `ExitButton`, `wrapText`          | ya           |
+| `vr-panels.js`   | `InfoPanel`, `PhasePanel`, `ExitButton`, `ControllerHints`, `wrapText` | ya |
 | `vr-hp.js`       | `DeviceOrientationControls`, jalur stereo HP                 | ya           |
 | `vr-events.js`   | `EventLogger`                                                | **tidak**    |
 | `vr-phases.js`   | `PhaseManager`, state 4 fase                                 | **tidak**    |
 | `vr-responden.js`| deret `kode_responden` mode kiosk                            | **tidak**    |
 | `vr-petunjuk.js` | pilih objek belum-diamati terdekat + sudut penanda           | **tidak**    |
 | `vr-sesi.js`     | panel penutup sesi, pergantian responden (DOM murni)         | **tidak**    |
+| `vr-pandangan.js`| titik berdiri + yaw rig pembuka, dari bounding box model      | **tidak**    |
 
-Empat berkas tanpa Three.js diuji `npm run test:js`. `EventLogger` punya `start()`
+Berkas tanpa Three.js diuji `npm run test:js`. `EventLogger` punya `start()`
 terpisah dari constructor justru untuk itu: constructor hanya menyiapkan state,
 `start()` yang memasang `setInterval` dan pengait `pagehide`, jadi tes bisa membuat
 logger tanpa meninggalkan timer hidup yang menahan proses node. `flush()` menerima

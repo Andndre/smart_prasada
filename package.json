@@ -5,7 +5,7 @@
         "build": "vite build",
         "dev": "vite",
         "watch": "vite build --watch",
-        "test:js": "node --test tests/js/vr-phases.test.js tests/js/vr-responden.test.js tests/js/vr-events.test.js tests/js/vr-petunjuk.test.js",
+        "test:js": "node --test tests/js/vr-phases.test.js tests/js/vr-responden.test.js tests/js/vr-events.test.js tests/js/vr-petunjuk.test.js tests/js/vr-pandangan.test.js",
         "host": "cloudflared tunnel run --protocol http2 --url http://localhost:8000 ganesha-tunnel"
     },
     "devDependencies": {

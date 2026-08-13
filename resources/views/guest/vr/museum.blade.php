@@ -20,7 +20,7 @@
          jadi headset akan menyajikan versi basi setelah salah satu modul disunting — dan
          hard-refresh di browser Quest bukan hal sepele saat responden sudah antre. --}}
     @php
-        $modulVr = ['vr-phases', 'vr-responden', 'vr-events', 'vr-panels', 'vr-controls', 'vr-sesi', 'vr-hp', 'vr-petunjuk'];
+        $modulVr = ['vr-phases', 'vr-responden', 'vr-events', 'vr-panels', 'vr-controls', 'vr-sesi', 'vr-hp', 'vr-petunjuk', 'vr-pandangan'];
     @endphp
     <script type="importmap">
         {

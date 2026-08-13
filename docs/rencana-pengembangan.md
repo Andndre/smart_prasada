@@ -445,7 +445,7 @@ habis, keduanya tetap dikerjakan; A3–A5 boleh gugur.
 |---|---|---|---|
 | B1 | **Momen penutup** — saat potongan terakhir terpasang: audio menguat, cahaya berubah sebentar, narasi satu kalimat, lalu `PhasePanel` mengantar ke refleksi | kecil | Sesi butuh akhir yang terasa, bukan panel yang tiba-tiba muncul. Ini juga jembatan naratif ke modul refleksi — persis "pemaknaan" hal. 9 |
 | B2 | **Narasi audio per objek** | konten saja | `path_audio` + `InfoPanel.show()` sudah jalan. Suara mengalahkan teks di VR: siswa bisa tetap melihat objek sambil mendengar. Pertimbangkan **memangkas teks panel** begitu ada audio |
-| B3 | **Skala & titik pandang pembuka** | sepele | Arahkan pandangan awal ke punden pada jarak yang membuatnya terasa besar. Kesan pertama menentukan seluruh laporan keterpakaian, dan ini gratis |
+| B3 | ~~**Skala & titik pandang pembuka**~~ *(selesai — `vr-pandangan.js`)* | sepele | Arahkan pandangan awal ke punden pada jarak yang membuatnya terasa besar. Kesan pertama menentukan seluruh laporan keterpakaian, dan ini gratis |
 
 ### Tahap C — sengaja tidak dikerjakan
 
