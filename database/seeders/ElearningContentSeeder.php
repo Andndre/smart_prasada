@@ -47,8 +47,9 @@ class ElearningContentSeeder extends Seeder
             $this->seedPretest($materi, $topicKey);
             $this->seedEbook($materi, $topicKey);
             $this->seedPosttest($materi, $topicKey);
-            $this->seedSitus($materi, $topicKey, $admin);
         }
+
+        $this->seedSitus($admin);
     }
 
     private function getContentData(): array
@@ -71,10 +72,6 @@ class ElearningContentSeeder extends Seeder
                     ['q' => 'Bahan utama pembuatan punden berundak?', 'a' => 'Batu kapur', 'b' => 'Besi', 'c' => 'Kayu', 'd' => 'Tanah liat', 'e' => 'Logam', 'answer' => 'A'],
                     ['q' => 'Fungsi祭坛 punden berundak terkait dengan kepercayaan?', 'a' => 'Animisme', 'b' => 'Hindu', 'c' => 'Buddha', 'd' => 'Kristen', 'e' => 'Islam', 'answer' => 'A'],
                 ],
-                'situs' => [
-                    ['nama' => 'Situs Punden Berundak Gangkelit', 'alamat' => 'Desa Bedulu, Gianyar, Bali', 'lat' => -8.5093, 'lng' => 115.3056, 'deskripsi' => 'Situs punden berundak bersejarah di kawasan Bedulu.', 'masa' => null],
-                    ['nama' => 'Situs Punden Berundak Yeh Ho', 'alamat' => 'Desa Pejem, Tabanan, Bali', 'lat' => -8.4234, 'lng' => 115.1234, 'deskripsi' => 'Situs peninggalan punden berundak di kawasan pesisir Tabanan.', 'masa' => null],
-                ],
             ],
             'Sarkofagus' => [
                 'pretest' => [
@@ -91,9 +88,6 @@ class ElearningContentSeeder extends Seeder
                     ['q' => 'Sarkofagus Yeh Mengening memiliki ciri?', 'a' => 'Bentuk manusia', 'b' => 'Bentuk rumah', 'c' => 'Bentuk animal', 'd' => 'Bentuk tanaman', 'e' => 'Bentuk abstrak', 'answer' => 'A'],
                     ['q' => 'Fungsi sarkofagus dalam masyarakat prasejarah?', 'a' => 'Tempat tinggal', 'b' => 'Pemakaman', 'c' => 'Simpananan', 'd' => 'Peribadatan', 'e' => 'Penerangan', 'answer' => 'B'],
                     ['q' => 'Lokasi utama penemuan sarkofagus di Bali?', 'a' => 'Kuta', 'b' => 'Bedulu', 'c' => 'Denpasar', 'd' => 'Singaraja', 'e' => 'Sanur', 'answer' => 'B'],
-                ],
-                'situs' => [
-                    ['nama' => 'Situs Sarkofagus Yeh Mengening', 'alamat' => 'Desa Bedulu, Gianyar, Bali', 'lat' => -8.5123, 'lng' => 115.3067, 'deskripsi' => 'Situs penemuan sarkofagus dengan ukiran wajah manusia.', 'masa' => null],
                 ],
             ],
             'Arca Megalitik' => [
@@ -112,9 +106,6 @@ class ElearningContentSeeder extends Seeder
                     ['q' => 'Arca Dwarapala ditemukan di?', 'a' => 'Bedulu', 'b' => 'Tampaksiring', 'c' => 'Kintamani', 'd' => 'Jembrana', 'e' => 'Klungkung', 'answer' => 'B'],
                     ['q' => 'Perbedaan arca megalitik dengan arca Hindu-Buddha?', 'a' => 'Tidak ada perbedaan', 'b' => 'Ukuran lebih besar dan lebih tua', 'c' => 'Berwarna', 'd' => 'Dapat bergerak', 'e' => 'Terbuat dari emas', 'answer' => 'B'],
                 ],
-                'situs' => [
-                    ['nama' => 'Situs Arca Megalitik Taman Bung Karno', 'alamat' => 'Desa Tampaksiring, Gianyar, Bali', 'lat' => -8.4321, 'lng' => 115.2876, 'deskripsi' => 'Kawasan penemuan arca megalitik di Gianyar.', 'masa' => null],
-                ],
             ],
             'Menhir' => [
                 'pretest' => [
@@ -132,9 +123,6 @@ class ElearningContentSeeder extends Seeder
                     ['q' => 'Orientasi menhir sering dikaitkan dengan?', 'a' => 'Arah angin', 'b' => 'Arah matahari', 'c' => 'Arah air', 'd' => 'Arah laut', 'e' => 'Arah gunung', 'answer' => 'B'],
                     ['q' => 'Fungsi ritual menhir?', 'a' => 'Hiburan', 'b' => 'Komunikasi dengan roh leluhur', 'c' => 'Pemakaman', 'd' => 'Penyimpanan', 'e' => 'Perang', 'answer' => 'B'],
                 ],
-                'situs' => [
-                    ['nama' => 'Situs Menhir Galian', 'alamat' => 'Desa Galian, Gianyar, Bali', 'lat' => -8.5012, 'lng' => 115.2987, 'deskripsi' => 'Situs penemuan menhir di kawasan Galian.', 'masa' => null],
-                ],
             ],
             'Dolmen' => [
                 'pretest' => [
@@ -151,9 +139,6 @@ class ElearningContentSeeder extends Seeder
                     ['q' => 'Bahan utama dolmen?', 'a' => 'Kayu', 'b' => 'Batu kapur', 'c' => 'Besi', 'd' => 'Tanah', 'e' => 'Logam', 'answer' => 'B'],
                     ['q' => 'Fungsi altar dolmen?', 'a' => 'Makan', 'b' => 'Persembahan ritual', 'c' => 'Tidur', 'd' => 'Bermain', 'e' => 'Berbicara', 'answer' => 'B'],
                     ['q' => 'Penelitian dolmen di Bali dilakukan oleh?', 'a' => 'Van Hövell', 'b' => 'Sutherland', 'c' => 'Korn', 'd' => 'Soekarno', 'e' => 'Habibie', 'answer' => 'C'],
-                ],
-                'situs' => [
-                    ['nama' => 'Situs Dolmen Malet', 'alamat' => 'Desa Malet, Gianyar, Bali', 'lat' => -8.4876, 'lng' => 115.3123, 'deskripsi' => 'Situs penemuan dolmen di kawasan Malet.', 'masa' => null],
                 ],
             ],
             // Era B - Hindu-Buddha
@@ -173,10 +158,6 @@ class ElearningContentSeeder extends Seeder
                     ['q' => 'Jumlah arca utama di Pura Besakih?', 'a' => '5', 'b' => '10', 'c' => '17', 'd' => '25', 'e' => '50', 'answer' => 'C'],
                     ['q' => 'Periode pembuatan arca Hindu-Buddha di Bali?', 'a' => '1000 SM', 'b' => 'Abad ke-8-14', 'c' => 'Abad ke-20', 'd' => '1945', 'e' => '1800', 'answer' => 'B'],
                 ],
-                'situs' => [
-                    ['nama' => 'Situs Arca Pura Besakih', 'alamat' => 'Desa Besakih, Rendang, Karangasem, Bali', 'lat' => -8.3764, 'lng' => 115.3167, 'deskripsi' => 'Kumpulan arca di kompleks Pura Besakih.', 'masa' => null],
-                    ['nama' => 'Situs Arca Yeh Ganggi', 'alamat' => 'Desa Yeh Ganggi, Klungkung, Bali', 'lat' => -8.5234, 'lng' => 115.4012, 'deskripsi' => 'Situs penemuan arca bersejarah di Yeh Ganggi.', 'masa' => null],
-                ],
             ],
             'Candi' => [
                 'pretest' => [
@@ -194,10 +175,6 @@ class ElearningContentSeeder extends Seeder
                     ['q' => 'Candi di Bali kebanyakan beragama?', 'a' => 'Buddha', 'b' => 'Hindu', 'c' => 'Kristen', 'd' => 'Islam', 'e' => 'Konghucu', 'answer' => 'B'],
                     ['q' => 'Arca yang ditemukan di Candi Gunung Kawi?', 'a' => 'Ganesha', 'b' => 'Shiva', 'c' => 'Vishnu', 'd' => 'Brahma', 'e' => 'Semua benar', 'answer' => 'E'],
                 ],
-                'situs' => [
-                    ['nama' => 'Candi Gunung Kawi', 'alamat' => 'Desa Tampaksiring, Gianyar, Bali', 'lat' => -8.4376, 'lng' => 115.3123, 'deskripsi' => 'Candi kuno yang diukir di tebing batu.', 'masa' => null],
-                    ['nama' => 'Candi Mengwi', 'alamat' => 'Desa Mengwi, Badung, Bali', 'lat' => -8.5234, 'lng' => 115.2345, 'deskripsi' => 'Situs candi bersejarah di Mengwi.', 'masa' => null],
-                ],
             ],
             'Prasasti' => [
                 'pretest' => [
@@ -214,9 +191,6 @@ class ElearningContentSeeder extends Seeder
                     ['q' => 'Periode prasasti di Bali?', 'a' => '1000 SM', 'b' => 'Abad ke-9-15', 'c' => 'Abad ke-20', 'd' => '1800', 'e' => '1945', 'answer' => 'B'],
                     ['q' => 'Prasasti sering ditemukan di?', 'a' => 'Laut', 'b' => 'Sungai', 'c' => 'Kaki bukit', 'd' => 'Hutan', 'e' => 'Sawah', 'answer' => 'C'],
                     ['q' => 'Informasi dalam prasasti meliputi?', 'a' => 'Hanya nama', 'b' => 'Sejarah, agama, Donation', 'c' => 'Hanya angka', 'd' => 'Hanya gambar', 'e' => 'Hanya cuaca', 'answer' => 'B'],
-                ],
-                'situs' => [
-                    ['nama' => 'Situs Prasasti Sukuh', 'alamat' => 'Desa Sukuh, Karangasem, Bali', 'lat' => -8.4234, 'lng' => 115.3567, 'deskripsi' => 'Lokasi penemuan prasasti Sukuh.', 'masa' => null],
                 ],
             ],
             // Era C - Majapahit
@@ -236,9 +210,6 @@ class ElearningContentSeeder extends Seeder
                     ['q' => 'Pengaruh Majapahit pada bahasa?', 'a' => 'Menghilangkan bahasa lokal', 'b' => 'Memperkaya kosakata', 'c' => 'Tidak berubah', 'd' => 'Menggantikan sepenuhnya', 'e' => 'Menghapus bahasa', 'answer' => 'B'],
                     ['q' => 'Tari Kecak berasal dari pengaruh?', 'a' => 'Majapahit', 'b' => 'Kolonial', 'c' => 'India', 'd' => 'China', 'e' => 'Eropa', 'answer' => 'A'],
                 ],
-                'situs' => [
-                    ['nama' => 'Pura Kehen', 'alamat' => 'Desa Bangli, Bangli, Bali', 'lat' => -8.3723, 'lng' => 115.1234, 'deskripsi' => 'Pura bersejarah yang dibangun pada masa pengaruh Majapahit.', 'masa' => null],
-                ],
             ],
             // Era D - Gelgel dan Sembilan Kerajaan
             'Wayang Kamasan' => [
@@ -256,9 +227,6 @@ class ElearningContentSeeder extends Seeder
                     ['q' => 'Bahan wayang Kamasan?', 'a' => 'Kulit', 'b' => 'Kayu', 'c' => 'Kain', 'd' => 'Tali', 'e' => 'Logam', 'answer' => 'B'],
                     ['q' => 'Perbedaan wayang Kamasan dengan wayang kulit?', 'a' => 'Teknik pembuatan', 'b' => 'Tidak ada', 'c' => 'Bahan', 'd' => 'Cerita', 'e' => 'Warna', 'answer' => 'A'],
                     ['q' => 'Wayang Kamasan disimpan di?', 'a' => 'Museum Puri Lukisan', 'b' => 'Museum Le Mayeur', 'c' => 'Museum Bali', 'd' => ' Semua benar', 'e' => 'Tidak ada', 'answer' => 'D'],
-                ],
-                'situs' => [
-                    ['nama' => 'Sentra Wayang Kamasan', 'alamat' => 'Desa Kamasan, Klungkung, Bali', 'lat' => -8.5234, 'lng' => 115.4123, 'deskripsi' => 'Pusat pembuatan dan penjualan wayang Kamasan.', 'masa' => null],
                 ],
             ],
             // Era E - Kolonial Belanda
@@ -278,9 +246,6 @@ class ElearningContentSeeder extends Seeder
                     ['q' => 'Gedung art deco banyak ditemukan di?', 'a' => 'Singaraja', 'b' => 'Denpasar', 'c' => 'Kuta', 'd' => 'Ubud', 'e' => 'Nusa Dua', 'answer' => 'A'],
                     ['q' => 'Peninggalan dokumenter kolonial di Bali?', 'a' => 'Pura', 'b' => 'Brosur dan foto', 'c' => 'Candi', 'd' => 'Arca', 'e' => 'Prasasti', 'answer' => 'B'],
                 ],
-                'situs' => [
-                    ['nama' => 'Gedung Art Deco Singaraja', 'alamat' => 'Kota Singaraja, Bali', 'lat' => -8.1234, 'lng' => 115.0876, 'deskripsi' => 'Kawasan gedung-gedung bergaya art deco peninggalan kolonial.', 'masa' => null],
-                ],
             ],
             // Era F - Pasca Kemerdekaan
             'Masa Pasca-Kemerdekaan' => [
@@ -298,10 +263,6 @@ class ElearningContentSeeder extends Seeder
                     ['q' => 'Peristiwa 1965 di Bali melibatkan?', 'a' => 'Hanya politik', 'b' => 'G30S', 'c' => 'Tsunami', 'd' => 'Gempa', 'e' => 'Tsunami dan gempa', 'answer' => 'B'],
                     ['q' => 'Peninggalan seni rupa modern di Bali?', 'a' => 'Candi', 'b' => 'Museum', 'c' => 'Pura', 'd' => 'Arca', 'e' => 'Prasasti', 'answer' => 'B'],
                     ['q' => 'Warisan budaya pasca kemerdekaan?', 'a' => 'Hanya tradisi', 'b' => 'Tradisi dan modernisasi', 'c' => 'Hanya modern', 'd' => 'Tidak ada', 'e' => 'Hanya arsitektur', 'answer' => 'B'],
-                ],
-                'situs' => [
-                    ['nama' => 'Monumen Perjuangan Rakyat Bali', 'alamat' => 'Kota Denpasar, Bali', 'lat' => -8.6534, 'lng' => 115.2145, 'deskripsi' => 'Monumen bersejarah perjuangan rakyat Bali.', 'masa' => null],
-                    ['nama' => 'Museum Le Mayeur', 'alamat' => 'Sanur, Denpasar, Bali', 'lat' => -8.6823, 'lng' => 115.2634, 'deskripsi' => 'Museum yang didirikan oleh pelukis Belgia Le Mayeur.', 'masa' => null],
                 ],
             ],
         ];
@@ -412,85 +373,290 @@ class ElearningContentSeeder extends Seeder
         }
     }
 
-    private function seedSitus(Materi $materi, ?string $topicKey, User $admin): void
+    /**
+     * Situs, museum, dan objek yang benar-benar punya berkas GLB di storage.
+     *
+     * Dipisahkan dari getContentData() karena datanya bukan konten per-topik
+     * yang bisa digenerate: tiap baris terikat pada satu berkas nyata. Objek
+     * sengaja tidak membawa mesh_name — penautan ke node GLB dilakukan admin
+     * lewat editor VR, dan menebaknya di sini hanya akan menghasilkan objek
+     * yang diam-diam tidak pernah muncul di headset.
+     *
+     * @return array<int, array{materi: string, nama: string, alamat: string, deskripsi: string, lat: float, lng: float, museum: string, model: string, objek: array<int, array<string, string|list<string>|null>>}>
+     */
+    private function getSitusData(): array
     {
-        $contentData = $this->getContentData();
-        $data = $contentData[$topicKey] ?? $contentData['Punden Berundak'];
+        return [
+            [
+                'materi' => 'Punden Berundak',
+                'nama' => 'Pura Candi',
+                'alamat' => 'Selulung, Kec. Kintamani, Kabupaten Bangli, Bali 80652',
+                'deskripsi' => 'Kompleks pura di Desa Selulung yang menyimpan punden berundak bertingkat lima peninggalan tradisi megalitik.',
+                'lat' => -8.19769754,
+                'lng' => 115.26779916,
+                'museum' => 'Punden Berundak di Pura Mehu',
+                'model' => 'virtual-museum/models/1774095667_Punden_Atas-v1.glb',
+                'objek' => [
+                    [
+                        'nama' => 'Punden Berundak Pelinggih I Ratu Gede Kanginan',
+                        'gambar_real' => 'virtual-museum/objects/images/1774059085_gambar_real_pundenatas1.jpg',
+                        'path_obj' => 'virtual-museum/objects/models/1773736570_obj_PundenAtas_1-v1.glb',
+                        'deskripsi' => 'Punden Berundak Pelinggih I Ratu Gede Kanginan merupakan bangunan suci bertingkat yang terdiri dari lima tingkatan dengan denah dasar berbentuk segi empat. Bangunan ini terbuat dari batu padas yang dikombinasikan dengan batu bata dan direkatkan menggunakan tanah. Setiap tingkatan memiliki teras yang semakin mengecil ke arah atas, mencerminkan konsep kesakralan yang meningkat menuju puncak. Pada bagian puncak terdapat struktur berbentuk mahkota padmasana yang terbuat dari batu padas, serta sebuah menhir berbentuk lonjong yang dipercaya berkaitan dengan pemujaan leluhur. Pada sisi selatan bangunan terdapat tangga dari susunan batu padas yang menghubungkan tingkat pertama hingga tingkat keempat. Pola hias pada bangunan ini relatif sederhana, dengan penutup lantai berbentuk capon (sisi genta) serta hiasan bunga teratai dan simbar gantung pada bagian sudut teras.',
+                        'path_audio' => 'virtual-museum/objects/audio/1775982250_audio_deskripsi3.mp3',
+                    ],
+                    [
+                        'nama' => 'Punden Berundak Pelinggih I Ratu Gede Makarang',
+                        'gambar_real' => 'virtual-museum/objects/images/1774059133_gambar_real_pundenatas2.jpg',
+                        'path_obj' => 'virtual-museum/objects/models/1773736612_obj_PundenAtas_2-v1.glb',
+                        'deskripsi' => 'Punden Berundak Pelinggih I Ratu Gede Makarang merupakan bangunan punden berundak yang terdiri dari empat tingkatan dengan denah dasar berbentuk segi empat. Bangunan ini disusun dari batu padas yang direkatkan menggunakan tanah dan memiliki teras pada setiap tingkatnya yang semakin mengecil ke arah atas. Pada bagian puncak bangunan terdapat sebuah menhir yang terbuat dari batu padas, yang diduga memiliki fungsi sebagai simbol pemujaan terhadap roh leluhur. Struktur bangunan ini memiliki bentuk yang sederhana tanpa ornamen atau pola hias yang rumit. Hiasan yang tampak hanya terdapat pada bagian penutup lantai teras yang diprofil berbentuk capon (sisi genta). Keberadaan bangunan ini menunjukkan kesinambungan tradisi megalitik dalam praktik keagamaan masyarakat Bali hingga masa sekarang.',
+                        'path_audio' => 'virtual-museum/objects/audio/1775982296_audio_deskripsi4.mp3',
+                    ],
+                    [
+                        'nama' => 'Punden Berundak di Pura Bale Agung',
+                        'gambar_real' => 'virtual-museum/objects/images/1774239979_gambar_real_WhatsAppImage2026-03-23at12.25.05.jpeg',
+                        'path_obj' => 'virtual-museum/objects/models/1774240301_obj_pundenmadya11-v1.glb',
+                        'deskripsi' => 'Punden berundak Madya Petirtaan terdiri atas tiga tingkatan dengan ukuran yang semakin kecil ke arah atas. Pada bagian puncak bangunan terdapat sebuah lubang yang diduga sebagai tempat menhir. Oleh masyarakat setempat, bangunan ini disebut Madya Petirtaan dan digunakan sebagai tempat memohon air suci yang digunakan dalam berbagai upacara keagamaan.',
+                        'path_audio' => 'virtual-museum/objects/audio/1775988611_audio_deskripsi5revisi.mp3',
+                    ],
+                ],
+            ],
 
-        if (! isset($data['situs'])) {
-            // Create a default situs
+            [
+                'materi' => 'Punden Berundak',
+                'nama' => 'Pura Mihu',
+                'alamat' => 'Selulung, Kec. Kintamani, Kabupaten Bangli, Bali 80652',
+                'deskripsi' => 'Areal pura dengan dua punden berundak yang menghadap Gunung Penulisan sebagai arah pemujaan.',
+                'lat' => -8.19831133,
+                'lng' => 115.26741012,
+                'museum' => 'Punden Berundak di Pura Candi',
+                'model' => 'virtual-museum/models/1773755935_PundenBawah-v1.glb',
+                'objek' => [
+                    [
+                        'nama' => 'Punden Berundak Pelinggih I Ratu Dukuh Jegir',
+                        'gambar_real' => 'virtual-museum/objects/images/1774059698_gambar_real_pundenbawah1.jpg',
+                        'path_obj' => 'virtual-museum/objects/models/1774062505_obj_pundenbawah2-v1.glb',
+                        'deskripsi' => 'Punden berundak ini terdiri atas lima tingkatan yang semakin kecil ke arah atas dan memiliki bentuk dasar segi empat. Bangunan tersebut dibuat dari pasangan batu padas dengan perekat tanah dan terletak di halaman barat laut Punden Berundak Ratu Gede Kemulan. Pada bagian puncak bangunan terdapat batu tegak yang bentuknya menyerupai pegangan genta, yang menjadi simbol sakral dalam pemujaan. Ornamen pada bangunan ini relatif sederhana, terutama berupa profil capon (sisi genta) pada bagian kaki bangunan.',
+                        'path_audio' => 'virtual-museum/objects/audio/1775990355_audio_deskripsi2revisi.mp3',
+                    ],
+                    [
+                        'nama' => 'Punden Berundak Pelinggih I Ratu Gede Kemulan',
+                        'gambar_real' => 'virtual-museum/objects/images/1774060055_gambar_real_pundenbawah2.jpg',
+                        'path_obj' => 'virtual-museum/objects/models/1774062780_obj_pundenbawah1-v1.glb',
+                        'deskripsi' => 'Punden berundak Pelinggih I Ratu Gede Kemulan memiliki lima tingkatan yang semakin mengecil ke arah puncak. Bangunan tersebut dibuat dari batu padas dengan perekat tanah dan memiliki bentuk dasar segi empat. Posisinya berada di areal Pura Candi dan menghadap ke selatan, dengan arah pemujaan menuju Gunung Penulisan di sebelah utara. Pada bagian puncak bangunan terdapat sebuah batu berbentuk kerucut yang merupakan menhir, yang berfungsi sebagai simbol pemujaan leluhur. Struktur bangunan juga dilengkapi dengan berbagai ornamen hias seperti motif simbar gantung, ceplok bunga, serta sulur-suluran berbentuk bunga teratai pada beberapa bagian dinding dan sudut bangunan.',
+                        'path_audio' => 'virtual-museum/objects/audio/1775981635_audio_deskripsi1.mp3',
+                    ],
+                ],
+            ],
+
+            [
+                'materi' => 'Arca Megalitik',
+                'nama' => 'Pura Taulan',
+                'alamat' => 'Selulung, Kec. Kintamani, Kabupaten Bangli, Bali',
+                'deskripsi' => 'Pura yang menyimpan sepasang arca bercorak Tionghoa, bukti akulturasi budaya Bali dan Tionghoa.',
+                'lat' => -8.20996209,
+                'lng' => 115.26267737,
+                'museum' => 'Arca Peninggalan di Pura Taulan',
+                'model' => 'virtual-museum/models/1774140700_Kamasan-v1.glb',
+                'objek' => [
+                    [
+                        'nama' => 'Arca Bercorak Tionghoa',
+                        'gambar_real' => 'virtual-museum/objects/images/1774144553_gambar_real_purataulan.jpg',
+                        'path_obj' => 'virtual-museum/objects/models/1774240235_obj_kawitankecil-v1.glb',
+                        'deskripsi' => 'Arca bercorak Tionghoa di Pura Taulan merupakan sepasang arca yang menggambarkan figur laki-laki dan perempuan dengan proporsi tubuh yang seimbang serta dihiasi ornamen khas budaya Tionghoa. Arca laki-laki memiliki tinggi sekitar 124 cm dengan ciri mengenakan mahkota tinggi, kalung, serta busana dengan ikat pinggang yang disimpul di bagian depan. Pasangannya, arca perempuan, berukuran sedikit lebih kecil dengan tinggi sekitar 121 cm dan digambarkan mengenakan mahkota, perhiasan, serta kain panjang hingga pergelangan kaki. Kedua arca ini memperlihatkan gaya seni yang menunjukkan pengaruh budaya Tionghoa, namun ditempatkan dalam konteks religius masyarakat Bali. Keberadaan arca tersebut menjadi bukti adanya proses akulturasi budaya antara masyarakat Bali dan komunitas Tionghoa pada masa lampau. Selain arca tersebut, di kawasan pura juga ditemukan fragmen arca serta lingga semu yang menunjukkan adanya perpaduan unsur Hindu Siwa dan tradisi Buddhis-Tionghoa dalam praktik keagamaan masyarakat pada masa lampau.',
+                        'path_audio' => 'virtual-museum/objects/audio/1775982372_audio_deskripsi6revisi.mp3',
+                    ],
+                ],
+            ],
+
+            [
+                'materi' => 'Wayang Kamasan',
+                'nama' => 'Museum Kerta Gosa',
+                'alamat' => 'Jl. Kenanga No.11, Semarapura Kelod, Kec. Klungkung, Kabupaten Klungkung, Bali 80761',
+                'deskripsi' => 'Bekas balai pengadilan Kerajaan Klungkung dengan langit-langit berhiaskan lukisan wayang gaya Kamasan.',
+                'lat' => -8.53582524,
+                'lng' => 115.40354081,
+                'museum' => 'Galeri Virtual Wayang Kamasan',
+                'model' => 'virtual-museum/models/1774229897_Kamasan-v1.glb',
+                'objek' => [
+                    [
+                        'nama' => 'Ramayana',
+                        'mesh_name' => 'lukisan-4',
+                        'gambar_real' => 'virtual-museum/objects/images/1774234145_gambar_real_edit5.jpg',
+                        'path_obj' => 'virtual-museum/objects/models/1774238816_obj_lukisan1-v1.glb',
+                        'deskripsi' => 'Lukisan yang menggambarkan perjalanan rama dan rombongan keranya melawan pasukan rahwana yaitu raksasa kumbakarna di lautan menuju kerajaan kosala.',
+                        'path_audio' => 'virtual-museum/objects/audio/1775988415_audio_deskripsi7.mp3',
+                    ],
+                    [
+                        'nama' => 'Manasija',
+                        'mesh_name' => 'lukisan-5',
+                        'gambar_real' => 'virtual-museum/objects/images/1774238373_gambar_real_edit5Edited.jpg',
+                        'path_obj' => 'virtual-museum/objects/models/1774238830_obj_lukisan2-v2.glb',
+                        'deskripsi' => 'Lukisan yang bermakna kisah cinta yang abadi dari kedua pasangan yang setia.',
+                        'path_audio' => 'virtual-museum/objects/audio/1775988432_audio_deskripsi7.mp3',
+                    ],
+                    [
+                        'nama' => 'Bhagavad Gita',
+                        'mesh_name' => 'lukisan-3',
+                        'gambar_real' => 'virtual-museum/objects/images/1774238544_gambar_real_4edit.png',
+                        'path_obj' => 'virtual-museum/objects/models/1774238844_obj_lukisan3-v3.glb',
+                        'deskripsi' => 'Kisah yang menceritakan percakapan Sri Krisna dan Arjuna dalam medan perang kurusena yang dikutip dengan menggunakan nyanyian-nyanyian Bhagavan.',
+                        'path_audio' => 'virtual-museum/objects/audio/1775988450_audio_deskripsi7.mp3',
+                    ],
+                    [
+                        'nama' => 'Dewanagari',
+                        'mesh_name' => 'lukisan-2',
+                        'gambar_real' => 'virtual-museum/objects/images/1774238712_gambar_real_edit1.jpg',
+                        'path_obj' => 'virtual-museum/objects/models/1774238859_obj_lukisan4-v4.glb',
+                        'deskripsi' => 'Kisah kematian Dewanagari yang merupakan raja atau pemimpin asura',
+                        'path_audio' => 'virtual-museum/objects/audio/1775988468_audio_deskripsi7.mp3',
+                    ],
+                    [
+                        'nama' => 'Svarga Loka',
+                        'mesh_name' => 'lukisan-1',
+                        'gambar_real' => 'virtual-museum/objects/images/1774238791_gambar_real_edit1.jpg',
+                        'path_obj' => 'virtual-museum/objects/models/1774238791_obj_lukisan5-v5.glb',
+                        'deskripsi' => 'Pada lukisan tersebut memiliki makna atau cerita tentang svarga loka yang dihuni dewa dan wong.',
+                        'path_audio' => 'virtual-museum/objects/audio/1775988482_audio_deskripsi7.mp3',
+                    ],
+                ],
+            ],
+
+            [
+                'materi' => 'Menhir',
+                'nama' => 'Pura Puseh Desa Adat Selulung Kintamani',
+                'alamat' => 'Selulung, Kec. Kintamani, Kabupaten Bangli, Bali',
+                'deskripsi' => 'Pura desa adat dengan menhir setinggi 74 cm di halaman luar yang masih dipandang sakral hingga kini.',
+                'lat' => -8.20059721,
+                'lng' => 115.2715472,
+                'museum' => 'Menhir di Pura Puseh Adat Selullung',
+                'model' => 'virtual-museum/models/1774232761_menhir-v1.glb',
+                'objek' => [
+                    [
+                        'nama' => 'Menhir',
+                        'gambar_real' => 'virtual-museum/objects/images/1774233000_gambar_real_ScreenshotFrom2026-03-2310-28-27.png',
+                        'path_obj' => 'virtual-museum/objects/models/1774233000_obj_menhirreal-v1.glb',
+                        'deskripsi' => 'Menhir merupakan sebuah batu tegak peninggalan tradisi megalitik yang terletak di halaman luar pura. Menhir ini memiliki tinggi sekitar 74 cm dengan lebar bagian atas dan bawah sekitar 29 cm. Dalam kepercayaan masyarakat prasejarah, menhir berfungsi sebagai simbol penghormatan kepada roh leluhur atau tokoh yang dimuliakan dalam komunitas. Masyarakat setempat hingga kini masih memandang menhir tersebut sebagai benda sakral yang berkaitan dengan permohonan keselamatan, kesejahteraan, dan kesuburan. Keberadaan menhir ini menunjukkan kesinambungan tradisi megalitik yang tetap dihormati dan diintegrasikan dalam praktik keagamaan masyarakat Bali hingga masa kini.',
+                        'path_audio' => 'virtual-museum/objects/audio/1775988527_audio_deskripsi8.mp3',
+                    ],
+                ],
+            ],
+
+            // Satu-satunya scene yang penamaan nodenya lengkap dan rapi, karena itu
+            // satu-satunya yang bisa memperagakan alur VR utuh: panel info, chip nilai
+            // karakter, sampai aktivitas pemasangan. Empat scene lain memakai nama
+            // default Blender (`Plane.057`, `Cube.001`) tanpa node yang mewakili satu
+            // artefak, jadi mesh_name di sana mustahil sampai model diekspor ulang.
+            //
+            // Situs tersendiri, bukan museum kedua pada situs Pura Mihu, karena
+            // guest/vr/maps.blade.php hanya menautkan `virtualMuseum->first()` — museum
+            // kedua tidak akan pernah bisa dibuka dari peta.
+            //
+            // Namanya menyebut "Rintisan" dengan sengaja: geometrinya prosedural tanpa
+            // tekstur dan punden utamanya hanya 2,2 m padahal aslinya ±5,7 m, sementara
+            // Pura Mehu sudah punya museum bermodel asli. Dua pin dengan mutu berbeda
+            // tanpa penanda akan tertukar. Hapus entri ini kalau uji lapangan tidak
+            // ingin menampilkannya.
+            [
+                'materi' => 'Punden Berundak',
+                'nama' => 'Punden Berundak Pura Mehu (Rintisan)',
+                'alamat' => 'Selulung, Kec. Kintamani, Kabupaten Bangli, Bali',
+                'deskripsi' => 'Model rintisan Punden Berundak Pura Mehu untuk gladi bersih. Geometrinya masih sketsa prosedural tanpa tekstur, tetapi seluruh objeknya sudah tertaut ke data sehingga panel informasi dan nilai karakter bisa dicoba utuh.',
+                'lat' => -8.19831133,
+                'lng' => 115.26741012,
+                'museum' => 'Punden Berundak Pura Mehu (Rintisan)',
+                'model' => 'virtual-museum/models/punden-berundak-pura-mehu.glb',
+                'objek' => [
+                    // Tiga deskripsi pertama dikutip apa adanya dari daftar-objek.txt
+                    // milik pemodel. Empat sisanya menerangkan unsur arsitektur Bali
+                    // secara umum plus ukuran terukur dari GLB — sengaja tidak
+                    // mengarang klaim arkeologis khusus situs ini; naskah sebenarnya
+                    // menunggu tim materi.
+                    [
+                        'nama' => 'Punden Berundak Utama',
+                        'mesh_name' => 'Punden_Berundak_Utama',
+                        'deskripsi' => 'Struktur teras batu bertingkat 5 undak yang mengerucut ke atas, terbuat dari batu padas, dengan alas berbentuk segi empat memanjang (±5,7 x 5,5 m) dan tinggi total ±3,1 m. Berfungsi sebagai sarana pemujaan leluhur dan Ida Sang Hyang Widhi Wasa pada masa megalitikum.',
+                        'nilai_karakter' => ['religius', 'gotong_royong'],
+                    ],
+                    [
+                        'nama' => 'Padma Kurung',
+                        'mesh_name' => 'Padma_Kurung',
+                        'deskripsi' => 'Relung/wadah di puncak punden berundak, berdinding tiga sisi (kanan, kiri, belakang) tanpa atap — bagian tersuci dari struktur, tempat bersemayamnya arwah leluhur.',
+                        'nilai_karakter' => ['religius'],
+                    ],
+                    [
+                        'nama' => 'Area Persembahyangan',
+                        'mesh_name' => 'Area_Persembahyangan',
+                        'deskripsi' => 'Pelataran batu datar di sekitar punden berundak, tempat pengunjung/umat melakukan persembahyangan.',
+                        'nilai_karakter' => ['religius', 'gotong_royong'],
+                    ],
+                    [
+                        'nama' => 'Punden Berundak Kedua',
+                        'mesh_name' => 'Punden_Berundak_Kedua',
+                        'deskripsi' => 'Punden berundak kedua di kompleks ini, berukuran lebih kecil daripada punden utama (sekitar 2,1 x 2,5 m pada model). Keberadaan lebih dari satu punden dalam satu areal menunjukkan bahwa pemujaan di situs ini tidak terpusat pada satu bangunan saja.',
+                        'nilai_karakter' => ['religius'],
+                    ],
+                    [
+                        'nama' => 'Candi Bentar',
+                        'mesh_name' => 'Candi_Bentar',
+                        'deskripsi' => 'Gerbang belah tanpa atap yang menandai pintu masuk ke areal suci. Bentuknya seperti satu bangunan yang dibelah dua dan digeser, sehingga pengunjung berjalan menembus celah di antaranya sebagai penanda perpindahan dari ruang luar ke ruang sakral.',
+                        'nilai_karakter' => ['religius', 'kreatif'],
+                    ],
+                    [
+                        'nama' => 'Bale Pesandekan',
+                        'mesh_name' => 'Bale_Pesandekan',
+                        'deskripsi' => 'Bangunan terbuka beratap di areal pura, tempat umat beristirahat serta menyiapkan sarana upacara sebelum persembahyangan dimulai.',
+                        'nilai_karakter' => ['gotong_royong'],
+                    ],
+                    [
+                        'nama' => 'Lingkungan Situs',
+                        'mesh_name' => 'Lingkungan_Situs',
+                        'deskripsi' => 'Kontur tanah, tumbuhan, dan batu lepas di sekeliling pelataran. Bagian ini bukan bangunan, tetapi ikut menjelaskan mengapa situs dibangun di titik tersebut.',
+                    ],
+                ],
+            ],
+        ];
+    }
+
+    private function seedSitus(User $admin): void
+    {
+        foreach ($this->getSitusData() as $data) {
+            $materi = Materi::where('judul', $data['materi'])->first();
+
+            if (! $materi) {
+                $this->command->warn("Materi '{$data['materi']}' tidak ditemukan. Melewati situs {$data['nama']}.");
+
+                continue;
+            }
+
             $situs = SitusPeninggalan::updateOrCreate(
+                ['nama' => $data['nama']],
                 [
                     'materi_id' => $materi->materi_id,
-                    'nama' => 'Situs '.$materi->judul,
-                ],
-                [
-                    'alamat' => 'Bali',
-                    'lat' => -8.5 + (rand(-50, 50) / 100),
-                    'lng' => 115.3 + (rand(-50, 50) / 100),
-                    'deskripsi' => 'Situs untuk materi '.$materi->judul,
+                    'alamat' => $data['alamat'],
+                    'deskripsi' => $data['deskripsi'],
+                    'lat' => $data['lat'],
+                    'lng' => $data['lng'],
                     'user_id' => $admin->id,
                 ]
             );
-        } else {
-            foreach ($data['situs'] as $situsData) {
-                $situs = SitusPeninggalan::updateOrCreate(
-                    [
-                        'materi_id' => $materi->materi_id,
-                        'nama' => $situsData['nama'],
-                    ],
-                    [
-                        'alamat' => $situsData['alamat'],
-                        'lat' => $situsData['lat'],
-                        'lng' => $situsData['lng'],
-                        'deskripsi' => $situsData['deskripsi'],
-                        'user_id' => $admin->id,
-                    ]
-                );
 
-                // Create virtual museum for this situs
-                $this->seedVirtualMuseum($situs);
-            }
-        }
-    }
-
-    private function seedVirtualMuseum(SitusPeninggalan $situs): void
-    {
-        // Create virtual museum
-        $museum = VirtualMuseum::updateOrCreate(
-            ['situs_id' => $situs->situs_id],
-            [
-                'nama' => 'Virtual Museum '.$situs->nama,
-                'path_obj' => 'virtual-museum/'.$situs->situs_id.'/museum.glb',
-            ]
-        );
-
-        // Create virtual museum objects
-        $objects = [
-            [
-                'nama' => 'Objek '.$situs->nama.' 1',
-                'gambar_real' => 'images/ar/placeholder-real.png',
-                'path_obj' => 'virtual-museum/objects/'.bin2hex(random_bytes(4)).'.glb',
-                'deskripsi' => 'Objek virtual museum untuk '.$situs->nama,
-            ],
-            [
-                'nama' => 'Objek '.$situs->nama.' 2',
-                'gambar_real' => 'images/ar/placeholder-real2.png',
-                'path_obj' => 'virtual-museum/objects/'.bin2hex(random_bytes(4)).'.glb',
-                'deskripsi' => 'Objek virtual museum kedua untuk '.$situs->nama,
-            ],
-        ];
-
-        foreach ($objects as $objectData) {
-            VirtualMuseumObject::updateOrCreate(
+            $museum = VirtualMuseum::updateOrCreate(
+                ['situs_id' => $situs->situs_id],
                 [
-                    'museum_id' => $museum->museum_id,
-                    'nama' => $objectData['nama'],
-                ],
-                array_merge($objectData, [
-                    'situs_id' => $situs->situs_id,
-                ])
+                    'nama' => $data['museum'],
+                    'path_obj' => $data['model'],
+                ]
             );
+
+            foreach ($data['objek'] as $objek) {
+                VirtualMuseumObject::updateOrCreate(
+                    [
+                        'museum_id' => $museum->museum_id,
+                        'nama' => $objek['nama'],
+                    ],
+                    array_merge($objek, ['situs_id' => $situs->situs_id])
+                );
+            }
         }
     }
 }
