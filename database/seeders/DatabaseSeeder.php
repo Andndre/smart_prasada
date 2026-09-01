@@ -18,6 +18,7 @@ class DatabaseSeeder extends Seeder
             TestUserSeeder::class,
             MateriHierarchySeeder::class,
             ElearningContentSeeder::class,
+            PertanyaanRefleksiSeeder::class,
         ]);
     }
 }
