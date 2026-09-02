@@ -28,6 +28,18 @@ describe('GET /refleksi/{museum_id}', function () {
         $response->assertSeeInOrder(['Pertanyaan pertama?', 'Pertanyaan kedua?']);
     });
 
+    it('hides the app navigation so the shared kiosk account is not on display', function () {
+        $user = User::factory()->create(['name' => 'Fasilitator Kiosk']);
+        $museum = VirtualMuseum::factory()->create();
+        PertanyaanRefleksi::factory()->create(['museum_id' => $museum->museum_id]);
+
+        $this->actingAs($user)->get(route('refleksi.show', $museum->museum_id))
+            ->assertDontSee($user->name);
+
+        $this->actingAs($user)->get(route('refleksi.selesai'))
+            ->assertDontSee($user->name);
+    });
+
     it('does not show questions belonging to another museum', function () {
         $user = User::factory()->create();
         $museum = VirtualMuseum::factory()->create();

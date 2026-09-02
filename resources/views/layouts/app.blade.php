@@ -16,7 +16,12 @@
     </head>
     <body class="font-sans antialiased">
         <div class="min-h-screen bg-gray-100">
-            @include('layouts.navigation')
+            {{-- Halaman ujung sesi VR memakai <x-app-layout tanpa-navigasi>: responden
+                 tidak seharusnya melihat menu akun bersama, dan di mode kiosk nama akun
+                 fasilitator ikut terpampang di setiap siswa. --}}
+            @unless ($attributes->has('tanpa-navigasi'))
+                @include('layouts.navigation')
+            @endunless
 
             <!-- Page Heading -->
             @isset($header)
