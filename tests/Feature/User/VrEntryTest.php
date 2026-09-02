@@ -42,6 +42,17 @@ test('authenticated user can open vr museum page for a valid museum', function (
     $response->assertSee((string) $museum->museum_id, false);
 });
 
+test('vr museum nav keeps the id the session hides it by', function () {
+    $user = User::factory()->create(['level_sekarang' => 1, 'progress_level_sekarang' => 1]);
+    $situs = SitusPeninggalan::factory()->create(['user_id' => $user->id]);
+    $museum = VirtualMuseum::factory()->create(['situs_id' => $situs->situs_id]);
+
+    $url = route('vr.museum', ['situs_id' => $situs->situs_id, 'museum_id' => $museum->museum_id]);
+
+    $this->actingAs($user)->get($url)->assertSee('id="vr-nav"', false);
+    $this->actingAs($user)->get($url.'?kiosk=1')->assertDontSee('id="vr-nav"', false);
+});
+
 test('vr museum page ships a valid importmap for every vr module', function () {
     $user = User::factory()->create(['level_sekarang' => 1, 'progress_level_sekarang' => 1]);
     $situs = SitusPeninggalan::factory()->create(['user_id' => $user->id]);

@@ -222,7 +222,9 @@ async function startHeadsetSession(renderer, scene, camera, rig, teleport) {
 
     // Satu muara untuk semua cara keluar — tombol dalam scene, tombol sistem Meta, atau
     // headset dilepas — jadi siswa selalu disambut kembali dengan jalan ke refleksi.
+    renderer.xr.addEventListener("sessionstart", () => hideElement("vr-nav"));
     renderer.xr.addEventListener("sessionend", () => {
+        showElement("vr-nav");
         teleport.logger?.log("sesi_selesai");
         teleport.logger?.flush();
         showPostSessionPanel(teleport.logger);
@@ -260,6 +262,14 @@ async function main() {
 
     const teleport = new TeleportControls(scene, camera, rig, [ground]);
     teleport.panel = new InfoPanel(scene, camera);
+
+    // Bilah judul menutupi bagian atas scene begitu sesi berjalan — di headset ia hanya
+    // mengotori pratinjau layar, tapi di stereo HP ia jatuh di kedua separuh mata. Jalur
+    // headset disembunyikan lewat `sessionstart`; jalur HP dikenali dari fullscreen, yang
+    // dipasang dan dilepas persis di awal dan akhir sesi stereo (vr-hp.js).
+    document.addEventListener("fullscreenchange", () => {
+        document.fullscreenElement ? hideElement("vr-nav") : showElement("vr-nav");
+    });
 
     window.addEventListener("resize", () => {
         camera.aspect = window.innerWidth / window.innerHeight;

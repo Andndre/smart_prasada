@@ -98,7 +98,7 @@
          adalah menjalankan uji dengan akun kiosk khusus yang tidak punya apa pun untuk
          dilihat — lihat syarat operasional di CLAUDE.md. --}}
     @unless (request()->boolean('kiosk'))
-        <div class="pointer-events-none fixed inset-x-0 top-0 z-[10000000]">
+        <div id="vr-nav" class="pointer-events-none fixed inset-x-0 top-0 z-[10000000]">
             <div class="pointer-events-auto flex items-center space-x-4 rounded-b-3xl bg-primary px-6 py-6 text-white">
                 <a href="{{ route('guest.situs.detail', $situs->situs_id) }}"
                     class="rounded-full p-2 transition-colors hover:bg-white/10">
