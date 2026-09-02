@@ -20,14 +20,13 @@
                         Terima kasih. Jawabanmu sudah tercatat dan akan digunakan untuk penelitian.
                     </p>
 
-                    {{-- Halaman netral, bukan daftar materi: di mode kiosk semua responden berbagi
-                         satu akun, jadi mengarahkan ke daftar materi akan menampilkan progres akun
-                         bersama itu ke setiap siswa. Langkah berikutnya ditentukan fasilitator,
-                         jadi jangan merantainya ke post-test. --}}
-                    <a href="{{ route('guest.home') }}"
+                    {{-- Kembali ke materi asal situs ini, bukan ke daftar materi: siswa
+                         melanjutkan tab yang sedang ia kerjakan. Turun ke beranda kalau
+                         halaman dibuka tanpa konteks museum. --}}
+                    <a href="{{ $materiId ? route('guest.elearning.materi', $materiId) : route('guest.home') }}"
                         class="inline-flex items-center rounded-lg bg-gray-100 px-6 py-3 font-medium text-gray-600 transition-colors hover:bg-gray-200">
                         <i class="fas fa-arrow-left mr-2"></i>
-                        Kembali ke beranda
+                        {{ $materiId ? 'Kembali ke materi' : 'Kembali ke beranda' }}
                     </a>
                 </div>
             </div>

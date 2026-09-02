@@ -378,10 +378,16 @@ Museum tanpa pertanyaan menampilkan penjelasan, bukan halaman kosong — kelas k
 yang sama dengan "scene tanpa slot" di Fase 3. Batas jawaban 2000 karakter,
 divalidasi di server, bukan hanya `maxlength` di form.
 
-Setelah simpan: halaman terima kasih netral, bukan daftar materi. Di mode kiosk semua
-responden berbagi satu akun, jadi daftar materi akan membocorkan progres akun bersama
-itu ke setiap siswa. Jangan merantainya ke post-test — langkah berikutnya milik
-fasilitator.
+Setelah simpan: halaman terima kasih, dengan satu tautan kembali ke **halaman materi
+asal situs itu** — bukan daftar materi, dan bukan rantai otomatis ke post-test. Museum
+dibawa ke sana lewat query `?museum=` supaya halamannya tetap bisa dibuka tanpa konteks
+(tautannya lalu turun ke beranda). Langkah berikutnya tetap milik fasilitator.
+
+Kedua halaman refleksi memakai `<x-app-layout tanpa-navigasi>`: di mode kiosk semua
+responden berbagi satu akun, jadi menu akun akan memampangkan nama fasilitator dan
+progres akun bersama itu ke setiap siswa. Tampilannya sengaja meniru pretest/posttest
+(bilah `bg-primary`, isi di atas `bg-gray-50`, kartu putih `rounded-2xl`) karena
+responden mengerjakan ketiganya berurutan dalam satu sesi.
 
 Ekspor di `RefleksiController::export()`, bukan menumpang `VrEventController`.
 

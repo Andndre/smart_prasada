@@ -40,6 +40,21 @@ describe('GET /refleksi/{museum_id}', function () {
             ->assertDontSee($user->name);
     });
 
+    it('sends the respondent back to the materi that owns the situs', function () {
+        $user = User::factory()->create();
+        $museum = VirtualMuseum::factory()->create();
+        $materiId = $museum->situsPeninggalan->materi_id;
+
+        $this->actingAs($user)->get(route('refleksi.selesai', ['museum' => $museum->museum_id]))
+            ->assertSee(route('guest.elearning.materi', $materiId), false)
+            ->assertSee('Kembali ke materi');
+
+        // Tanpa konteks museum halaman tetap bisa dibuka, tautannya turun ke beranda.
+        $this->actingAs($user)->get(route('refleksi.selesai'))
+            ->assertSee(route('guest.home'), false)
+            ->assertSee('Kembali ke beranda');
+    });
+
     it('does not show questions belonging to another museum', function () {
         $user = User::factory()->create();
         $museum = VirtualMuseum::factory()->create();
@@ -85,7 +100,7 @@ describe('POST /refleksi/{museum_id}', function () {
                 'sesi_id' => $sesiId,
                 'jawaban' => [$soal->pertanyaan_id => 'Gotong royong terlihat saat kerja bakti di kampung.'],
             ])
-            ->assertRedirect(route('refleksi.selesai'));
+            ->assertRedirect(route('refleksi.selesai', ['museum' => $museum->museum_id]));
 
         $jawaban = JawabanRefleksi::sole();
         expect($jawaban->kode_responden)->toBe('R042');
@@ -103,7 +118,7 @@ describe('POST /refleksi/{museum_id}', function () {
             ->post(route('refleksi.store', $museum->museum_id), [
                 'jawaban' => [$soal->pertanyaan_id => 'Jawaban tanpa kode.'],
             ])
-            ->assertRedirect(route('refleksi.selesai'));
+            ->assertRedirect(route('refleksi.selesai', ['museum' => $museum->museum_id]));
 
         expect(JawabanRefleksi::sole()->kode_responden)->toBeNull();
     });

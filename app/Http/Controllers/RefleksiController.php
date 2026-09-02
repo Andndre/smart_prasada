@@ -87,12 +87,20 @@ class RefleksiController extends Controller
             JawabanRefleksi::insert($baris);
         }
 
-        return redirect()->route('refleksi.selesai');
+        return redirect()->route('refleksi.selesai', ['museum' => $museum->museum_id]);
     }
 
-    public function selesai(): View
+    /**
+     * Museum dibawa lewat query string, bukan segmen rute, supaya halaman ini tetap
+     * bisa dibuka tanpa konteks apa pun — tautannya lalu turun ke beranda.
+     */
+    public function selesai(Request $request): View
     {
-        return view('guest.refleksi.selesai');
+        $museum = VirtualMuseum::with('situsPeninggalan')->find($request->query('museum'));
+
+        return view('guest.refleksi.selesai', [
+            'materiId' => $museum?->situsPeninggalan?->materi_id,
+        ]);
     }
 
     /**
