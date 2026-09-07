@@ -114,6 +114,45 @@
                 </div>
             </div>
 
+            {{-- Meja Pengisian Refleksi Siswa (Laptop / Tablet Fasilitator) --}}
+            <div class="mb-6 rounded-2xl border-2 border-emerald-200 bg-gradient-to-br from-emerald-50 via-white to-teal-50/40 p-6 shadow-sm">
+                <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div class="flex-1">
+                        <div class="flex items-center gap-2">
+                            <span class="inline-flex items-center rounded-full bg-emerald-600 px-2.5 py-0.5 text-xs font-bold uppercase tracking-wider text-white">
+                                <i class="fas fa-clipboard-check mr-1.5"></i> Meja Refleksi
+                            </span>
+                            <span class="text-xs font-semibold text-emerald-800">Khusus Laptop Guru / Tablet Siswa</span>
+                        </div>
+                        <h3 class="mt-1.5 text-lg font-bold text-gray-900">Form Refleksi Pasca-VR di Laptop Ini</h3>
+                        <p class="mt-1 text-xs leading-relaxed text-gray-600">
+                            Setelah siswa melepas headset, klik tombol di samping untuk membuka lembar refleksi di laptop ini agar siswa dapat mengetik dengan keyboard fisik yang nyaman.
+                        </p>
+                    </div>
+
+                    <div class="flex flex-col sm:items-end gap-2 shrink-0">
+                        <div class="flex items-center gap-1.5">
+                            <span class="text-xs font-medium text-gray-600">Kode Siswa:</span>
+                            <div class="flex items-center rounded-lg border border-gray-300 bg-white p-0.5 shadow-sm">
+                                <button type="button" id="btn-prev-kode-refleksi" class="px-2 py-1 text-xs text-gray-500 hover:text-purple-600 transition" title="Kode sebelumnya">
+                                    <i class="fas fa-minus"></i>
+                                </button>
+                                <input type="text" id="kode-refleksi" value="R001"
+                                    class="w-20 border-none p-0 text-center font-mono text-sm font-bold text-emerald-700 focus:ring-0">
+                                <button type="button" id="btn-next-kode-refleksi" class="px-2 py-1 text-xs text-gray-500 hover:text-purple-600 transition" title="Kode berikutnya">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <a id="btn-buka-refleksi" href="#" target="_blank"
+                            class="inline-flex items-center justify-center rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-bold text-white shadow-md transition hover:bg-emerald-700 hover:shadow-lg">
+                            <i class="fas fa-pen-to-square mr-2"></i>
+                            <span id="label-buka-refleksi">Buka Form Refleksi (R001)</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
             <div class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
                 <h3 class="mb-4 text-base font-semibold text-gray-900">Pengaturan Responden & Mode Sesi</h3>
                 <div class="space-y-4">
@@ -289,7 +328,54 @@
                 setTimeout(() => (label.textContent = `Salin PIN (${pin})`), 2000);
             });
 
+            // Logika Meja Pengisian Refleksi Siswa di Laptop
+            const refleksiBasis = @json(route('refleksi.show', $museum->museum_id));
+            const inputRefleksi = document.getElementById('kode-refleksi');
+            const btnBukaRefleksi = document.getElementById('btn-buka-refleksi');
+            const labelBukaRefleksi = document.getElementById('label-buka-refleksi');
+            const btnPrevRefleksi = document.getElementById('btn-prev-kode-refleksi');
+            const btnNextRefleksi = document.getElementById('btn-next-kode-refleksi');
+
+            function perbaruiTautanRefleksi() {
+                if (!inputRefleksi || !btnBukaRefleksi) return;
+                const kode = inputRefleksi.value.trim();
+                const url = new URL(refleksiBasis, location.origin);
+                if (kode) url.searchParams.set('kode', kode);
+                btnBukaRefleksi.href = url.toString();
+                if (labelBukaRefleksi) {
+                    labelBukaRefleksi.textContent = kode ? `Buka Form Refleksi (${kode})` : 'Buka Form Refleksi';
+                }
+            }
+
+            function geserKode(step) {
+                if (!inputRefleksi) return;
+                const val = inputRefleksi.value.trim();
+                const cocok = /^(.*?)(\d+)$/.exec(val);
+                if (!cocok) return;
+                const [, awalan, angka] = cocok;
+                const baru = Math.max(1, Number(angka) + step);
+                inputRefleksi.value = awalan + String(baru).padStart(angka.length, '0');
+                inputRefleksi.dataset.touched = 'true';
+                perbaruiTautanRefleksi();
+            }
+
+            inputRefleksi?.addEventListener('input', () => {
+                inputRefleksi.dataset.touched = 'true';
+                perbaruiTautanRefleksi();
+            });
+
+            btnPrevRefleksi?.addEventListener('click', () => geserKode(-1));
+            btnNextRefleksi?.addEventListener('click', () => geserKode(1));
+
+            document.getElementById('kode')?.addEventListener('change', (e) => {
+                if (inputRefleksi && !inputRefleksi.dataset.touched) {
+                    inputRefleksi.value = e.target.value.trim();
+                    perbaruiTautanRefleksi();
+                }
+            });
+
             perbarui();
+            perbaruiTautanRefleksi();
         })();
     </script>
 </x-app-layout>
