@@ -58,11 +58,14 @@
             @else
                 <div class="space-y-3">
                     @foreach ($pertanyaan as $soal)
-                        <div class="flex items-start justify-between gap-4 rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
+                        <div
+                            class="flex items-start justify-between gap-4 rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
                             <div class="min-w-0">
                                 <div class="mb-2 flex items-center gap-2">
-                                    <span class="rounded bg-gray-100 px-2 py-0.5 text-xs text-gray-600">#{{ $soal->urutan }}</span>
-                                    <span class="rounded-full bg-purple-100 px-3 py-1 text-xs font-medium text-purple-800">
+                                    <span
+                                        class="rounded bg-gray-100 px-2 py-0.5 text-xs text-gray-600">#{{ $soal->urutan }}</span>
+                                    <span
+                                        class="rounded-full bg-purple-100 px-3 py-1 text-xs font-medium text-purple-800">
                                         {{ $soal->nilai_karakter->label() }}
                                     </span>
                                 </div>
@@ -71,7 +74,8 @@
                             <div class="flex shrink-0 items-center gap-2">
                                 <a href="{{ route('admin.pertanyaan-refleksi.edit', $soal->pertanyaan_id) }}"
                                     class="rounded-md border border-gray-300 px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-50">Edit</a>
-                                <form method="POST" action="{{ route('admin.pertanyaan-refleksi.destroy', $soal->pertanyaan_id) }}"
+                                <form method="POST"
+                                    action="{{ route('admin.pertanyaan-refleksi.destroy', $soal->pertanyaan_id) }}"
                                     onsubmit="return confirm('Hapus pertanyaan ini beserta jawaban siswa yang terkait?')">
                                     @csrf
                                     @method('DELETE')
