@@ -4,13 +4,22 @@
          berurutan dalam satu sesi, jadi tampilan yang berbeda terbaca sebagai aplikasi
          lain. Navigasinya saja yang dilepas — lihat catatan di layouts/app.blade.php. --}}
     <div class="bg-primary px-6 py-6 text-white">
-        <div class="mx-auto max-w-7xl">
-            <h1 class="text-lg font-bold">Refleksi</h1>
-            <p class="text-sm opacity-90">
-                {{ $museum->nama }}@if ($museum->situsPeninggalan)
-                    &middot; {{ $museum->situsPeninggalan->nama }}
-                @endif
-            </p>
+        <div class="mx-auto flex max-w-7xl flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+                <h1 class="text-lg font-bold">Refleksi</h1>
+                <p class="text-sm opacity-90">
+                    {{ $museum->nama }}@if ($museum->situsPeninggalan)
+                        &middot; {{ $museum->situsPeninggalan->nama }}
+                    @endif
+                </p>
+            </div>
+            @if (!empty($kodeResponden))
+                <div class="inline-flex items-center gap-2 self-start rounded-xl bg-white/20 px-3.5 py-1.5 backdrop-blur-sm sm:self-auto">
+                    <i class="fas fa-user-check text-xs text-purple-200"></i>
+                    <span class="text-xs uppercase tracking-wider text-purple-100">Responden:</span>
+                    <span class="font-mono text-sm font-bold text-white">{{ $kodeResponden }}</span>
+                </div>
+            @endif
         </div>
     </div>
 
