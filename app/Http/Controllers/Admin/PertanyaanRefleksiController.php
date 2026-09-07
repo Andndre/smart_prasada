@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Enums\NilaiKarakter;
 use App\Http\Controllers\Controller;
+use App\Models\JawabanRefleksi;
 use App\Models\PertanyaanRefleksi;
 use App\Models\VirtualMuseum;
 use Illuminate\Http\RedirectResponse;
@@ -22,7 +23,9 @@ class PertanyaanRefleksiController extends Controller
             ->orderBy('pertanyaan_id')
             ->get();
 
-        return view('admin.pertanyaan-refleksi.index', compact('museum', 'pertanyaan'));
+        $jumlahJawaban = JawabanRefleksi::where('museum_id', $museum_id)->count();
+
+        return view('admin.pertanyaan-refleksi.index', compact('museum', 'pertanyaan', 'jumlahJawaban'));
     }
 
     public function create(int $museum_id): View
@@ -80,6 +83,60 @@ class PertanyaanRefleksiController extends Controller
 
         return redirect()->route('admin.pertanyaan-refleksi', $museumId)
             ->with('success', 'Pertanyaan refleksi berhasil dihapus!');
+    }
+
+    /**
+     * Tampilkan rekapitulasi jawaban refleksi siswa untuk museum ini.
+     */
+    public function hasil(Request $request, int $museum_id): View
+    {
+        $museum = VirtualMuseum::with('situsPeninggalan')->findOrFail($museum_id);
+
+        $query = JawabanRefleksi::where('museum_id', $museum_id)
+            ->with(['pertanyaan', 'user'])
+            ->when($request->filled('search'), function ($q) use ($request) {
+                $term = trim($request->input('search'));
+                $q->where(function ($sub) use ($term) {
+                    $sub->where('kode_responden', 'like', "%{$term}%")
+                        ->orWhere('jawaban', 'like', "%{$term}%");
+                });
+            })
+            ->when($request->filled('pertanyaan_id'), function ($q) use ($request) {
+                $q->where('pertanyaan_id', (int) $request->input('pertanyaan_id'));
+            })
+            ->latest('created_at');
+
+        $jawaban = $query->paginate(20)->withQueryString();
+
+        $totalJawaban = JawabanRefleksi::where('museum_id', $museum_id)->count();
+        $totalResponden = JawabanRefleksi::where('museum_id', $museum_id)
+            ->whereNotNull('kode_responden')
+            ->distinct('kode_responden')
+            ->count('kode_responden');
+        $pertanyaanList = PertanyaanRefleksi::where('museum_id', $museum_id)
+            ->orderBy('urutan')
+            ->get();
+
+        return view('admin.pertanyaan-refleksi.hasil', [
+            'museum' => $museum,
+            'jawaban' => $jawaban,
+            'totalJawaban' => $totalJawaban,
+            'totalResponden' => $totalResponden,
+            'pertanyaanList' => $pertanyaanList,
+        ]);
+    }
+
+    /**
+     * Hapus satu baris jawaban refleksi (misal data uji coba).
+     */
+    public function destroyJawaban(int $jawaban_id): RedirectResponse
+    {
+        $jawaban = JawabanRefleksi::findOrFail($jawaban_id);
+        $museumId = $jawaban->museum_id;
+        $jawaban->delete();
+
+        return redirect()->route('admin.hasil-refleksi', $museumId)
+            ->with('success', 'Jawaban refleksi berhasil dihapus!');
     }
 
     /**
