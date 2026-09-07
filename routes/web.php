@@ -176,6 +176,8 @@ Route::group(['middleware' => ['auth', 'admin']], function () {
     Route::get('/admin/refleksi/{pertanyaan_id}/edit', [PertanyaanRefleksiController::class, 'edit'])->name('admin.pertanyaan-refleksi.edit');
     Route::put('/admin/refleksi/{pertanyaan_id}', [PertanyaanRefleksiController::class, 'update'])->name('admin.pertanyaan-refleksi.update');
     Route::delete('/admin/refleksi/{pertanyaan_id}', [PertanyaanRefleksiController::class, 'destroy'])->name('admin.pertanyaan-refleksi.destroy');
+    Route::get('/admin/virtual-museum/{museum_id}/hasil-refleksi', [PertanyaanRefleksiController::class, 'hasil'])->name('admin.hasil-refleksi');
+    Route::delete('/admin/refleksi/jawaban/{jawaban_id}', [PertanyaanRefleksiController::class, 'destroyJawaban'])->name('admin.jawaban-refleksi.destroy');
     Route::get('/admin/virtual-museum/{museum_id}/editor', [AdminController::class, 'editorVirtualMuseum'])->name('admin.virtual-museum.editor');
     Route::post('/admin/virtual-museum/{museum_id}/editor/objects', [AdminController::class, 'editorSaveObject'])->name('admin.virtual-museum.editor.save');
 

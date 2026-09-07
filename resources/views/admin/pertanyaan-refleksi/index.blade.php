@@ -27,10 +27,20 @@
                         Ditampilkan di layar biasa setelah siswa selesai menjelajahi museum ini.
                     </p>
                 </div>
-                <a href="{{ route('admin.pertanyaan-refleksi.create', $museum->museum_id) }}"
-                    class="inline-flex items-center rounded-md bg-purple-600 px-4 py-2 text-sm font-semibold text-white hover:bg-purple-700">
-                    <i class="fas fa-plus mr-2"></i>Tambah Pertanyaan
-                </a>
+                <div class="flex flex-wrap items-center gap-2">
+                    <a href="{{ route('admin.hasil-refleksi', $museum->museum_id) }}"
+                        class="inline-flex items-center rounded-md bg-teal-600 px-4 py-2 text-sm font-semibold text-white hover:bg-teal-700">
+                        <i class="fas fa-clipboard-list mr-2"></i>Lihat Hasil ({{ $jumlahJawaban }})
+                    </a>
+                    <a href="{{ route('admin.refleksi.export', ['museum' => $museum->museum_id]) }}"
+                        class="inline-flex items-center rounded-md border border-gray-300 bg-white px-3.5 py-2 text-sm font-semibold text-gray-700 shadow-sm hover:bg-gray-50">
+                        <i class="fas fa-file-csv mr-2 text-emerald-600"></i>Unduh CSV
+                    </a>
+                    <a href="{{ route('admin.pertanyaan-refleksi.create', $museum->museum_id) }}"
+                        class="inline-flex items-center rounded-md bg-purple-600 px-4 py-2 text-sm font-semibold text-white hover:bg-purple-700">
+                        <i class="fas fa-plus mr-2"></i>Tambah Pertanyaan
+                    </a>
+                </div>
             </div>
 
             @if (session('success'))

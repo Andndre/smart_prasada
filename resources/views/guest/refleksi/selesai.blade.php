@@ -33,7 +33,8 @@
                                     @endif
                                 </a>
                             @else
-                                <div class="rounded-xl border border-blue-200 bg-blue-50 px-4 py-2.5 text-xs font-medium text-blue-800">
+                                <div
+                                    class="rounded-xl border border-blue-200 bg-blue-50 px-4 py-2.5 text-xs font-medium text-blue-800">
                                     <i class="fas fa-info-circle mr-1.5"></i>
                                     Seluruh rangkaian responden pada sesi ini telah selesai.
                                 </div>

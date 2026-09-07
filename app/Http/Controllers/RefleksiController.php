@@ -167,19 +167,25 @@ class RefleksiController extends Controller
      * Sengaja di sini, bukan menumpang VrEventController — nama controller yang
      * berbohong soal isinya adalah utang yang murah dihindari sekarang.
      */
-    public function export(): StreamedResponse
+    public function export(Request $request): StreamedResponse
     {
+        $museumId = $request->query('museum');
         $kolom = [
             'jawaban_id', 'kode_responden', 'sesi_id', 'user_id', 'nama_user',
             'museum_id', 'nama_museum', 'nilai_karakter', 'pertanyaan', 'jawaban', 'dijawab_pada',
         ];
 
-        return response()->streamDownload(function () use ($kolom) {
+        $namaFile = $museumId
+            ? "jawaban-refleksi-museum-{$museumId}-".now()->format('Y-m-d-His').'.csv'
+            : 'jawaban-refleksi-'.now()->format('Y-m-d-His').'.csv';
+
+        return response()->streamDownload(function () use ($kolom, $museumId) {
             $keluaran = fopen('php://output', 'w');
             fputcsv($keluaran, $kolom);
 
             JawabanRefleksi::query()
                 ->with(['user:id,name', 'virtualMuseum:museum_id,nama', 'pertanyaan'])
+                ->when($museumId, fn ($query) => $query->where('museum_id', (int) $museumId))
                 ->orderBy('kode_responden')
                 ->orderBy('created_at')
                 ->chunk(500, function ($jawaban) use ($keluaran) {
@@ -201,7 +207,7 @@ class RefleksiController extends Controller
                 });
 
             fclose($keluaran);
-        }, 'jawaban-refleksi-'.now()->format('Y-m-d-His').'.csv', [
+        }, $namaFile, [
             'Content-Type' => 'text/csv',
         ]);
     }

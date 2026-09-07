@@ -65,8 +65,9 @@ class VrEventController extends Controller
      * Sengaja bukan rekap: bentuk rekap yang dibutuhkan analisis belum diketahui, dan
      * baris mentah bisa diolah sendiri di SPSS/Excel.
      */
-    public function export(): StreamedResponse
+    public function export(Request $request): StreamedResponse
     {
+        $museumId = $request->query('museum');
         $perangkatPerSesi = $this->perangkatPerSesi();
 
         $kolom = [
@@ -74,12 +75,17 @@ class VrEventController extends Controller
             'perangkat', 'jenis', 'mesh_name', 'offset_ms', 'detail', 'diterima_server',
         ];
 
-        return response()->streamDownload(function () use ($kolom, $perangkatPerSesi) {
+        $namaFile = $museumId
+            ? "vr-events-museum-{$museumId}-".now()->format('Y-m-d-His').'.csv'
+            : 'vr-events-'.now()->format('Y-m-d-His').'.csv';
+
+        return response()->streamDownload(function () use ($kolom, $perangkatPerSesi, $museumId) {
             $keluaran = fopen('php://output', 'w');
             fputcsv($keluaran, $kolom);
 
             VrEvent::query()
                 ->with(['user:id,name', 'virtualMuseum:museum_id,nama'])
+                ->when($museumId, fn ($query) => $query->where('museum_id', (int) $museumId))
                 ->orderBy('sesi_id')
                 ->orderBy('offset_ms')
                 ->chunk(500, function ($events) use ($keluaran, $perangkatPerSesi) {
@@ -102,7 +108,7 @@ class VrEventController extends Controller
                 });
 
             fclose($keluaran);
-        }, 'vr-events-'.now()->format('Y-m-d-His').'.csv', [
+        }, $namaFile, [
             'Content-Type' => 'text/csv',
         ]);
     }

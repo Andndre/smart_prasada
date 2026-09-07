@@ -151,6 +151,30 @@
                         </a>
                     </div>
                 </div>
+
+                @if (auth()->user()?->role === 'admin')
+                    <div class="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-emerald-200/60 pt-3 text-xs">
+                        <span class="font-medium text-gray-600">
+                            <i class="fas fa-database mr-1 text-emerald-600"></i>Data Pengujian:
+                        </span>
+                        <div class="flex flex-wrap items-center gap-3">
+                            <a href="{{ route('admin.hasil-refleksi', $museum->museum_id) }}" target="_blank"
+                                class="inline-flex items-center font-semibold text-teal-800 transition hover:text-teal-950 hover:underline">
+                                <i class="fas fa-clipboard-list mr-1"></i>Rekap Jawaban di Web
+                            </a>
+                            <span class="text-gray-300">&bull;</span>
+                            <a href="{{ route('admin.refleksi.export', ['museum' => $museum->museum_id]) }}"
+                                class="inline-flex items-center font-semibold text-emerald-800 transition hover:text-emerald-950 hover:underline">
+                                <i class="fas fa-file-csv mr-1"></i>Unduh CSV Refleksi
+                            </a>
+                            <span class="text-gray-300">&bull;</span>
+                            <a href="{{ route('admin.vr-events.export', ['museum' => $museum->museum_id]) }}"
+                                class="inline-flex items-center font-semibold text-purple-700 transition hover:text-purple-900 hover:underline">
+                                <i class="fas fa-chart-line mr-1"></i>Unduh Log VR (CSV)
+                            </a>
+                        </div>
+                    </div>
+                @endif
             </div>
 
             <div class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
