@@ -11,13 +11,15 @@
                     </li>
                     <li class="flex items-center text-gray-400">
                         <i class="fas fa-chevron-right mx-2 text-xs"></i>
-                        <a href="{{ route('admin.virtual-museum.show', $museum->museum_id) }}" class="hover:text-gray-600">
+                        <a href="{{ route('admin.virtual-museum.show', $museum->museum_id) }}"
+                            class="hover:text-gray-600">
                             {{ $museum->nama }}
                         </a>
                     </li>
                     <li class="flex items-center text-gray-400">
                         <i class="fas fa-chevron-right mx-2 text-xs"></i>
-                        <a href="{{ route('admin.pertanyaan-refleksi', $museum->museum_id) }}" class="hover:text-gray-600">
+                        <a href="{{ route('admin.pertanyaan-refleksi', $museum->museum_id) }}"
+                            class="hover:text-gray-600">
                             Refleksi
                         </a>
                     </li>
@@ -33,7 +35,8 @@
                 <div>
                     <h1 class="text-2xl font-bold text-gray-900 sm:text-3xl">Hasil Jawaban Refleksi</h1>
                     <p class="mt-1 text-sm text-gray-600">
-                        Rekapitulasi jawaban refleksi responden untuk <strong class="text-gray-800">{{ $museum->nama }}</strong>.
+                        Rekapitulasi jawaban refleksi responden untuk <strong
+                            class="text-gray-800">{{ $museum->nama }}</strong>.
                     </p>
                 </div>
                 <div class="flex flex-wrap items-center gap-2">
@@ -62,7 +65,8 @@
             <div class="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
                 <div class="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
                     <div class="flex items-center">
-                        <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-purple-100 text-purple-600">
+                        <div
+                            class="flex h-12 w-12 items-center justify-center rounded-xl bg-purple-100 text-purple-600">
                             <i class="fas fa-comments text-xl"></i>
                         </div>
                         <div class="ml-4">
@@ -73,7 +77,8 @@
                 </div>
                 <div class="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
                     <div class="flex items-center">
-                        <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-100 text-emerald-600">
+                        <div
+                            class="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-100 text-emerald-600">
                             <i class="fas fa-users text-xl"></i>
                         </div>
                         <div class="ml-4">
@@ -97,7 +102,8 @@
 
             <!-- Filter & Search Card -->
             <div class="mb-6 rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
-                <form method="GET" action="{{ route('admin.hasil-refleksi', $museum->museum_id) }}" class="flex flex-col gap-3 sm:flex-row sm:items-center">
+                <form method="GET" action="{{ route('admin.hasil-refleksi', $museum->museum_id) }}"
+                    class="flex flex-col gap-3 sm:flex-row sm:items-center">
                     <div class="flex-1">
                         <div class="relative">
                             <i class="fas fa-search absolute left-3.5 top-3 text-xs text-gray-400"></i>
@@ -109,7 +115,8 @@
 
                     @if ($pertanyaanList->isNotEmpty())
                         <div class="sm:w-64">
-                            <select name="pertanyaan_id" class="w-full rounded-xl border border-gray-300 py-2 text-sm focus:border-purple-500 focus:ring-purple-500">
+                            <select name="pertanyaan_id"
+                                class="w-full rounded-xl border border-gray-300 py-2 text-sm focus:border-purple-500 focus:ring-purple-500">
                                 <option value="">Semua Pertanyaan</option>
                                 @foreach ($pertanyaanList as $p)
                                     <option value="{{ $p->pertanyaan_id }}" @selected(request('pertanyaan_id') == $p->pertanyaan_id)>
@@ -121,11 +128,13 @@
                     @endif
 
                     <div class="flex items-center gap-2">
-                        <button type="submit" class="rounded-xl bg-purple-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-purple-700">
+                        <button type="submit"
+                            class="rounded-xl bg-purple-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-purple-700">
                             <i class="fas fa-filter mr-1.5"></i>Filter
                         </button>
                         @if (request()->hasAny(['search', 'pertanyaan_id']))
-                            <a href="{{ route('admin.hasil-refleksi', $museum->museum_id) }}" class="rounded-xl border border-gray-300 bg-gray-50 px-3.5 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100">
+                            <a href="{{ route('admin.hasil-refleksi', $museum->museum_id) }}"
+                                class="rounded-xl border border-gray-300 bg-gray-50 px-3.5 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100">
                                 Reset
                             </a>
                         @endif
@@ -136,7 +145,8 @@
             <!-- Answers Table -->
             @if ($jawaban->isEmpty())
                 <div class="rounded-2xl border border-dashed border-gray-300 bg-white p-12 text-center shadow-sm">
-                    <div class="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-gray-100 text-gray-400">
+                    <div
+                        class="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-gray-100 text-gray-400">
                         <i class="fas fa-inbox text-2xl"></i>
                     </div>
                     <h3 class="text-base font-semibold text-gray-900">Belum ada jawaban refleksi</h3>
@@ -166,11 +176,13 @@
                                     <tr class="transition hover:bg-gray-50/80">
                                         <td class="whitespace-nowrap px-6 py-4 align-top">
                                             @if ($row->kode_responden)
-                                                <span class="inline-flex items-center rounded-lg bg-emerald-50 px-2.5 py-1 font-mono text-xs font-bold text-emerald-700 border border-emerald-200">
+                                                <span
+                                                    class="inline-flex items-center rounded-lg border border-emerald-200 bg-emerald-50 px-2.5 py-1 font-mono text-xs font-bold text-emerald-700">
                                                     {{ $row->kode_responden }}
                                                 </span>
                                             @else
-                                                <span class="inline-flex items-center rounded-lg bg-gray-100 px-2 py-0.5 text-xs text-gray-500 italic">
+                                                <span
+                                                    class="inline-flex items-center rounded-lg bg-gray-100 px-2 py-0.5 text-xs italic text-gray-500">
                                                     Anonim
                                                 </span>
                                             @endif
@@ -180,33 +192,41 @@
                                                 </div>
                                             @endif
                                         </td>
-                                        <td class="px-6 py-4 align-top max-w-xs">
+                                        <td class="max-w-xs px-6 py-4 align-top">
                                             @if ($row->pertanyaan)
-                                                <span class="inline-flex items-center rounded-full bg-purple-100 px-2.5 py-0.5 text-xs font-semibold text-purple-800 mb-1">
+                                                <span
+                                                    class="mb-1 inline-flex items-center rounded-full bg-purple-100 px-2.5 py-0.5 text-xs font-semibold text-purple-800">
                                                     {{ $row->pertanyaan->nilai_karakter?->label() }}
                                                 </span>
-                                                <p class="text-xs font-medium text-gray-800 line-clamp-2">
+                                                <p class="line-clamp-2 text-xs font-medium text-gray-800">
                                                     {{ $row->pertanyaan->pertanyaan }}
                                                 </p>
                                             @else
-                                                <span class="text-xs italic text-gray-400">(Pertanyaan telah dihapus)</span>
+                                                <span class="text-xs italic text-gray-400">(Pertanyaan telah
+                                                    dihapus)</span>
                                             @endif
                                         </td>
                                         <td class="px-6 py-4 align-top">
-                                            <div class="rounded-xl border border-gray-100 bg-gray-50/70 p-3.5 text-sm text-gray-900 leading-relaxed whitespace-pre-line">
+                                            <div
+                                                class="whitespace-pre-line rounded-xl border border-gray-100 bg-gray-50/70 p-3.5 text-sm leading-relaxed text-gray-900">
                                                 {{ $row->jawaban }}
                                             </div>
                                         </td>
                                         <td class="whitespace-nowrap px-6 py-4 align-top text-xs text-gray-500">
-                                            <div class="font-medium text-gray-800">{{ $row->created_at?->format('d M Y') }}</div>
-                                            <div class="text-gray-400">{{ $row->created_at?->format('H:i') }} WITA</div>
+                                            <div class="font-medium text-gray-800">
+                                                {{ $row->created_at?->format('d M Y') }}</div>
+                                            <div class="text-gray-400">{{ $row->created_at?->format('H:i') }} WITA
+                                            </div>
                                         </td>
-                                        <td class="whitespace-nowrap px-6 py-4 align-top text-right text-xs">
-                                            <form method="POST" action="{{ route('admin.jawaban-refleksi.destroy', $row->jawaban_id) }}"
+                                        <td class="whitespace-nowrap px-6 py-4 text-right align-top text-xs">
+                                            <form method="POST"
+                                                action="{{ route('admin.jawaban-refleksi.destroy', $row->jawaban_id) }}"
                                                 onsubmit="return confirm('Hapus baris jawaban ini?')">
                                                 @csrf
                                                 @method('DELETE')
-                                                <button type="submit" class="rounded-lg p-1.5 text-gray-400 transition hover:bg-red-50 hover:text-red-600" title="Hapus jawaban ini">
+                                                <button type="submit"
+                                                    class="rounded-lg p-1.5 text-gray-400 transition hover:bg-red-50 hover:text-red-600"
+                                                    title="Hapus jawaban ini">
                                                     <i class="fas fa-trash-alt"></i>
                                                 </button>
                                             </form>
