@@ -46,22 +46,22 @@ export function showPostSessionPanel(logger) {
         '<p style="font-size:20px;font-weight:600;margin:0">Sesi VR selesai</p>' +
         (logger.kodeResponden
             ? `<p style="margin:0;opacity:.7;font:600 14px monospace">Responden: ${logger.kodeResponden}</p>`
-            : "") +
-        '<p style="margin:0;opacity:.8;max-width:32ch">Lanjutkan dengan menuliskan refleksimu.</p>' +
-        `<a href="${tujuan}" style="${gayaTombol}">Lanjut ke Refleksi</a>`;
+            : "");
 
     if (kioskAktif) {
-        // Gerbang integritas data, bukan gerbang belajar. Di mode kiosk panel ini TIDAK
-        // bisa ditutup: kalau scene menerima responden berikutnya tanpa mengganti kode,
-        // dua orang tergabung jadi satu kode — dan itu salah diam-diam, lebih buruk
-        // daripada kode kosong yang setidaknya jujur. Mengandalkan fasilitator untuk
-        // ingat, sambil ia sedang memasangkan headset ke siswa berikutnya, akan gagal.
-        //
-        // Ini tidak melanggar "fase tidak pernah mengunci" dari Fase 3: yang itu soal
-        // alur belajar siswa di dalam sesi. Ini langkah fasilitator di antara sesi.
-        isi += `<button type="button" id="btn-responden-berikutnya" style="${gayaTombol};background:#059669">Responden berikutnya</button>`;
+        // Alur Kiosk: Siswa melepas headset dan mengisi refleksi di meja laptop/tablet guru.
+        // Tombol primer adalah "Responden berikutnya" agar headset langsung siap untuk siswa berikutnya.
+        isi +=
+            '<div style="background:rgba(255,255,255,.08);padding:14px 20px;border-radius:16px;max-width:36ch;margin:4px 0">' +
+            '<p style="margin:0;font-size:14px;line-height:1.5">Silakan <strong>lepas headset</strong> dan lanjutkan mengisi refleksi di <strong>meja fasilitator/laptop</strong>.</p>' +
+            '</div>' +
+            `<button type="button" id="btn-responden-berikutnya" style="${gayaTombol};background:#059669;font-size:16px">Responden berikutnya</button>` +
+            `<a href="${tujuan}" style="${gayaTaut};font-size:13px;opacity:.7;margin-top:2px">Atau isi refleksi di headset ini</a>`;
     } else {
-        isi += `<button type="button" id="btn-lanjut-jelajah" style="${gayaTaut}">Kembali menjelajah</button>`;
+        isi +=
+            '<p style="margin:0;opacity:.8;max-width:32ch">Lanjutkan dengan menuliskan refleksimu.</p>' +
+            `<a href="${tujuan}" style="${gayaTombol}">Lanjut ke Refleksi</a>` +
+            `<button type="button" id="btn-lanjut-jelajah" style="${gayaTaut}">Kembali menjelajah</button>`;
     }
 
     panel.innerHTML = isi;
