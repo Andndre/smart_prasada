@@ -143,6 +143,12 @@ describe('POST /refleksi/{museum_id}', function () {
             'kode' => 'R015',
         ]));
 
+        $expectedUrl = route('refleksi.show', $museum->museum_id).'?'.http_build_query([
+            'kiosk' => '1',
+            'kode' => 'R016',
+            'kode_akhir' => 'R030',
+        ]);
+
         $this->actingAs($user)
             ->get(route('refleksi.selesai', [
                 'museum' => $museum->museum_id,
@@ -152,7 +158,38 @@ describe('POST /refleksi/{museum_id}', function () {
             ]))
             ->assertSuccessful()
             ->assertSee('Siapkan Responden Berikutnya (R016)')
-            ->assertSee('kode=R016');
+            ->assertSee($expectedUrl)
+            ->assertDontSee(route('vr.museum', [$museum->situs_id, $museum->museum_id]))
+            ->assertSee('Kembali ke Peluncur Sesi');
+    });
+
+    it('shows session finished and hides next respondent button when kode_akhir is reached', function () {
+        $user = User::factory()->create();
+        $museum = VirtualMuseum::factory()->create();
+
+        $this->actingAs($user)
+            ->get(route('refleksi.selesai', [
+                'museum' => $museum->museum_id,
+                'kiosk' => '1',
+                'kode_akhir' => 'R030',
+                'kode' => 'R030',
+            ]))
+            ->assertSuccessful()
+            ->assertDontSee('Siapkan Responden Berikutnya')
+            ->assertSee('Seluruh rangkaian responden pada sesi ini telah selesai')
+            ->assertSee('Kembali ke Peluncur Sesi');
+    });
+
+    it('displays respondent code badge on refleksi show page when kode query is present', function () {
+        $user = User::factory()->create();
+        $museum = VirtualMuseum::factory()->create();
+        PertanyaanRefleksi::factory()->create(['museum_id' => $museum->museum_id]);
+
+        $this->actingAs($user)
+            ->get(route('refleksi.show', [$museum->museum_id, 'kode' => 'R042']))
+            ->assertSuccessful()
+            ->assertSee('Responden:')
+            ->assertSee('R042');
     });
 
     it('skips blank answers instead of storing empty rows', function () {

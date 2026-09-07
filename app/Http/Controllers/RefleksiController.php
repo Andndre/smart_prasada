@@ -118,14 +118,16 @@ class RefleksiController extends Controller
         $urlBerikutnya = null;
         if ($isKiosk && $museum) {
             $kodeBerikutnya = self::hitungKodeBerikutnya($kodeResponden, $kodeAkhir);
-            $queryBerikutnya = ['kiosk' => 1];
             if ($kodeBerikutnya) {
-                $queryBerikutnya['kode'] = $kodeBerikutnya;
+                $queryBerikutnya = [
+                    'kiosk' => 1,
+                    'kode' => $kodeBerikutnya,
+                ];
+                if ($kodeAkhir) {
+                    $queryBerikutnya['kode_akhir'] = $kodeAkhir;
+                }
+                $urlBerikutnya = route('refleksi.show', $museum->museum_id).'?'.http_build_query($queryBerikutnya);
             }
-            if ($kodeAkhir) {
-                $queryBerikutnya['kode_akhir'] = $kodeAkhir;
-            }
-            $urlBerikutnya = route('vr.museum', [$museum->situs_id, $museum->museum_id]).'?'.http_build_query($queryBerikutnya);
         }
 
         return view('guest.refleksi.selesai', [

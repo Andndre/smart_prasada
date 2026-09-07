@@ -54,7 +54,7 @@ export function showPostSessionPanel(logger) {
         isi +=
             '<div style="background:rgba(255,255,255,.08);padding:14px 20px;border-radius:16px;max-width:36ch;margin:4px 0">' +
             '<p style="margin:0;font-size:14px;line-height:1.5">Silakan <strong>lepas headset</strong> dan lanjutkan mengisi refleksi di <strong>meja fasilitator/laptop</strong>.</p>' +
-            '</div>' +
+            "</div>" +
             `<button type="button" id="btn-responden-berikutnya" style="${gayaTombol};background:#059669;font-size:16px">Responden berikutnya</button>` +
             `<a href="${tujuan}" style="${gayaTaut};font-size:13px;opacity:.7;margin-top:2px">Atau isi refleksi di headset ini</a>`;
     } else {
