@@ -20,6 +20,7 @@ class PanoramaController extends Controller
     public function editor(Request $request, int $situsId)
     {
         $situs = SitusPeninggalan::findOrFail($situsId);
+
         return view('admin.panorama.editor', compact('situs'));
     }
 

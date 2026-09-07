@@ -7,7 +7,9 @@
         <div class="mx-auto max-w-7xl">
             <h1 class="text-lg font-bold">Refleksi</h1>
             <p class="text-sm opacity-90">
-                {{ $museum->nama }}@if ($museum->situsPeninggalan) &middot; {{ $museum->situsPeninggalan->nama }}@endif
+                {{ $museum->nama }}@if ($museum->situsPeninggalan)
+                    &middot; {{ $museum->situsPeninggalan->nama }}
+                @endif
             </p>
         </div>
     </div>
@@ -23,14 +25,15 @@
                         Sesi VR-mu tetap tercatat. Pertanyaan refleksi untuk situs ini belum disusun,
                         jadi tidak ada yang perlu kamu isi sekarang.
                     </p>
-                    @if (auth()->user()?->role === 'admin')
+                    @if (auth()->user()?->role === 'admin' && !request()->boolean('kiosk') && !session('is_kiosk_session'))
                         <a href="{{ route('admin.pertanyaan-refleksi', $museum->museum_id) }}"
                             class="mt-4 inline-flex items-center rounded-lg bg-amber-600 px-6 py-3 font-medium text-white transition-colors hover:bg-amber-700">
                             Susun pertanyaan refleksi
                         </a>
                     @endif
                     <div class="mt-4">
-                        <a href="{{ route('guest.home') }}" class="text-sm font-medium text-amber-900 underline">Kembali ke beranda</a>
+                        <a href="{{ route('guest.home') }}" class="text-sm font-medium text-amber-900 underline">Kembali
+                            ke beranda</a>
                     </div>
                 </div>
             @else
@@ -52,19 +55,22 @@
                     <h3 class="mb-4 text-xl font-bold text-gray-900">Instruksi Refleksi</h3>
                     <div class="space-y-3 text-gray-700">
                         <div class="flex items-start space-x-3">
-                            <div class="mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-purple-100">
+                            <div
+                                class="mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-purple-100">
                                 <span class="text-xs font-medium text-purple-600">1</span>
                             </div>
                             <p>Refleksi ini terdiri dari {{ $pertanyaan->count() }} pertanyaan terbuka.</p>
                         </div>
                         <div class="flex items-start space-x-3">
-                            <div class="mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-purple-100">
+                            <div
+                                class="mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-purple-100">
                                 <span class="text-xs font-medium text-purple-600">2</span>
                             </div>
                             <p>Jawab sejujurnya berdasarkan apa yang kamu amati di dalam museum virtual.</p>
                         </div>
                         <div class="flex items-start space-x-3">
-                            <div class="mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-purple-100">
+                            <div
+                                class="mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-purple-100">
                                 <span class="text-xs font-medium text-purple-600">3</span>
                             </div>
                             <p>Tidak ada jawaban benar atau salah.</p>
@@ -76,18 +82,28 @@
                     @csrf
                     <input type="hidden" name="kode_responden" value="{{ $kodeResponden }}">
                     <input type="hidden" name="sesi_id" value="{{ $sesiId }}">
+                    @if (request()->has('kiosk'))
+                        <input type="hidden" name="kiosk" value="{{ request('kiosk') }}">
+                    @endif
+                    @if (request()->has('kode_akhir'))
+                        <input type="hidden" name="kode_akhir" value="{{ request('kode_akhir') }}">
+                    @endif
 
                     @foreach ($pertanyaan as $index => $soal)
                         <div class="mb-6 rounded-2xl bg-white p-6 shadow-sm">
                             <div class="mb-6">
                                 <div class="mb-4 flex items-center justify-between gap-4">
                                     <div class="flex items-center space-x-3">
-                                        <div class="flex h-8 w-8 items-center justify-center rounded-full bg-purple-100">
-                                            <span class="text-sm font-medium text-purple-600">{{ $index + 1 }}</span>
+                                        <div
+                                            class="flex h-8 w-8 items-center justify-center rounded-full bg-purple-100">
+                                            <span
+                                                class="text-sm font-medium text-purple-600">{{ $index + 1 }}</span>
                                         </div>
-                                        <h3 class="text-lg font-semibold text-gray-900">Pertanyaan {{ $index + 1 }}</h3>
+                                        <h3 class="text-lg font-semibold text-gray-900">Pertanyaan {{ $index + 1 }}
+                                        </h3>
                                     </div>
-                                    <span class="shrink-0 rounded-full bg-purple-100 px-3 py-1 text-xs font-medium text-purple-800">
+                                    <span
+                                        class="shrink-0 rounded-full bg-purple-100 px-3 py-1 text-xs font-medium text-purple-800">
                                         {{ $soal->nilai_karakter->label() }}
                                     </span>
                                 </div>
@@ -96,12 +112,11 @@
                                 </label>
                             </div>
 
-                            <textarea id="jawaban-{{ $soal->pertanyaan_id }}"
-                                name="jawaban[{{ $soal->pertanyaan_id }}]" rows="4"
+                            <textarea id="jawaban-{{ $soal->pertanyaan_id }}" name="jawaban[{{ $soal->pertanyaan_id }}]" rows="4"
                                 maxlength="{{ $maksPanjang }}"
                                 class="block w-full rounded-lg border border-gray-200 p-4 transition-all duration-300 focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500"
-                                placeholder="Tulis refleksimu di sini...">{{ old('jawaban.'.$soal->pertanyaan_id) }}</textarea>
-                            @error('jawaban.'.$soal->pertanyaan_id)
+                                placeholder="Tulis refleksimu di sini...">{{ old('jawaban.' . $soal->pertanyaan_id) }}</textarea>
+                            @error('jawaban.' . $soal->pertanyaan_id)
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                             @enderror
                         </div>

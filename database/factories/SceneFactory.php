@@ -7,7 +7,7 @@ use App\Models\SitusPeninggalan;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Scene>
+ * @extends Factory<Scene>
  */
 class SceneFactory extends Factory
 {
@@ -21,7 +21,7 @@ class SceneFactory extends Factory
         return [
             'situs_id' => SitusPeninggalan::factory(),
             'name' => fake()->words(3, true),
-            'image' => '/storage/panoramas/' . fake()->uuid() . '.jpg',
+            'image' => '/storage/panoramas/'.fake()->uuid().'.jpg',
             'camera_x' => 0,
             'camera_y' => 0,
             'camera_z' => 0,

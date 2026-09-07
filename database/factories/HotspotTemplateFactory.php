@@ -6,7 +6,7 @@ use App\Models\HotspotTemplate;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\HotspotTemplate>
+ * @extends Factory<HotspotTemplate>
  */
 class HotspotTemplateFactory extends Factory
 {
@@ -20,10 +20,10 @@ class HotspotTemplateFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => fake()->words(2, true) . ' Template',
+            'name' => fake()->words(2, true).' Template',
             'type' => fake()->randomElement(HotspotTemplate::getTypes()),
-            'file_path' => '/hotspots/' . fake()->word() . '.svg',
-            'thumbnail_path' => '/hotspots/thumbnails/' . fake()->word() . '.png',
+            'file_path' => '/hotspots/'.fake()->word().'.svg',
+            'thumbnail_path' => '/hotspots/thumbnails/'.fake()->word().'.png',
             'is_animated' => fake()->boolean(30),
             'default_color' => fake()->hexColor(),
         ];

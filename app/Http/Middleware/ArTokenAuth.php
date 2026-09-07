@@ -32,6 +32,10 @@ class ArTokenAuth
                 return redirect()->route('login');
             }
 
+            if ($request->boolean('kiosk')) {
+                $request->session()->put('is_kiosk_session', true);
+            }
+
             return $next($request);
         }
 
@@ -47,6 +51,10 @@ class ArTokenAuth
 
             // Token is valid, log the user in
             Auth::login($user);
+
+            if ($request->boolean('kiosk')) {
+                $request->session()->put('is_kiosk_session', true);
+            }
 
             Log::info('AR Token validated successfully', [
                 'user_id' => $user->id,

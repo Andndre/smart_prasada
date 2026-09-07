@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Hash;
 
 class User extends Authenticatable
 {
@@ -124,5 +125,23 @@ class User extends Authenticatable
     public function logAktivitas(): HasMany
     {
         return $this->hasMany(LogAktivitas::class, 'user_id', 'id');
+    }
+
+    /**
+     * Ambil atau buat akun kiosk khusus yang aman untuk sesi headset bersama.
+     * Akun ini memiliki role 'user' tanpa privilese admin atau riwayat belajar pribadi.
+     */
+    public static function getOrCreateKioskUser(): self
+    {
+        return static::firstOrCreate(
+            ['email' => 'kiosk@smartprasada.id'],
+            [
+                'name' => 'Akun Kiosk Lapangan',
+                'password' => Hash::make('kiosk_smartprasada_secret'),
+                'role' => 'user',
+                'level_sekarang' => 0,
+                'progress_level_sekarang' => 0,
+            ]
+        );
     }
 }

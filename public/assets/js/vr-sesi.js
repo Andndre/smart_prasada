@@ -23,7 +23,11 @@ export function showPostSessionPanel(logger) {
 
     const tujuan = new URL(refleksiUrl, location.origin);
     tujuan.searchParams.set("sesi", logger.sesiId);
-    if (logger.kodeResponden) tujuan.searchParams.set("kode", logger.kodeResponden);
+    if (logger.kodeResponden)
+        tujuan.searchParams.set("kode", logger.kodeResponden);
+    if (kioskAktif) tujuan.searchParams.set("kiosk", "1");
+    if (kodeAkhirResponden)
+        tujuan.searchParams.set("kode_akhir", kodeAkhirResponden);
 
     const panel = document.createElement("div");
     panel.id = "panel-selesai";
@@ -68,7 +72,9 @@ export function showPostSessionPanel(logger) {
         ?.addEventListener("click", () => panel.remove());
     panel
         .querySelector("#btn-responden-berikutnya")
-        ?.addEventListener("click", () => mintaRespondenBerikutnya(panel, logger));
+        ?.addEventListener("click", () =>
+            mintaRespondenBerikutnya(panel, logger),
+        );
 }
 
 /** Muat ulang scene untuk responden berikutnya, mempertahankan seluruh konteks sesi. */
@@ -78,13 +84,17 @@ function mulaiRespondenBerikutnya(kode) {
     // kiosk dan kode_akhir harus ikut terbawa; kalau hilang, navigasi aplikasi muncul
     // kembali di tengah uji dan deret kode berhenti otomatis.
     if (kioskAktif) url.searchParams.set("kiosk", "1");
-    if (kodeAkhirResponden) url.searchParams.set("kode_akhir", kodeAkhirResponden);
+    if (kodeAkhirResponden)
+        url.searchParams.set("kode_akhir", kodeAkhirResponden);
     url.searchParams.delete("arToken");
     location.href = url.toString();
 }
 
 function mintaRespondenBerikutnya(panel, logger) {
-    const otomatis = kodeOtomatisBerikutnya(logger.kodeResponden, kodeAkhirResponden);
+    const otomatis = kodeOtomatisBerikutnya(
+        logger.kodeResponden,
+        kodeAkhirResponden,
+    );
     if (otomatis) {
         mulaiRespondenBerikutnya(otomatis);
         return;

@@ -1,7 +1,7 @@
 <x-elearning-layout>
     {{-- Header Section --}}
     <div class="bg-primary px-6 py-6 text-white">
-        <div class="max-w-7xl mx-auto">
+        <div class="mx-auto max-w-7xl">
             <div class="flex items-center justify-between">
                 <div class="flex items-center space-x-4">
                     <button class="back-button rounded-full p-2 transition-colors hover:bg-white/10">
@@ -18,269 +18,281 @@
 
     {{-- Content Section --}}
     <div class="min-h-screen bg-gray-50">
-        <div class="max-w-7xl mx-auto px-6 py-6">
-        {{-- Hero Image Section --}}
-        <div class="mb-6 overflow-hidden rounded-2xl bg-white shadow-sm">
-            <div class="relative aspect-[16/9] bg-gradient-to-br from-orange-400 to-orange-600">
-                {{-- Tampilkan thumbnail menggunakan accessor --}}
-                <img src="{{ $situs->getThumbnailUrlAttribute() }}" alt="{{ $situs->nama }}"
-                    class="h-full w-full object-cover">
+        <div class="mx-auto max-w-7xl px-6 py-6">
+            {{-- Hero Image Section --}}
+            <div class="mb-6 overflow-hidden rounded-2xl bg-white shadow-sm">
+                <div class="relative aspect-[16/9] bg-gradient-to-br from-orange-400 to-orange-600">
+                    {{-- Tampilkan thumbnail menggunakan accessor --}}
+                    <img src="{{ $situs->getThumbnailUrlAttribute() }}" alt="{{ $situs->nama }}"
+                        class="h-full w-full object-cover">
 
-                {{-- Overlay with basic info --}}
-                <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-6">
-                    <h2 class="mb-2 text-2xl font-bold text-white">{{ $situs->nama }}</h2>
-                    @if ($situs->alamat)
-                        <div class="flex items-center text-white/90">
-                            <i class="fas fa-map-marker-alt mr-2"></i>
-                            <span class="text-sm">{{ $situs->alamat }}</span>
-                        </div>
-                    @endif
-                </div>
-            </div>
-        </div>
-
-        {{-- Location Info Card --}}
-        @if ($situs->lat && $situs->lng)
-            <div class="mb-6 rounded-2xl bg-white p-6 shadow-sm">
-                <h3 class="mb-4 flex items-center text-lg font-bold text-gray-900">
-                    <i class="fas fa-map-marked-alt mr-2 text-orange-600"></i>
-                    Lokasi
-                </h3>
-
-                <div class="space-y-3">
-                    @if ($situs->alamat)
-                        <div class="flex items-start space-x-3">
-                            <i class="fas fa-location-dot mt-1 text-gray-400"></i>
-                            <div>
-                                <p class="font-medium text-gray-900">Alamat</p>
-                                <p class="text-gray-600">{{ $situs->alamat }}</p>
+                    {{-- Overlay with basic info --}}
+                    <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-6">
+                        <h2 class="mb-2 text-2xl font-bold text-white">{{ $situs->nama }}</h2>
+                        @if ($situs->alamat)
+                            <div class="flex items-center text-white/90">
+                                <i class="fas fa-map-marker-alt mr-2"></i>
+                                <span class="text-sm">{{ $situs->alamat }}</span>
                             </div>
-                        </div>
-                    @endif
-
-                    <div class="flex items-start space-x-3">
-                        <i class="fas fa-globe mt-1 text-gray-400"></i>
-                        <div>
-                            <p class="font-medium text-gray-900">Koordinat</p>
-                            <p class="text-gray-600">{{ $situs->lat }}, {{ $situs->lng }}</p>
-                        </div>
+                        @endif
                     </div>
                 </div>
             </div>
-        @endif
 
-        {{-- Description Card --}}
-        @if ($situs->deskripsi)
-            <div class="mb-6 rounded-2xl bg-white p-6 shadow-sm">
-                <h3 class="mb-4 flex items-center text-lg font-bold text-gray-900">
-                    <i class="fas fa-info-circle mr-2 text-blue-600"></i>
-                    Deskripsi
-                </h3>
-                <div class="prose prose-gray max-w-none">
-                    <p class="leading-relaxed text-gray-700">{{ $situs->deskripsi }}</p>
-                </div>
-            </div>
-        @endif
+            {{-- Location Info Card --}}
+            @if ($situs->lat && $situs->lng)
+                <div class="mb-6 rounded-2xl bg-white p-6 shadow-sm">
+                    <h3 class="mb-4 flex items-center text-lg font-bold text-gray-900">
+                        <i class="fas fa-map-marked-alt mr-2 text-orange-600"></i>
+                        Lokasi
+                    </h3>
 
-        {{-- Virtual Living Museum Spots --}}
-        @if ($situs->virtualMuseum->count() > 0)
-            <div class="mb-6 rounded-2xl bg-white p-6 shadow-sm">
-                <h3 class="mb-4 flex items-center text-lg font-bold text-gray-900">
-                    <i class="fas fa-location-dot mr-2 text-purple-600"></i>
-                    Spot Virtual Living Museum (VR)
-                </h3>
-
-                <div class="grid grid-cols-1 gap-4">
-                    @foreach ($situs->virtualMuseum as $museum)
-                        <div class="rounded-xl border border-gray-200 p-4 transition-shadow hover:shadow-md">
-                            <div class="mb-4 flex items-center space-x-3">
-                                <div class="flex h-12 w-12 items-center justify-center rounded-lg bg-purple-100">
-                                    <i class="fas fa-location-dot text-purple-600"></i>
+                    <div class="space-y-3">
+                        @if ($situs->alamat)
+                            <div class="flex items-start space-x-3">
+                                <i class="fas fa-location-dot mt-1 text-gray-400"></i>
+                                <div>
+                                    <p class="font-medium text-gray-900">Alamat</p>
+                                    <p class="text-gray-600">{{ $situs->alamat }}</p>
                                 </div>
-                                <div class="flex-1">
-                                    <h4 class="font-semibold text-gray-900">{{ $museum->nama }}</h4>
-                                    @if ($museum->virtualMuseumObjects->count() > 0)
-                                        <p class="text-sm text-gray-600">
-                                            <span
-                                                class="font-medium">{{ $museum->virtualMuseumObjects->count() }}</span>
-                                            objek peninggalan tersedia
-                                        </p>
+                            </div>
+                        @endif
+
+                        <div class="flex items-start space-x-3">
+                            <i class="fas fa-globe mt-1 text-gray-400"></i>
+                            <div>
+                                <p class="font-medium text-gray-900">Koordinat</p>
+                                <p class="text-gray-600">{{ $situs->lat }}, {{ $situs->lng }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            @endif
+
+            {{-- Description Card --}}
+            @if ($situs->deskripsi)
+                <div class="mb-6 rounded-2xl bg-white p-6 shadow-sm">
+                    <h3 class="mb-4 flex items-center text-lg font-bold text-gray-900">
+                        <i class="fas fa-info-circle mr-2 text-blue-600"></i>
+                        Deskripsi
+                    </h3>
+                    <div class="prose prose-gray max-w-none">
+                        <p class="leading-relaxed text-gray-700">{{ $situs->deskripsi }}</p>
+                    </div>
+                </div>
+            @endif
+
+            {{-- Virtual Living Museum Spots --}}
+            @if ($situs->virtualMuseum->count() > 0)
+                <div class="mb-6 rounded-2xl bg-white p-6 shadow-sm">
+                    <h3 class="mb-4 flex items-center text-lg font-bold text-gray-900">
+                        <i class="fas fa-location-dot mr-2 text-purple-600"></i>
+                        Spot Virtual Living Museum (VR)
+                    </h3>
+
+                    <div class="grid grid-cols-1 gap-4">
+                        @foreach ($situs->virtualMuseum as $museum)
+                            <div class="rounded-xl border border-gray-200 p-4 transition-shadow hover:shadow-md">
+                                <div class="mb-4 flex items-center space-x-3">
+                                    <div class="flex h-12 w-12 items-center justify-center rounded-lg bg-purple-100">
+                                        <i class="fas fa-location-dot text-purple-600"></i>
+                                    </div>
+                                    <div class="flex-1">
+                                        <h4 class="font-semibold text-gray-900">{{ $museum->nama }}</h4>
+                                        @if ($museum->virtualMuseumObjects->count() > 0)
+                                            <p class="text-sm text-gray-600">
+                                                <span
+                                                    class="font-medium">{{ $museum->virtualMuseumObjects->count() }}</span>
+                                                objek peninggalan tersedia
+                                            </p>
+                                        @endif
+                                    </div>
+                                </div>
+
+                                {{-- VR Launch Button for this specific spot --}}
+                                <div class="flex flex-col gap-2 sm:flex-row">
+                                    <button onclick="launchSpotVR({{ $museum->museum_id }}, '{{ $museum->nama }}')"
+                                        class="inline-flex flex-1 transform items-center justify-center rounded-lg bg-gradient-to-r from-purple-600 to-blue-600 px-4 py-2.5 text-sm font-medium text-white shadow-md transition-all duration-200 hover:scale-[1.01] hover:from-purple-700 hover:to-blue-700">
+                                        <i class="fas fa-vr-cardboard mr-2"></i>
+                                        Jelajahi VR
+                                    </button>
+                                    @auth
+                                        <a href="{{ route('vr.peluncur', $museum->museum_id) }}"
+                                            title="Buka QR peluncur sesi headset / kiosk untuk guru & fasilitator"
+                                            class="inline-flex items-center justify-center rounded-lg border border-purple-200 bg-purple-50 px-3 py-2.5 text-sm font-medium text-purple-700 transition-colors hover:bg-purple-100">
+                                            <i class="fas fa-qrcode mr-1.5"></i>
+                                            Peluncur Sesi (Kiosk)
+                                        </a>
+                                    @endauth
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+            @endif
+
+            {{-- Virtual 360 Tour Section --}}
+            @if ($situs->panoramaScenes && $situs->panoramaScenes->count() > 0)
+                <div class="mb-6 rounded-2xl bg-white p-6 shadow-sm">
+                    <h3 class="mb-4 flex items-center text-lg font-bold text-gray-900">
+                        <i class="fas fa-street-view mr-2 text-cyan-600"></i>
+                        Tur Virtual 360°
+                    </h3>
+
+                    <div class="rounded-xl border border-gray-200 p-4 transition-shadow hover:shadow-md">
+                        <div class="mb-4 flex items-center space-x-3">
+                            <div class="flex h-12 w-12 items-center justify-center rounded-lg bg-cyan-100">
+                                <i class="fas fa-street-view text-cyan-600"></i>
+                            </div>
+                            <div class="flex-1">
+                                <h4 class="font-semibold text-gray-900">Panorama Interaktif</h4>
+                                <p class="text-sm text-gray-600">
+                                    Jelajahi situs ini melalui sudut pandang 360 derajat yang interaktif.
+                                </p>
+                            </div>
+                        </div>
+
+                        <a href="{{ route('guest.situs.panorama', $situs->situs_id) }}"
+                            class="inline-flex w-full transform items-center justify-center rounded-lg bg-gradient-to-r from-cyan-600 to-blue-600 px-4 py-3 font-medium text-white shadow-md transition-all duration-200 hover:scale-[1.02] hover:from-cyan-700 hover:to-blue-700">
+                            <i class="fas fa-play-circle mr-2"></i>
+                            Mulai Tur 360°
+                        </a>
+                    </div>
+                </div>
+            @endif
+
+            {{-- Heritage Objects Section --}}
+            @php
+                $allObjects = collect();
+                foreach ($situs->virtualMuseum as $museum) {
+                    foreach ($museum->virtualMuseumObjects as $object) {
+                        $object->museum_name = $museum->nama;
+                        $allObjects->push($object);
+                    }
+                }
+            @endphp
+
+            @if ($allObjects->count() > 0)
+                <div class="mb-6 rounded-2xl bg-white p-6 shadow-sm">
+                    <h3 class="mb-4 flex items-center text-lg font-bold text-gray-900">
+                        <i class="fas fa-gem mr-2 text-amber-600"></i>
+                        Heritage Objects
+                        <span class="ml-2 rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-medium text-amber-800">
+                            {{ $allObjects->count() }}
+                        </span>
+                    </h3>
+
+                    <div class="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
+                        @foreach ($allObjects as $object)
+                            <div class="group cursor-pointer overflow-hidden rounded-xl border border-gray-100 bg-gray-50 transition-all duration-300 hover:-translate-y-1 hover:shadow-md"
+                                onclick="showObjectModal({{ $object->object_id }}, '{{ addslashes($object->nama) }}', '{{ addslashes($object->deskripsi ?? '') }}', '{{ $object->gambar_real ? asset('storage/' . $object->gambar_real) : asset('images/placeholder/object.png') }}', '{{ $object->museum_name }}')">
+                                <div class="relative aspect-square overflow-hidden bg-gray-200">
+                                    @if ($object->gambar_real)
+                                        <img src="{{ asset('storage/' . $object->gambar_real) }}"
+                                            alt="{{ $object->nama }}"
+                                            class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105">
+                                    @else
+                                        <div class="flex h-full w-full items-center justify-center">
+                                            <i class="fas fa-gem text-4xl text-gray-300"></i>
+                                        </div>
+                                    @endif
+
+                                    {{-- Lock indicator overlay --}}
+                                    @if (!$is_unlocked)
+                                        <div class="absolute inset-0 flex items-center justify-center bg-black/40">
+                                            <div class="rounded-full bg-white/90 p-2">
+                                                <i class="fas fa-lock text-sm text-gray-600"></i>
+                                            </div>
+                                        </div>
                                     @endif
                                 </div>
+                                <div class="p-3">
+                                    <p class="truncate text-sm font-medium text-gray-800">{{ $object->nama }}</p>
+                                    <p class="truncate text-xs text-gray-500">{{ $object->museum_name }}</p>
+                                </div>
                             </div>
-
-                            {{-- VR Launch Button for this specific spot --}}
-                            <button onclick="launchSpotVR({{ $museum->museum_id }}, '{{ $museum->nama }}')"
-                                class="inline-flex w-full transform items-center justify-center rounded-lg bg-gradient-to-r from-purple-600 to-blue-600 px-4 py-3 font-medium text-white shadow-md transition-all duration-200 hover:scale-[1.02] hover:from-purple-700 hover:to-blue-700">
-                                <i class="fas fa-vr-cardboard mr-2"></i>
-                                Jelajahi VR
-                            </button>
-                        </div>
-                    @endforeach
-                </div>
-            </div>
-        @endif
-
-        {{-- Virtual 360 Tour Section --}}
-        @if ($situs->panoramaScenes && $situs->panoramaScenes->count() > 0)
-            <div class="mb-6 rounded-2xl bg-white p-6 shadow-sm">
-                <h3 class="mb-4 flex items-center text-lg font-bold text-gray-900">
-                    <i class="fas fa-street-view mr-2 text-cyan-600"></i>
-                    Tur Virtual 360°
-                </h3>
-                
-                <div class="rounded-xl border border-gray-200 p-4 transition-shadow hover:shadow-md">
-                    <div class="mb-4 flex items-center space-x-3">
-                        <div class="flex h-12 w-12 items-center justify-center rounded-lg bg-cyan-100">
-                            <i class="fas fa-street-view text-cyan-600"></i>
-                        </div>
-                        <div class="flex-1">
-                            <h4 class="font-semibold text-gray-900">Panorama Interaktif</h4>
-                            <p class="text-sm text-gray-600">
-                                Jelajahi situs ini melalui sudut pandang 360 derajat yang interaktif.
-                            </p>
-                        </div>
+                        @endforeach
                     </div>
-                    
-                    <a href="{{ route('guest.situs.panorama', $situs->situs_id) }}"
-                        class="inline-flex w-full transform items-center justify-center rounded-lg bg-gradient-to-r from-cyan-600 to-blue-600 px-4 py-3 font-medium text-white shadow-md transition-all duration-200 hover:scale-[1.02] hover:from-cyan-700 hover:to-blue-700">
-                        <i class="fas fa-play-circle mr-2"></i>
-                        Mulai Tur 360°
-                    </a>
                 </div>
-            </div>
-        @endif
+            @endif
 
-        {{-- Heritage Objects Section --}}
-        @php
-            $allObjects = collect();
-            foreach ($situs->virtualMuseum as $museum) {
-                foreach ($museum->virtualMuseumObjects as $object) {
-                    $object->museum_name = $museum->nama;
-                    $allObjects->push($object);
-                }
-            }
-        @endphp
-
-        @if ($allObjects->count() > 0)
+            {{-- VR Experience Section --}}
             <div class="mb-6 rounded-2xl bg-white p-6 shadow-sm">
                 <h3 class="mb-4 flex items-center text-lg font-bold text-gray-900">
-                    <i class="fas fa-gem mr-2 text-amber-600"></i>
-                    Heritage Objects
-                    <span class="ml-2 rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-medium text-amber-800">
-                        {{ $allObjects->count() }}
-                    </span>
+                    <i class="fas fa-vr-cardboard mr-2 text-green-600"></i>
+                    Cara Menggunakan VR
                 </h3>
 
-                <div class="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
-                    @foreach ($allObjects as $object)
-                        <div class="group cursor-pointer overflow-hidden rounded-xl border border-gray-100 bg-gray-50 transition-all duration-300 hover:-translate-y-1 hover:shadow-md"
-                            onclick="showObjectModal({{ $object->object_id }}, '{{ addslashes($object->nama) }}', '{{ addslashes($object->deskripsi ?? '') }}', '{{ $object->gambar_real ? asset('storage/' . $object->gambar_real) : asset('images/placeholder/object.png') }}', '{{ $object->museum_name }}')">
-                            <div class="relative aspect-square overflow-hidden bg-gray-200">
-                                @if ($object->gambar_real)
-                                    <img src="{{ asset('storage/' . $object->gambar_real) }}"
-                                        alt="{{ $object->nama }}"
-                                        class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105">
-                                @else
-                                    <div class="flex h-full w-full items-center justify-center">
-                                        <i class="fas fa-gem text-4xl text-gray-300"></i>
-                                    </div>
-                                @endif
+                <div class="space-y-4">
+                    {{-- Instructions --}}
+                    <div class="rounded-lg bg-gradient-to-br from-green-50 to-blue-50 p-4">
+                        <h5 class="mb-3 flex items-center font-semibold text-gray-900">
+                            <i class="fas fa-list-ol mr-2 text-gray-600"></i>
+                            Langkah-langkah:
+                        </h5>
+                        <ol class="ml-4 space-y-2 text-sm text-gray-700">
+                            <li class="flex items-start">
+                                <span
+                                    class="mr-3 mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-blue-500 text-xs font-bold text-white">1</span>
+                                <span>Pilih spot yang ingin dijelajahi dan klik tombol "Jelajahi VR"</span>
+                            </li>
+                            <li class="flex items-start">
+                                <span
+                                    class="mr-3 mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-blue-500 text-xs font-bold text-white">2</span>
+                                <span>Klik tombol "ENTER VR" lalu pasang HP ke Cardboard atau gunakan headset VR</span>
+                            </li>
+                            <li class="flex items-start">
+                                <span
+                                    class="mr-3 mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-blue-500 text-xs font-bold text-white">3</span>
+                                <span>Arahkan reticle ke lantai untuk berpindah, atau ke objek untuk melihat
+                                    informasinya</span>
+                            </li>
+                        </ol>
+                    </div>
 
-                                {{-- Lock indicator overlay --}}
-                                @if (!$is_unlocked)
-                                    <div class="absolute inset-0 flex items-center justify-center bg-black/40">
-                                        <div class="rounded-full bg-white/90 p-2">
-                                            <i class="fas fa-lock text-sm text-gray-600"></i>
-                                        </div>
-                                    </div>
-                                @endif
+                    {{-- Requirements Notice --}}
+                    <div class="rounded-lg border border-amber-200 bg-amber-50 p-4">
+                        <div class="flex items-start space-x-2">
+                            <i class="fas fa-exclamation-triangle mt-0.5 text-amber-600"></i>
+                            <div class="text-left">
+                                <p class="text-sm font-medium text-amber-800">Persyaratan:</p>
+                                <p class="mt-1 text-xs text-amber-700">Browser dengan dukungan WebXR (atau HP dengan
+                                    sensor gyro) dan koneksi stabil</p>
                             </div>
-                            <div class="p-3">
-                                <p class="truncate text-sm font-medium text-gray-800">{{ $object->nama }}</p>
-                                <p class="truncate text-xs text-gray-500">{{ $object->museum_name }}</p>
-                            </div>
-                        </div>
-                    @endforeach
-                </div>
-            </div>
-        @endif
-
-        {{-- VR Experience Section --}}
-        <div class="mb-6 rounded-2xl bg-white p-6 shadow-sm">
-            <h3 class="mb-4 flex items-center text-lg font-bold text-gray-900">
-                <i class="fas fa-vr-cardboard mr-2 text-green-600"></i>
-                Cara Menggunakan VR
-            </h3>
-
-            <div class="space-y-4">
-                {{-- Instructions --}}
-                <div class="rounded-lg bg-gradient-to-br from-green-50 to-blue-50 p-4">
-                    <h5 class="mb-3 flex items-center font-semibold text-gray-900">
-                        <i class="fas fa-list-ol mr-2 text-gray-600"></i>
-                        Langkah-langkah:
-                    </h5>
-                    <ol class="ml-4 space-y-2 text-sm text-gray-700">
-                        <li class="flex items-start">
-                            <span
-                                class="mr-3 mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-blue-500 text-xs font-bold text-white">1</span>
-                            <span>Pilih spot yang ingin dijelajahi dan klik tombol "Jelajahi VR"</span>
-                        </li>
-                        <li class="flex items-start">
-                            <span
-                                class="mr-3 mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-blue-500 text-xs font-bold text-white">2</span>
-                            <span>Klik tombol "ENTER VR" lalu pasang HP ke Cardboard atau gunakan headset VR</span>
-                        </li>
-                        <li class="flex items-start">
-                            <span
-                                class="mr-3 mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-blue-500 text-xs font-bold text-white">3</span>
-                            <span>Arahkan reticle ke lantai untuk berpindah, atau ke objek untuk melihat informasinya</span>
-                        </li>
-                    </ol>
-                </div>
-
-                {{-- Requirements Notice --}}
-                <div class="rounded-lg border border-amber-200 bg-amber-50 p-4">
-                    <div class="flex items-start space-x-2">
-                        <i class="fas fa-exclamation-triangle mt-0.5 text-amber-600"></i>
-                        <div class="text-left">
-                            <p class="text-sm font-medium text-amber-800">Persyaratan:</p>
-                            <p class="mt-1 text-xs text-amber-700">Browser dengan dukungan WebXR (atau HP dengan
-                                sensor gyro) dan koneksi stabil</p>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
 
-        {{-- Navigation Actions --}}
-        <div class="rounded-2xl bg-white p-6 shadow-sm">
-            <h3 class="mb-4 text-lg font-bold text-gray-900">Navigasi</h3>
+            {{-- Navigation Actions --}}
+            <div class="rounded-2xl bg-white p-6 shadow-sm">
+                <h3 class="mb-4 text-lg font-bold text-gray-900">Navigasi</h3>
 
-            <div class="space-y-3">
-                @if ($situs->materi)
-                    <a href="{{ route('guest.elearning.materi', $situs->materi->materi_id) }}"
-                        class="inline-flex w-full items-center justify-center rounded-xl bg-blue-600 px-4 py-3 font-medium text-white transition-colors hover:bg-blue-700">
-                        <i class="fas fa-arrow-left mr-2"></i>
-                        Kembali ke Materi: {{ $situs->materi->judul }}
+                <div class="space-y-3">
+                    @if ($situs->materi)
+                        <a href="{{ route('guest.elearning.materi', $situs->materi->materi_id) }}"
+                            class="inline-flex w-full items-center justify-center rounded-xl bg-blue-600 px-4 py-3 font-medium text-white transition-colors hover:bg-blue-700">
+                            <i class="fas fa-arrow-left mr-2"></i>
+                            Kembali ke Materi: {{ $situs->materi->judul }}
+                        </a>
+                    @endif
+
+                    <a href="{{ route('guest.elearning') }}"
+                        class="inline-flex w-full items-center justify-center rounded-xl bg-gray-100 px-4 py-3 font-medium text-gray-700 transition-colors hover:bg-gray-200">
+                        <i class="fas fa-home mr-2"></i>
+                        Kembali ke Beranda E-Learning
                     </a>
-                @endif
 
-                <a href="{{ route('guest.elearning') }}"
-                    class="inline-flex w-full items-center justify-center rounded-xl bg-gray-100 px-4 py-3 font-medium text-gray-700 transition-colors hover:bg-gray-200">
-                    <i class="fas fa-home mr-2"></i>
-                    Kembali ke Beranda E-Learning
-                </a>
-
-                @if ($situs->lat && $situs->lng)
-                    <a href="https://www.google.com/maps?q={{ $situs->lat }},{{ $situs->lng }}" target="_blank"
-                        class="inline-flex w-full items-center justify-center rounded-xl bg-green-600 px-4 py-3 font-medium text-white transition-colors hover:bg-green-700">
-                        <i class="fas fa-map-marked-alt mr-2"></i>
-                        Lihat di Google Maps
-                    </a>
-                @endif
+                    @if ($situs->lat && $situs->lng)
+                        <a href="https://www.google.com/maps?q={{ $situs->lat }},{{ $situs->lng }}"
+                            target="_blank"
+                            class="inline-flex w-full items-center justify-center rounded-xl bg-green-600 px-4 py-3 font-medium text-white transition-colors hover:bg-green-700">
+                            <i class="fas fa-map-marked-alt mr-2"></i>
+                            Lihat di Google Maps
+                        </a>
+                    @endif
+                </div>
             </div>
-        </div>
         </div>
     </div>
 

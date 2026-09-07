@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\PertanyaanRefleksiController;
 use App\Http\Controllers\Admin\VideoPeninggalanController;
 use App\Http\Controllers\AsetHotspotController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\KioskPinController;
 use App\Http\Controllers\KritikSaranController;
 use App\Http\Controllers\LanguageController;
 use App\Http\Controllers\LaporanPeninggalanController;
@@ -83,6 +84,11 @@ Route::middleware('ar.token')->get('/situs/{situs_id}/vr/{museum_id}', [HomeCont
 // Peluncur fasilitator — satu-satunya tempat yang mengirimkan ?kode=. Tanpa ini seluruh
 // data vr_event dan jawaban_refleksi tercatat anonim.
 Route::middleware('auth')->get('/vr/peluncur/{museum_id}', [VrPeluncurController::class, 'show'])->name('vr.peluncur');
+Route::middleware('auth')->post('/vr/peluncur/pin/update', [KioskPinController::class, 'update'])->name('vr.peluncur.pin.update');
+
+// Akses cepat PIN pairing untuk headset Meta Quest 2
+Route::get('/kiosk', [KioskPinController::class, 'show'])->name('kiosk.entry');
+Route::post('/kiosk', [KioskPinController::class, 'verify'])->middleware('throttle:10,1')->name('kiosk.verify');
 
 // Runtime event batches dari dalam scene VR. Sesi login sudah dibuat ar.token saat
 // halaman VR dibuka, jadi cukup 'auth' di sini.
