@@ -123,6 +123,38 @@ describe('POST /refleksi/{museum_id}', function () {
         expect(JawabanRefleksi::sole()->kode_responden)->toBeNull();
     });
 
+    it('carries kiosk and kode_akhir parameters to the completion page and prepares next respondent', function () {
+        $user = User::factory()->create();
+        $museum = VirtualMuseum::factory()->create();
+        $soal = PertanyaanRefleksi::factory()->create(['museum_id' => $museum->museum_id]);
+
+        $response = $this->actingAs($user)
+            ->post(route('refleksi.store', $museum->museum_id), [
+                'kode_responden' => 'R015',
+                'kode_akhir' => 'R030',
+                'kiosk' => '1',
+                'jawaban' => [$soal->pertanyaan_id => 'Jawaban refleksi saya.'],
+            ]);
+
+        $response->assertRedirect(route('refleksi.selesai', [
+            'museum' => $museum->museum_id,
+            'kiosk' => '1',
+            'kode_akhir' => 'R030',
+            'kode' => 'R015',
+        ]));
+
+        $this->actingAs($user)
+            ->get(route('refleksi.selesai', [
+                'museum' => $museum->museum_id,
+                'kiosk' => '1',
+                'kode_akhir' => 'R030',
+                'kode' => 'R015',
+            ]))
+            ->assertSuccessful()
+            ->assertSee('Siapkan Responden Berikutnya (R016)')
+            ->assertSee('kode=R016');
+    });
+
     it('skips blank answers instead of storing empty rows', function () {
         $user = User::factory()->create();
         $museum = VirtualMuseum::factory()->create();

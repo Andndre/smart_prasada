@@ -20,6 +20,20 @@
                         Terima kasih. Jawabanmu sudah tercatat dan akan digunakan untuk penelitian.
                     </p>
 
+                    @if (!empty($isKiosk) && !empty($urlBerikutnya))
+                        <div class="mb-4">
+                            <a href="{{ $urlBerikutnya }}"
+                                class="inline-flex items-center rounded-xl bg-emerald-600 px-6 py-3.5 text-base font-semibold text-white shadow-sm transition-colors hover:bg-emerald-700">
+                                <i class="fas fa-user-plus mr-2"></i>
+                                @if (!empty($kodeBerikutnya))
+                                    Siapkan Responden Berikutnya ({{ $kodeBerikutnya }})
+                                @else
+                                    Siapkan Responden Berikutnya
+                                @endif
+                            </a>
+                        </div>
+                    @endif
+
                     {{-- Kembali ke materi asal situs ini, bukan ke daftar materi: siswa
                          melanjutkan tab yang sedang ia kerjakan. Turun ke beranda kalau
                          halaman dibuka tanpa konteks museum. --}}

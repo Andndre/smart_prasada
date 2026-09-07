@@ -17,6 +17,10 @@ class IsAdmin
     {
         // Check if the user is authenticated and has the 'admin' role
         if ($request->user()) {
+            if ($request->session()->get('is_kiosk_session')) {
+                abort(403, 'Akses admin diblokir dalam mode kiosk.');
+            }
+
             if ($request->user()->role === 'admin') {
                 return $next($request);
             } elseif ($request->user()->role === 'user') {

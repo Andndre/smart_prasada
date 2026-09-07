@@ -1,71 +1,206 @@
 <x-app-layout>
     <div class="py-8">
-        <div class="mx-auto max-w-2xl px-4 sm:px-6 lg:px-8">
-            <div class="mb-6">
-                <p class="text-sm font-medium uppercase tracking-wide text-purple-600">Peluncur Sesi VR</p>
-                <h1 class="mt-1 text-2xl font-bold text-gray-900">{{ $museum->nama }}</h1>
+        <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
+            {{-- Breadcrumb Navigasi --}}
+            <nav class="mb-4 flex items-center space-x-2 text-sm text-gray-500">
                 @if ($situs)
-                    <p class="mt-1 text-gray-600">{{ $situs->nama }}</p>
+                    <a href="{{ route('guest.situs.detail', $situs->situs_id) }}"
+                        class="flex items-center transition-colors hover:text-purple-600">
+                        <i class="fas fa-arrow-left mr-1.5 text-xs"></i>
+                        Kembali ke {{ $situs->nama }}
+                    </a>
+                @elseif (auth()->user()?->role === 'admin')
+                    <a href="{{ route('admin.virtual-museum.show', $museum->museum_id) }}"
+                        class="flex items-center transition-colors hover:text-purple-600">
+                        <i class="fas fa-arrow-left mr-1.5 text-xs"></i>
+                        Kembali ke Detail Museum (Admin)
+                    </a>
+                @else
+                    <a href="{{ route('guest.home') }}"
+                        class="flex items-center transition-colors hover:text-purple-600">
+                        <i class="fas fa-arrow-left mr-1.5 text-xs"></i>
+                        Kembali ke Beranda
+                    </a>
+                @endif
+            </nav>
+
+            <div class="mb-6">
+                <div class="flex items-center gap-2">
+                    <span
+                        class="inline-flex items-center rounded-full bg-purple-100 px-2.5 py-0.5 text-xs font-semibold text-purple-700">
+                        <i class="fas fa-vr-cardboard mr-1"></i> Peluncur Sesi VR
+                    </span>
+                    @if ($isKioskAccount)
+                        <span
+                            class="inline-flex items-center rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-semibold text-emerald-700">
+                            <i class="fas fa-shield-alt mr-1"></i> Kiosk Sandbox Aktif
+                        </span>
+                    @endif
+                </div>
+                <h1 class="mt-2 text-2xl font-bold text-gray-900">{{ $museum->nama }}</h1>
+                @if ($situs)
+                    <p class="mt-0.5 text-sm text-gray-600">{{ $situs->nama }}</p>
                 @endif
             </div>
 
-            <div class="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+            {{-- Kartu Status Keamanan Akun Sesi --}}
+            <div
+                class="{{ $isKioskAccount ? 'border-emerald-200 bg-emerald-50/70' : 'border-blue-200 bg-blue-50/70' }} mb-6 rounded-xl border p-4 shadow-sm">
+                <div class="flex items-start space-x-3">
+                    <div
+                        class="{{ $isKioskAccount ? 'bg-emerald-200 text-emerald-700' : 'bg-blue-200 text-blue-700' }} mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full">
+                        <i class="fas {{ $isKioskAccount ? 'fa-shield-halved' : 'fa-user-check' }} text-sm"></i>
+                    </div>
+                    <div class="flex-1 text-xs">
+                        <h4 class="font-semibold text-gray-900">
+                            Akun Sesi Headset: <span class="font-mono text-purple-700">{{ $sessionUser->name }}</span>
+                            ({{ $sessionUser->email }})
+                        </h4>
+                        @if ($isAdminLaunching)
+                            <p class="mt-1 leading-relaxed text-emerald-800">
+                                <strong>Perlindungan Privilese Admin:</strong> Anda terdeteksi login sebagai
+                                Administrator. Untuk mencegah celah keamanan di headset Meta Quest yang dipakai siswa,
+                                token AR diterbitkan secara otomatis menggunakan <strong>Akun Kiosk Terisolasi</strong>
+                                (role non-admin). Hak akses admin Anda tetap aman.
+                            </p>
+                        @else
+                            <p class="mt-1 leading-relaxed text-gray-600">
+                                Sesi VR pada headset akan diautentikasi di bawah akun ini selama {{ $ttlMenit }}
+                                menit. Responden bergantian menggunakan akun bersama ini tanpa perlu login ulang.
+                            </p>
+                        @endif
+                    </div>
+                </div>
+            </div>
+
+            {{-- Kartu PIN Masuk Cepat Meta Quest 2 (Pairing Code) --}}
+            <div
+                class="mb-6 rounded-2xl border-2 border-purple-300 bg-gradient-to-br from-purple-50 via-white to-indigo-50/50 p-6 shadow-sm">
+                <div class="flex flex-col items-center justify-between gap-5 sm:flex-row">
+                    <div class="flex-1">
+                        <div class="flex items-center gap-2">
+                            <span
+                                class="inline-flex items-center rounded-full bg-purple-600 px-2.5 py-0.5 text-xs font-bold uppercase tracking-wider text-white">
+                                <i class="fas fa-key mr-1.5"></i> PIN Pairing
+                            </span>
+                            <span class="text-xs font-semibold text-purple-700">Khusus Meta Quest 2 / Tanpa Scanner
+                                QR</span>
+                        </div>
+                        <h3 class="mt-1.5 text-lg font-bold text-gray-900">Masuk Cepat dari Headset VR</h3>
+                        <p class="mt-1 text-xs leading-relaxed text-gray-600">
+                            Buka browser Meta Quest 2 ke alamat bookmark: <br>
+                            <a href="{{ url('/kiosk') }}" target="_blank"
+                                class="font-mono text-sm font-bold text-purple-700 underline">{{ url('/kiosk') }}</a>
+                            <br><span class="text-gray-500">Lalu masukkan 4 digit PIN di samping ini untuk langsung
+                                masuk.</span>
+                        </p>
+                    </div>
+
+                    <div class="flex flex-col items-center">
+                        <div class="flex items-center gap-2" title="Ketik 4 angka ini di Meta Quest">
+                            @foreach (str_split($pin) as $digit)
+                                <div
+                                    class="flex h-14 w-12 items-center justify-center rounded-xl border-2 border-purple-400 bg-white font-mono text-3xl font-black text-purple-700 shadow-md">
+                                    {{ $digit }}
+                                </div>
+                            @endforeach
+                        </div>
+                        <button type="button" id="btn-salin-pin"
+                            class="mt-2 flex items-center text-xs font-semibold text-purple-600 transition hover:text-purple-800">
+                            <i class="fas fa-copy mr-1"></i> <span id="label-salin-pin">Salin PIN
+                                ({{ $pin }})</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+                <h3 class="mb-4 text-base font-semibold text-gray-900">Pengaturan Responden & Mode Sesi</h3>
                 <div class="space-y-4">
                     <div>
-                        <label for="kode" class="mb-1 block text-sm font-medium text-gray-700">Kode responden pertama</label>
+                        <label for="kode" class="mb-1 block text-sm font-medium text-gray-700">Kode responden
+                            pertama</label>
                         <input type="text" id="kode" value="R001" autocomplete="off"
-                            class="block w-full rounded-md border border-gray-300 px-3 py-2 font-mono focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500">
+                            class="block w-full rounded-lg border border-gray-300 px-3.5 py-2 font-mono text-sm focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500">
                         <p class="mt-1 text-xs text-gray-500">
-                            Kode ini yang menyambungkan data VR dan refleksi ke angket serta pretest.
-                            Tanpa kode, seluruh sesi tercatat anonim.
+                            Kode ini yang menyambungkan rekaman interaksi VR dan refleksi ke angket responden.
                         </p>
                     </div>
 
                     <div>
                         <label for="kode-akhir" class="mb-1 block text-sm font-medium text-gray-700">
-                            Kode terakhir <span class="text-gray-400">(opsional)</span>
+                            Kode terakhir <span class="font-normal text-gray-400">(opsional untuk deret
+                                berurutan)</span>
                         </label>
-                        <input type="text" id="kode-akhir" placeholder="R020" autocomplete="off"
-                            class="block w-full rounded-md border border-gray-300 px-3 py-2 font-mono focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500">
+                        <input type="text" id="kode-akhir" placeholder="R030" autocomplete="off"
+                            class="block w-full rounded-lg border border-gray-300 px-3.5 py-2 font-mono text-sm focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500">
                         <p class="mt-1 text-xs text-gray-500">
-                            Isi kalau kodenya berurutan. Tombol "Responden berikutnya" di headset jadi
-                            satu ketukan tanpa mengetik. Kosongkan kalau kodenya tidak berurutan.
+                            Jika diisi, tombol "Responden berikutnya" di headset akan otomatis berpindah ke kode
+                            selanjutnya dengan 1 ketukan tanpa mengetik.
                         </p>
                     </div>
 
-                    <label class="flex items-center gap-2 text-sm text-gray-700">
-                        <input type="checkbox" id="kiosk" checked
-                            class="rounded border-gray-300 text-purple-600 focus:ring-purple-500">
-                        Mode kiosk — sembunyikan navigasi aplikasi di halaman VR
-                    </label>
+                    <div class="rounded-lg border border-gray-200 bg-gray-50 p-3">
+                        <label class="flex cursor-pointer items-start gap-2.5 text-sm text-gray-800">
+                            <input type="checkbox" id="kiosk" checked
+                                class="mt-0.5 rounded border-gray-300 text-purple-600 focus:ring-purple-500">
+                            <div>
+                                <span class="font-medium">Mode Kiosk Aktif</span>
+                                <p class="mt-0.5 text-xs text-gray-500">
+                                    Sembunyikan bilah navigasi aplikasi di dalam VR, kunci panel selesai untuk mencegah
+                                    kontaminasi kode antar-responden, dan aktifkan kontinuitas pergantian responden
+                                    otomatis.
+                                </p>
+                            </div>
+                        </label>
+                    </div>
                 </div>
 
                 <hr class="my-6 border-gray-200">
 
                 <div class="text-center">
-                    <div id="qr-code" class="mx-auto flex justify-center"></div>
-                    <p class="mt-4 break-all font-mono text-xs text-gray-500" id="tautan-teks"></p>
-                    <button type="button" id="btn-salin"
-                        class="mt-3 rounded-md border border-gray-300 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
-                        Salin tautan
-                    </button>
+                    <p class="mb-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Scan QR Code di Browser
+                        Headset VR</p>
+                    <div id="qr-code"
+                        class="mx-auto inline-block flex justify-center rounded-lg border border-gray-100 bg-white p-3 shadow-sm">
+                    </div>
+                    <p class="mx-auto mt-4 max-w-lg break-all rounded border border-gray-200 bg-gray-50 p-2.5 font-mono text-xs text-gray-500"
+                        id="tautan-teks"></p>
+
+                    <div class="mt-4 flex flex-wrap justify-center gap-2">
+                        <button type="button" id="btn-salin"
+                            class="inline-flex items-center rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm transition-colors hover:bg-gray-50">
+                            <i class="fas fa-copy mr-1.5"></i>
+                            <span id="label-salin">Salin tautan</span>
+                        </button>
+                        <a id="btn-buka-langsung" href="#" target="_blank"
+                            class="inline-flex items-center rounded-lg bg-purple-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-purple-700">
+                            <i class="fas fa-external-link-alt mr-1.5"></i>
+                            Buka Sesi di Tab Baru
+                        </a>
+                    </div>
                 </div>
 
-                <p class="mt-6 rounded-md bg-amber-50 p-3 text-xs text-amber-800">
-                    Tautan berlaku {{ $ttlMenit }} menit. Setelah dipindai sekali, headset tetap masuk
-                    sampai sesinya berakhir — responden berikutnya cukup lewat tombol di headset,
-                    tidak perlu memindai ulang.
-                </p>
+                <div
+                    class="mt-6 flex items-start space-x-2.5 rounded-lg border border-amber-200 bg-amber-50 p-3.5 text-xs text-amber-900">
+                    <i class="fas fa-info-circle mt-0.5 shrink-0 text-amber-600"></i>
+                    <div>
+                        <strong>Masa Berlaku Token:</strong> Tautan berlaku selama {{ $ttlMenit }} menit untuk
+                        proses handoff. Setelah headset memindai sekali dan sesi login terbentuk di browser headset,
+                        headset dapat dipakai bergantian sepanjang hari tanpa perlu memindai QR code lagi.
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/gh/davidshimjs/qrcodejs/qrcode.min.js"></script>
     <script>
-        (function () {
+        (function() {
             const basis = @json(route('vr.museum', [$museum->situs_id, $museum->museum_id]));
             const arToken = @json($arToken);
             const wadah = document.getElementById('qr-code');
+            const btnBuka = document.getElementById('btn-buka-langsung');
             let qr = null;
 
             function bangunTautan() {
@@ -86,6 +221,8 @@
             function perbarui() {
                 const tautan = bangunTautan();
                 document.getElementById('tautan-teks').textContent = tautan;
+                btnBuka.href = tautan;
+
                 wadah.innerHTML = '';
                 qr = new QRCode(wadah, {
                     text: tautan,
@@ -96,15 +233,60 @@
                 });
             }
 
-            for (const id of ['kode', 'kode-akhir', 'kiosk']) {
-                document.getElementById(id).addEventListener('input', perbarui);
-                document.getElementById(id).addEventListener('change', perbarui);
+            const pin = @json($pin);
+            const updatePinUrl = @json(route('vr.peluncur.pin.update'));
+            const csrfToken = @json(csrf_token());
+
+            let syncTimer = null;
+
+            function sinkronkanPinKeServer() {
+                clearTimeout(syncTimer);
+                syncTimer = setTimeout(async () => {
+                    try {
+                        await fetch(updatePinUrl, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': csrfToken,
+                                'Accept': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                pin: pin,
+                                kode: document.getElementById('kode').value.trim(),
+                                kode_akhir: document.getElementById('kode-akhir').value
+                                    .trim(),
+                                kiosk: document.getElementById('kiosk').checked ? 1 : 0
+                            })
+                        });
+                    } catch (err) {
+                        console.error('Gagal sinkronisasi PIN:', err);
+                    }
+                }, 300);
             }
 
-            document.getElementById('btn-salin').addEventListener('click', async (e) => {
+            for (const id of ['kode', 'kode-akhir', 'kiosk']) {
+                document.getElementById(id).addEventListener('input', () => {
+                    perbarui();
+                    sinkronkanPinKeServer();
+                });
+                document.getElementById(id).addEventListener('change', () => {
+                    perbarui();
+                    sinkronkanPinKeServer();
+                });
+            }
+
+            document.getElementById('btn-salin').addEventListener('click', async () => {
+                const label = document.getElementById('label-salin');
                 await navigator.clipboard?.writeText(bangunTautan());
-                e.target.textContent = 'Tersalin ✓';
-                setTimeout(() => (e.target.textContent = 'Salin tautan'), 2000);
+                label.textContent = 'Tersalin ✓';
+                setTimeout(() => (label.textContent = 'Salin tautan'), 2000);
+            });
+
+            document.getElementById('btn-salin-pin')?.addEventListener('click', async () => {
+                const label = document.getElementById('label-salin-pin');
+                await navigator.clipboard?.writeText(pin);
+                label.textContent = 'PIN Tersalin ✓';
+                setTimeout(() => (label.textContent = `Salin PIN (${pin})`), 2000);
             });
 
             perbarui();

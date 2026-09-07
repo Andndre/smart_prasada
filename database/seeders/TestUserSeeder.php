@@ -25,6 +25,12 @@ class TestUserSeeder extends Seeder
                 'password' => 'password',
                 'role' => 'user',
             ],
+            [
+                'name' => 'Akun Kiosk Lapangan',
+                'email' => 'kiosk@smartprasada.id',
+                'password' => 'kiosk_smartprasada_secret',
+                'role' => 'user',
+            ],
         ];
 
         foreach ($testUsers as $userData) {

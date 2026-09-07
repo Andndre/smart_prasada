@@ -32,6 +32,45 @@ describe('GET /vr/peluncur/{museum_id}', function () {
             ->toBe($fasilitator->id);
     });
 
+    it('mints dedicated kiosk user token when opened by an admin to prevent privilege escalation', function () {
+        $admin = User::factory()->create(['role' => 'admin']);
+        $museum = VirtualMuseum::factory()->create();
+
+        $response = $this->actingAs($admin)->get(route('vr.peluncur', $museum->museum_id));
+
+        $response->assertSuccessful();
+        $token = $response->viewData('arToken');
+        $userId = TokenHelper::verify($token)['user_id'];
+
+        $kioskUser = User::where('email', 'kiosk@smartprasada.id')->first();
+        expect($kioskUser)->not->toBeNull();
+        expect($userId)->toBe($kioskUser->id);
+        expect($userId)->not->toBe($admin->id);
+    });
+
+    it('blocks access to admin routes when session is flagged as kiosk session', function () {
+        $admin = User::factory()->create(['role' => 'admin']);
+
+        // Sesi biasa (bukan kiosk) bisa masuk admin dashboard
+        $this->actingAs($admin)->get(route('admin.dashboard'))->assertSuccessful();
+
+        // Sesi yang terflag is_kiosk_session diblokir dengan status 403
+        $this->actingAs($admin)->withSession(['is_kiosk_session' => true])
+            ->get(route('admin.dashboard'))
+            ->assertStatus(403);
+    });
+
+    it('displays kiosk launcher link on situs detail page for authenticated users', function () {
+        $user = User::factory()->create();
+        $situs = SitusPeninggalan::factory()->create();
+        $museum = VirtualMuseum::factory()->create(['situs_id' => $situs->situs_id]);
+
+        $this->actingAs($user)
+            ->get(route('guest.situs.detail', $situs->situs_id))
+            ->assertSuccessful()
+            ->assertSee(route('vr.peluncur', $museum->museum_id));
+    });
+
     it('is not accessible to guests', function () {
         $museum = VirtualMuseum::factory()->create();
 

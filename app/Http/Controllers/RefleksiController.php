@@ -87,7 +87,20 @@ class RefleksiController extends Controller
             JawabanRefleksi::insert($baris);
         }
 
-        return redirect()->route('refleksi.selesai', ['museum' => $museum->museum_id]);
+        $redirectParams = ['museum' => $museum->museum_id];
+        if ($request->filled('kiosk') || session('is_kiosk_session')) {
+            if ($request->filled('kiosk')) {
+                $redirectParams['kiosk'] = $request->input('kiosk');
+            }
+            if ($request->filled('kode_akhir')) {
+                $redirectParams['kode_akhir'] = $request->input('kode_akhir');
+            }
+            if ($request->filled('kode_responden')) {
+                $redirectParams['kode'] = $request->input('kode_responden');
+            }
+        }
+
+        return redirect()->route('refleksi.selesai', $redirectParams);
     }
 
     /**
@@ -97,10 +110,53 @@ class RefleksiController extends Controller
     public function selesai(Request $request): View
     {
         $museum = VirtualMuseum::with('situsPeninggalan')->find($request->query('museum'));
+        $kodeResponden = $request->query('kode');
+        $kodeAkhir = $request->query('kode_akhir');
+        $isKiosk = $request->boolean('kiosk') || (bool) session('is_kiosk_session');
+
+        $kodeBerikutnya = null;
+        $urlBerikutnya = null;
+        if ($isKiosk && $museum) {
+            $kodeBerikutnya = self::hitungKodeBerikutnya($kodeResponden, $kodeAkhir);
+            $queryBerikutnya = ['kiosk' => 1];
+            if ($kodeBerikutnya) {
+                $queryBerikutnya['kode'] = $kodeBerikutnya;
+            }
+            if ($kodeAkhir) {
+                $queryBerikutnya['kode_akhir'] = $kodeAkhir;
+            }
+            $urlBerikutnya = route('vr.museum', [$museum->situs_id, $museum->museum_id]).'?'.http_build_query($queryBerikutnya);
+        }
 
         return view('guest.refleksi.selesai', [
             'materiId' => $museum?->situsPeninggalan?->materi_id,
+            'museum' => $museum,
+            'isKiosk' => $isKiosk,
+            'kodeResponden' => $kodeResponden,
+            'kodeBerikutnya' => $kodeBerikutnya,
+            'urlBerikutnya' => $urlBerikutnya,
         ]);
+    }
+
+    /**
+     * Hitung kode responden berikutnya sesuai deret angka (misal R001 -> R002).
+     */
+    public static function hitungKodeBerikutnya(?string $kode, ?string $kodeAkhir = null): ?string
+    {
+        if (! $kode || ! preg_match('/^(.*?)(\d+)$/', $kode, $m)) {
+            return null;
+        }
+
+        $nextNum = (int) $m[2] + 1;
+        $next = $m[1].str_pad((string) $nextNum, strlen($m[2]), '0', STR_PAD_LEFT);
+
+        if ($kodeAkhir && preg_match('/^(.*?)(\d+)$/', $kodeAkhir, $mEnd)) {
+            if ($m[1] === $mEnd[1] && $nextNum > (int) $mEnd[2]) {
+                return null;
+            }
+        }
+
+        return $next;
     }
 
     /**

@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Helper\TokenHelper;
+use App\Models\User;
 use App\Models\VirtualMuseum;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\View\View;
 
 class VrPeluncurController extends Controller
@@ -28,17 +30,40 @@ class VrPeluncurController extends Controller
     public function show(int $museum_id): View
     {
         $museum = VirtualMuseum::with('situsPeninggalan')->findOrFail($museum_id);
+        $currentUser = Auth::user();
 
-        // Token dibuat HANYA untuk akun yang sedang login. Jangan pernah menerima
-        // user_id dari parameter — itu akan mengubah halaman ini jadi mesin
-        // pembuat sesi untuk akun mana pun.
-        $arToken = TokenHelper::generate(Auth::id(), self::TOKEN_TTL_MENIT);
+        // Keamanan Kiosk: Jangan pernah membiarkan akun admin menjadi sesi headset.
+        // Jika admin yang membuka, alihkan ke akun kiosk khusus (role 'user')
+        // agar browser headset tidak memiliki privilese admin jika siswa keluar scene.
+        $isKioskAccount = ($currentUser->role === 'admin') || request()->boolean('use_kiosk_account');
+        $sessionUser = $isKioskAccount ? User::getOrCreateKioskUser() : $currentUser;
+
+        $arToken = TokenHelper::generate($sessionUser->id, self::TOKEN_TTL_MENIT);
+
+        // Generate PIN 4-digit unik untuk pairing cepat dari browser Meta Quest 2
+        do {
+            $pin = (string) random_int(1000, 9999);
+        } while (Cache::has('kiosk_pin_'.$pin));
+
+        Cache::put('kiosk_pin_'.$pin, [
+            'museum_id' => $museum->museum_id,
+            'situs_id' => $museum->situs_id,
+            'user_id' => $sessionUser->id,
+            'arToken' => $arToken,
+            'kode' => 'R001',
+            'kode_akhir' => null,
+            'kiosk' => true,
+        ], now()->addMinutes(self::TOKEN_TTL_MENIT));
 
         return view('guest.vr.peluncur', [
             'museum' => $museum,
             'situs' => $museum->situsPeninggalan,
             'arToken' => $arToken,
             'ttlMenit' => self::TOKEN_TTL_MENIT,
+            'sessionUser' => $sessionUser,
+            'isKioskAccount' => $isKioskAccount,
+            'isAdminLaunching' => $currentUser->role === 'admin',
+            'pin' => $pin,
         ]);
     }
 }
