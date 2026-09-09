@@ -1,0 +1,139 @@
+meta:
+  profile: default
+  theme: tech-blue
+  layout: hierarchical
+  direction: TB
+  title: "Alur E-Learning Berjenjang & Gating Pembelajaran"
+  description: "Jalur belajar linear per era sejarah dan transisi 4 instrumen"
+
+modules:
+  - id: mod_nav
+    label: "Tahap 1: Akses & Navigasi Materi"
+  - id: mod_tahap
+    label: "Tahap 2: Siklus 4 Tahap Pembelajaran Per Materi"
+  - id: mod_eval
+    label: "Tahap 3: Evaluasi & Progres Siswa"
+
+nodes:
+  - id: user_login
+    label: "Siswa Login\nke Portal E-Learning"
+    type: user
+    module: mod_nav
+    style:
+      fontSize: 17
+
+  - id: select_era
+    label: "Pilih Era Sejarah\n(Prasejarah s/d Modern)"
+    type: process
+    module: mod_nav
+    style:
+      fontSize: 17
+
+  - id: select_materi
+    label: "Pilih Modul Materi\n(Punden Berundak)"
+    type: process
+    module: mod_nav
+    style:
+      fontSize: 17
+
+  - id: check_mode
+    label: "Cek Mode Aplikasi:\nDemo atau Reguler?"
+    type: decision
+    module: mod_nav
+    style:
+      fontSize: 17
+
+  # 4 Tahap Pembelajaran
+  - id: step_pretest
+    label: "1. Pre-Test\n(Baseline Kognitif)"
+    type: process
+    module: mod_tahap
+    style:
+      fontSize: 17
+
+  - id: step_ebook
+    label: "2. E-Book Flipbook\n(Membaca PDF Interaktif)"
+    type: process
+    module: mod_tahap
+    style:
+      fontSize: 17
+
+  - id: step_vlm
+    label: "3. Virtual Living Museum\n(Sesi Imersif WebXR)"
+    type: process
+    module: mod_tahap
+    style:
+      fontSize: 17
+
+  - id: step_posttest
+    label: "4. Post-Test\n(Evaluasi Capaian Akhir)"
+    type: process
+    module: mod_tahap
+    style:
+      fontSize: 17
+
+  # Evaluasi & Gating
+  - id: check_pass
+    label: "Nilai Post-Test\nLulus Syarat KKM?"
+    type: decision
+    module: mod_eval
+    style:
+      fontSize: 17
+
+  - id: update_progress
+    label: "Update Level & Rapor\n(Buka Kunci Level Berikut)"
+    type: database
+    module: mod_eval
+    style:
+      fontSize: 17
+
+  - id: next_materi
+    label: "Selesai Modul:\nLanjut ke Materi Berikutnya"
+    type: terminal
+    module: mod_eval
+    style:
+      fontSize: 18
+
+edges:
+  - from: user_login
+    to: select_era
+
+  - from: select_era
+    to: select_materi
+
+  - from: select_materi
+    to: check_mode
+
+  - from: check_mode
+    to: step_pretest
+    label: "Alur Reguler"
+
+  - from: check_mode
+    to: step_vlm
+    label: "Mode Demo (Semua Terbuka)"
+
+  - from: step_pretest
+    to: step_ebook
+    label: "Pre-Test Selesai"
+
+  - from: step_ebook
+    to: step_vlm
+    label: "Selesai Membaca"
+
+  - from: step_vlm
+    to: step_posttest
+    label: "Selesai Sesi VR"
+
+  - from: step_posttest
+    to: check_pass
+
+  - from: check_pass
+    to: update_progress
+    label: "Lulus"
+
+  - from: check_pass
+    to: step_ebook
+    label: "Remedial (Ulang E-book)"
+
+  - from: update_progress
+    to: next_materi

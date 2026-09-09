@@ -1,0 +1,151 @@
+meta:
+  profile: default
+  theme: tech-blue
+  layout: hierarchical
+  direction: TB
+  title: "Alur Data Penelitian & Validasi TKT"
+  description: "Cross-instrument tracking berbasis kode responden untuk pembuktian TKT 5 dan 6"
+
+modules:
+  - id: mod_vr_track
+    label: "Instrumen 1: Sesi VR & Runtime Event Logging"
+  - id: mod_refleksi_track
+    label: "Instrumen 2: Modul Refleksi Nilai Karakter"
+  - id: mod_eval_track
+    label: "Instrumen 3 & 4: Kognitif & Keterpakaian (SUS)"
+  - id: mod_validasi_tkt
+    label: "Sintesis Bukti Kenaikan TKT 4 → TKT 6"
+
+nodes:
+  - id: respondent_identity
+    label: "Identitas Tunggal Pengujian:\nKode Responden (R-xxx)"
+    type: user
+    style:
+      fontSize: 18
+
+  # Instrumen 1: VR
+  - id: vr_session
+    label: "Sesi VR WebXR Imersif\n• 10 Jenis Event Interaksi\n• Offset Milidetik (Client-side)"
+    type: process
+    module: mod_vr_track
+    style:
+      fontSize: 17
+
+  - id: beacon_buffer
+    label: "In-Memory Buffer & sendBeacon\n(Batch 15s / 20 event / pagehide)"
+    type: service
+    module: mod_vr_track
+    style:
+      fontSize: 17
+
+  - id: db_vr_event
+    label: "Basis Data: Tabel vr_event\n(Raw Event Logs per Responden)"
+    type: database
+    module: mod_vr_track
+    style:
+      fontSize: 17
+
+  - id: export_csv_event
+    label: "Ekspor CSV:\nLog Runtime Event Mentah"
+    type: document
+    module: mod_vr_track
+    style:
+      fontSize: 17
+
+  # Instrumen 2: Refleksi
+  - id: refleksi_session
+    label: "Modul Refleksi (Layar Biasa)\n• Form Jawaban Terbuka Siswa\n• 1 Pertanyaan per Nilai Karakter"
+    type: process
+    module: mod_refleksi_track
+    style:
+      fontSize: 17
+
+  - id: db_refleksi
+    label: "Basis Data: Tabel jawaban_refleksi\n(Data Kualitatif Pemaknaan)"
+    type: database
+    module: mod_refleksi_track
+    style:
+      fontSize: 17
+
+  - id: export_csv_refleksi
+    label: "Ekspor CSV:\nJawaban Refleksi Nilai Karakter"
+    type: document
+    module: mod_refleksi_track
+    style:
+      fontSize: 17
+
+  # Instrumen 3 & 4: Kognitif & Usability
+  - id: kognitif_test
+    label: "Pre-Test & Post-Test Kuis\n(5 Pilihan Ganda → jawaban_user)"
+    type: process
+    module: mod_eval_track
+    style:
+      fontSize: 17
+
+  - id: usability_survey
+    label: "Kuesioner Keterpakaian Sistem\n(Skala SUS → kritik_saran)"
+    type: process
+    module: mod_eval_track
+    style:
+      fontSize: 17
+
+  - id: analysis_metrics
+    label: "Kalkulasi N-Gain Score &\nPersentil Keterpakaian SUS"
+    type: document
+    module: mod_eval_track
+    style:
+      fontSize: 17
+
+  # Sintesis Akhir
+  - id: tkt_validation
+    label: "Laporan Validasi Kenaikan TKT 6:\nSistem Stabil Terintegrasi\nTanpa Intervensi Pengembang"
+    type: terminal
+    module: mod_validasi_tkt
+    style:
+      fontSize: 18
+
+edges:
+  - from: respondent_identity
+    to: vr_session
+    label: "Mulai Sesi VR"
+
+  - from: vr_session
+    to: beacon_buffer
+    label: "Streaming Event"
+
+  - from: beacon_buffer
+    to: db_vr_event
+    label: "POST /vr/events"
+
+  - from: db_vr_event
+    to: export_csv_event
+
+  # Lanjut ke Refleksi
+  - from: export_csv_event
+    to: refleksi_session
+    label: "Lanjut Refleksi"
+
+  - from: refleksi_session
+    to: db_refleksi
+    label: "Simpan Form"
+
+  - from: db_refleksi
+    to: export_csv_refleksi
+
+  # Lanjut ke Kuis & Usability
+  - from: export_csv_refleksi
+    to: kognitif_test
+    label: "Instrumen Kognitif"
+
+  - from: kognitif_test
+    to: usability_survey
+    label: "Instrumen SUS"
+
+  - from: usability_survey
+    to: analysis_metrics
+    label: "Olah Statistik"
+
+  # Muara ke Pembuktian TKT 6
+  - from: analysis_metrics
+    to: tkt_validation
+    label: "Verifikasi Kelulusan"

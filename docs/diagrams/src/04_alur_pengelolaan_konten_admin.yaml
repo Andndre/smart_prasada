@@ -1,0 +1,112 @@
+meta:
+  profile: default
+  theme: tech-blue
+  layout: hierarchical
+  direction: TB
+  title: "Alur Pengelolaan Konten (Administrator)"
+  description: "Tujuh tahap konfigurasi kurikulum, aset 3D, editor spatial, dan instrumen riset"
+
+modules:
+  - id: mod_kurikulum
+    label: "Tahap 1-2: Kurikulum & Bahan Ajar"
+  - id: mod_situs_3d
+    label: "Tahap 3-5: Situs, Virtual Museum & Editor 3D"
+  - id: mod_instrumen
+    label: "Tahap 6-7: Instrumen Refleksi & Ekspor Data"
+
+nodes:
+  - id: admin_login
+    label: "Administrator Login\nke Panel Admin"
+    type: user
+    style:
+      fontSize: 18
+
+  # Tahap 1 & 2
+  - id: step1_era_materi
+    label: "Langkah 1: Kelola Era & Materi\n(Atur Urutan & Sampul)"
+    type: process
+    module: mod_kurikulum
+    style:
+      fontSize: 17
+
+  - id: step2_ebook_soal
+    label: "Langkah 2: Upload PDF E-Book\n& Buat Soal Pre/Post-Test"
+    type: process
+    module: mod_kurikulum
+    style:
+      fontSize: 17
+
+  # Tahap 3, 4, 5
+  - id: step3_situs
+    label: "Langkah 3: Daftarkan Situs\n(Koordinat GPS & Sampul)"
+    type: process
+    module: mod_situs_3d
+    style:
+      fontSize: 17
+
+  - id: step4_upload_glb
+    label: "Langkah 4: Buat Museum Virtual\n& Upload GLB (Chunked)"
+    type: process
+    module: mod_situs_3d
+    style:
+      fontSize: 17
+
+  - id: step5_editor_3d
+    label: "Langkah 5: Editor Visual 3D\n• Tautkan node GLB via mesh_name\n• Atur delta puzzle [x, y, z]\n• Sematkan audio narasi & nilai"
+    type: service
+    module: mod_situs_3d
+    style:
+      fontSize: 17
+
+  # Tahap 6 & 7
+  - id: step6_refleksi
+    label: "Langkah 6: Bank Soal Refleksi\n(1 Soal per Nilai Karakter)"
+    type: process
+    module: mod_instrumen
+    style:
+      fontSize: 17
+
+  - id: step7_export_csv
+    label: "Langkah 7: Ekspor Data Riset\n(CSV Runtime Event & Refleksi)"
+    type: database
+    module: mod_instrumen
+    style:
+      fontSize: 17
+
+  - id: end_admin
+    label: "Selesai: Konten & Instrumen\nSiap Diuji Lapangan (TKT 6)"
+    type: terminal
+    module: mod_instrumen
+    style:
+      fontSize: 18
+
+edges:
+  - from: admin_login
+    to: step1_era_materi
+
+  - from: step1_era_materi
+    to: step2_ebook_soal
+    label: "Kurikulum Siap"
+
+  - from: step2_ebook_soal
+    to: step3_situs
+    label: "Bahan Ajar Siap"
+
+  - from: step3_situs
+    to: step4_upload_glb
+    label: "Situs Terdaftar"
+
+  - from: step4_upload_glb
+    to: step5_editor_3d
+    label: "Model 3D Siap"
+
+  - from: step5_editor_3d
+    to: step6_refleksi
+    label: "Objek Dikonfigurasi"
+
+  - from: step6_refleksi
+    to: step7_export_csv
+    label: "Instrumen Terhubung"
+
+  - from: step7_export_csv
+    to: end_admin

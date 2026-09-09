@@ -1,0 +1,125 @@
+meta:
+  profile: default
+  theme: tech-blue
+  layout: hierarchical
+  direction: TB
+  title: "Arsitektur Sistem Lima Modul SmartPrasada"
+  description: "Struktur lima modul utama dan interaksinya dengan lapisan backend dan runtime 3D"
+
+modules:
+  - id: mod_vr_runtime
+    label: "Lapisan VR & Runtime 3D (WebXR)"
+  - id: mod_ui_interaction
+    label: "Lapisan Interaksi & Antarmuka Spasial"
+  - id: mod_content_eval
+    label: "Lapisan Konten & Evaluasi Nilai"
+  - id: mod_backend
+    label: "Lapisan Backend & Basis Data (Laravel 11)"
+
+nodes:
+  # Modul 1
+  - id: m1_rendering
+    label: "Modul 1: VR Rendering Engine\n• Three.js + WebXR API\n• DracoLoader & HDRI Skybox\n• PCFSoftShadowMap"
+    type: service
+    module: mod_vr_runtime
+    style:
+      fontSize: 17
+
+  # Modul 2
+  - id: m2_interaction
+    label: "Modul 2: Interaction Controller\n• Teleport Lengkung & Thumbstick\n• Raycast Highlight Seleksi Objek\n• Grab & Snap Puzzle 0.5m & Haptic"
+    type: service
+    module: mod_ui_interaction
+    style:
+      fontSize: 17
+
+  # Modul 4
+  - id: m4_ui_spatial
+    label: "Modul 4: User Interface Layer\n• In-Scene 3D Mesh (Bukan DOM)\n• Panel Info, Audio & Chip Nilai\n• Panel Fase & Penanda Arah Objek"
+    type: service
+    module: mod_ui_interaction
+    style:
+      fontSize: 17
+
+  # Modul 3
+  - id: m3_cms
+    label: "Modul 3: Learning Content Mgmt\n• Panel Admin Kurikulum (Era/Materi)\n• Editor Visual 3D Spatial\n• Pemetaan Nilai Karakter (Enum)"
+    type: service
+    module: mod_content_eval
+    style:
+      fontSize: 17
+
+  # Modul 5
+  - id: m5_refleksi
+    label: "Modul 5: Modul Refleksi\n• Bank Soal Terbuka Per Nilai\n• Form Siswa Layar Biasa (Non-VR)\n• Ekspor CSV Riset TKT"
+    type: service
+    module: mod_content_eval
+    style:
+      fontSize: 17
+
+  # Backend & Storage
+  - id: laravel_core
+    label: "Laravel 11 Backend Core\n• Routing & Middleware (ar.token, auth)\n• REST & Beacon Controller\n• Chunked File Uploader"
+    type: service
+    module: mod_backend
+    style:
+      fontSize: 17
+
+  - id: mysql_db
+    label: "MySQL Database\n• users, materi, virtual_museum\n• virtual_museum_object, vr_event\n• jawaban_refleksi, jawaban_user"
+    type: database
+    module: mod_backend
+    style:
+      fontSize: 17
+
+  - id: storage_assets
+    label: "File Storage Publik\n• Model 3D GLB & Draco\n• Audio Narasi & HDRI Skybox\n• PDF E-Book & Marker AR"
+    type: database
+    module: mod_backend
+    style:
+      fontSize: 17
+
+edges:
+  - from: m1_rendering
+    to: m2_interaction
+    label: "Scene 3D"
+
+  - from: m1_rendering
+    to: m4_ui_spatial
+    label: "Render Mesh"
+
+  - from: m2_interaction
+    to: m4_ui_spatial
+    label: "Raycast"
+
+  - from: m4_ui_spatial
+    to: m5_refleksi
+    label: "Fase 4"
+
+  - from: m3_cms
+    to: m1_rendering
+    label: "Objek 3D"
+
+  - from: m3_cms
+    to: m5_refleksi
+    label: "Nilai"
+
+  - from: m3_cms
+    to: laravel_core
+    label: "CRUD"
+
+  - from: m5_refleksi
+    to: laravel_core
+    label: "Jawaban"
+
+  - from: m2_interaction
+    to: laravel_core
+    label: "Beacon"
+
+  - from: laravel_core
+    to: mysql_db
+    label: "ORM"
+
+  - from: laravel_core
+    to: storage_assets
+    label: "Storage"

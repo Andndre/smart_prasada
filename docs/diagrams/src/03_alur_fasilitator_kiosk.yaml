@@ -1,0 +1,130 @@
+meta:
+  profile: default
+  theme: tech-blue
+  layout: hierarchical
+  direction: TB
+  title: "Alur Fasilitator (Mode Kiosk & Pergantian Responden)"
+  description: "Operasional mandiri tanpa intervensi teknis pengembang untuk uji TKT 6"
+
+modules:
+  - id: mod_laptop
+    label: "Tahap 1: Peluncur Sesi di Laptop Fasilitator"
+  - id: mod_headset
+    label: "Tahap 2: Sesi Imersif di Headset Siswa"
+  - id: mod_integritas
+    label: "Tahap 3: Integritas Data & Pergantian Responden"
+
+nodes:
+  - id: fasilitator_login
+    label: "Fasilitator Login\nke Dashboard Guru"
+    type: user
+    module: mod_laptop
+    style:
+      fontSize: 17
+
+  - id: buka_peluncur
+    label: "Buka Peluncur Sesi\n/vr/peluncur/{museum_id}"
+    type: process
+    module: mod_laptop
+    style:
+      fontSize: 17
+
+  - id: generate_qr
+    label: "Generate QR & Token HMAC\n(Kode: R-001, Kiosk=1, TTL 30m)"
+    type: process
+    module: mod_laptop
+    style:
+      fontSize: 17
+
+  - id: scan_qr
+    label: "Siswa Pindai QR\n(Kamera Headset VR)"
+    type: process
+    module: mod_headset
+    style:
+      fontSize: 17
+
+  - id: exchange_token
+    label: "Validasi Token Stateless\nMasuk Scene Tanpa Ketik Password"
+    type: service
+    module: mod_headset
+    style:
+      fontSize: 17
+
+  - id: scene_kiosk
+    label: "Sesi VR Aktif (Mode Kiosk)\nNavigasi Web Otomatis Disembunyikan"
+    type: process
+    module: mod_headset
+    style:
+      fontSize: 17
+
+  - id: end_trigger
+    label: "Sesi VR Selesai\n(Tekan Tombol Selesai di VR)"
+    type: process
+    module: mod_headset
+    style:
+      fontSize: 17
+
+  - id: panel_kiosk_lock
+    label: "Panel Penutup Terkunci di VR\n(Cegah Data 2 Responden Tercampur)"
+    type: decision
+    module: mod_integritas
+    style:
+      fontSize: 17
+
+  - id: refleksi_siswa
+    label: "Siswa Lepas Headset VR\nIsi Modul Refleksi di Layar Biasa"
+    type: process
+    module: mod_integritas
+    style:
+      fontSize: 17
+
+  - id: next_respondent_btn
+    label: "Fasilitator Tekan Tombol:\nResponden Berikutnya di Laptop"
+    type: process
+    module: mod_integritas
+    style:
+      fontSize: 17
+
+  - id: auto_reload_code
+    label: "Peluncur Auto-Reload:\nDeret Kode Baru (R-002) Tanpa Scan Ulang"
+    type: terminal
+    module: mod_integritas
+    style:
+      fontSize: 18
+
+edges:
+  - from: fasilitator_login
+    to: buka_peluncur
+
+  - from: buka_peluncur
+    to: generate_qr
+
+  - from: generate_qr
+    to: scan_qr
+    label: "Tampilkan QR"
+
+  - from: scan_qr
+    to: exchange_token
+    label: "Kirim Token"
+
+  - from: exchange_token
+    to: scene_kiosk
+
+  - from: scene_kiosk
+    to: end_trigger
+
+  - from: end_trigger
+    to: panel_kiosk_lock
+    label: "Kunci Sesi"
+
+  - from: panel_kiosk_lock
+    to: refleksi_siswa
+    label: "Siswa Lepas Headset"
+
+  - from: refleksi_siswa
+    to: next_respondent_btn
+    label: "Refleksi Selesai"
+
+  - from: next_respondent_btn
+    to: auto_reload_code
+    label: "Kode Berlanjut"
