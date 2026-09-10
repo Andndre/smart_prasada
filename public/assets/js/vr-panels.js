@@ -31,6 +31,43 @@ export function wrapText(ctx, text, x, y, maxWidth, lineHeight, maxLines) {
     if (line) ctx.fillText(line, x, y);
 }
 
+/**
+ * Membagi teks panjang menjadi halaman-halaman baris teks agar tidak terpotong elipsis di VR.
+ */
+export function layoutTextPages(ctx, text, maxWidth, linesPerPage = 6) {
+    if (!text) return [[]];
+    const paragraphs = String(text).split(/\r?\n/);
+    const allLines = [];
+
+    for (const paragraph of paragraphs) {
+        const words = paragraph.split(/\s+/).filter(Boolean);
+        if (words.length === 0) {
+            continue;
+        }
+        let currentLine = "";
+        for (const word of words) {
+            const attempt = currentLine ? currentLine + " " + word : word;
+            if (ctx.measureText(attempt).width > maxWidth && currentLine) {
+                allLines.push(currentLine);
+                currentLine = word;
+            } else {
+                currentLine = attempt;
+            }
+        }
+        if (currentLine) {
+            allLines.push(currentLine);
+        }
+    }
+
+    if (allLines.length === 0) return [[]];
+
+    const pages = [];
+    for (let i = 0; i < allLines.length; i += linesPerPage) {
+        pages.push(allLines.slice(i, i + linesPerPage));
+    }
+    return pages;
+}
+
 // Floating in-scene info card (HTML overlays are not rendered inside a WebXR session).
 export class InfoPanel {
     constructor(scene, camera) {
@@ -50,23 +87,39 @@ export class InfoPanel {
                 depthTest: false,
             }),
         );
-        this.mesh.renderOrder = 1000;
+        // Naikkan renderOrder dari 1000 ke 2000 agar PhasePanel (1002) dan ExitButton (1002)
+        // tidak tembus/bocor di atas InfoPanel ketika info card sedang dibuka.
+        this.mesh.renderOrder = 2000;
         this.mesh.visible = false;
         // Diisi main(): menentukan apakah objek puzzle perlu menjelaskan kenapa ia
         // tidak bisa dipasang di perangkat ini.
         this.bisaGenggam = false;
+
+        this.info = null;
+        this.pages = [];
+        this.currentPage = 0;
+        this.totalPages = 1;
+
         scene.add(this.mesh);
     }
 
     show(info, targetPoint) {
-        this.draw(info);
+        this.info = info;
+        this.currentPage = 0;
+        this.paginate();
+        this.draw();
 
         const cameraWorld = this.camera.getWorldPosition(new THREE.Vector3());
-        const direction = new THREE.Vector3().subVectors(targetPoint, cameraWorld);
+        const direction = new THREE.Vector3().subVectors(
+            targetPoint,
+            cameraWorld,
+        );
         const distance = Math.min(direction.length() * 0.7, 2);
         direction.normalize();
 
-        this.mesh.position.copy(cameraWorld).addScaledVector(direction, distance);
+        this.mesh.position
+            .copy(cameraWorld)
+            .addScaledVector(direction, distance);
         this.mesh.lookAt(cameraWorld);
         this.mesh.visible = true;
 
@@ -87,44 +140,279 @@ export class InfoPanel {
         this.audio = null;
     }
 
-    draw(info) {
+    paginate() {
+        const ctx = this.canvas.getContext("2d");
+        ctx.font = "34px Inter, sans-serif";
+        const maxWidth = this.canvas.width - 90;
+        const linesPerPage = 6;
+        this.pages = layoutTextPages(
+            ctx,
+            this.info?.deskripsi || "",
+            maxWidth,
+            linesPerPage,
+        );
+        this.totalPages = Math.max(1, this.pages.length);
+        if (this.currentPage >= this.totalPages) {
+            this.currentPage = this.totalPages - 1;
+        }
+    }
+
+    nextPage() {
+        if (this.currentPage < this.totalPages - 1) {
+            this.currentPage++;
+            this.draw();
+            return true;
+        }
+        return false;
+    }
+
+    prevPage() {
+        if (this.currentPage > 0) {
+            this.currentPage--;
+            this.draw();
+            return true;
+        }
+        return false;
+    }
+
+    handleTrigger(raycaster) {
+        if (!this.mesh.visible) return false;
+
+        const hits = raycaster
+            ? raycaster.intersectObject(this.mesh, false)
+            : [];
+        if (hits.length === 0) {
+            // Menekan trigger sambil mengarahkan pointer ke luar panel -> tutup panel
+            this.hide();
+            return false;
+        }
+
+        const hit = hits[0];
+        if (!hit.uv) {
+            return this.advanceOrClose();
+        }
+
+        const px = hit.uv.x * this.canvas.width;
+        const py = (1 - hit.uv.y) * this.canvas.height;
+
+        // 1. Tombol silang di header (pojok kanan atas)
+        if (px >= 890 && py <= 110) {
+            this.hide();
+            return false;
+        }
+
+        // 2. Tombol navigasi di footer
+        if (py >= 535) {
+            // Tombol kiri "← Kembali"
+            if (px <= 250 && this.currentPage > 0) {
+                this.prevPage();
+                return true;
+            }
+            // Tombol kanan "Lanjut →" atau "Tutup ✕"
+            if (px >= 750) {
+                if (this.currentPage < this.totalPages - 1) {
+                    this.nextPage();
+                    return true;
+                } else {
+                    this.hide();
+                    return false;
+                }
+            }
+        }
+
+        // 3. Klik di area badan panel: maju ke halaman berikutnya atau tutup jika halaman terakhir
+        return this.advanceOrClose();
+    }
+
+    advanceOrClose() {
+        if (this.currentPage < this.totalPages - 1) {
+            this.nextPage();
+            return true;
+        }
+        this.hide();
+        return false;
+    }
+
+    draw() {
+        if (!this.info) return;
         const ctx = this.canvas.getContext("2d");
         const { width, height } = this.canvas;
         ctx.clearRect(0, 0, width, height);
 
-        ctx.fillStyle = "rgba(17, 24, 39, 0.92)";
+        // Background kartu gelap
+        ctx.fillStyle = "rgba(17, 24, 39, 0.95)";
         ctx.beginPath();
         ctx.roundRect(0, 0, width, height, 32);
         ctx.fill();
 
+        // Border halus
+        ctx.strokeStyle = "rgba(255, 255, 255, 0.12)";
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        // Banner header ungu
         ctx.fillStyle = "#7c3aed";
         ctx.beginPath();
         ctx.roundRect(0, 0, width, 110, [32, 32, 0, 0]);
         ctx.fill();
 
+        // Judul header
         ctx.fillStyle = "#ffffff";
-        ctx.font = "bold 52px Inter, sans-serif";
-        ctx.fillText(info.nama, 40, 74);
+        ctx.textAlign = "left";
+        const maxTitleWidth = this.totalPages > 1 ? 710 : 830;
+        let titleFontSize = 48;
+        ctx.font = `bold ${titleFontSize}px Inter, sans-serif`;
+        while (
+            ctx.measureText(this.info.nama).width > maxTitleWidth &&
+            titleFontSize > 26
+        ) {
+            titleFontSize -= 2;
+            ctx.font = `bold ${titleFontSize}px Inter, sans-serif`;
+        }
+        ctx.fillText(this.info.nama, 44, 72);
 
-        ctx.font = "36px Inter, sans-serif";
-        ctx.fillStyle = "#e5e7eb";
-        // 6 baris, bukan 8 — dua baris terakhir disisihkan untuk chip nilai karakter.
-        wrapText(ctx, info.deskripsi || "", 40, 180, width - 80, 50, 6);
+        // Indikator halaman di header (jika > 1 halaman)
+        if (this.totalPages > 1) {
+            const badgeW = 100;
+            const badgeH = 42;
+            const badgeX = width - 44 - 48 - 14 - badgeW;
+            const badgeY = 34;
 
-        this.drawChips(ctx, info.nilai_karakter, 40, 455, width - 80);
+            ctx.fillStyle = "rgba(0, 0, 0, 0.32)";
+            ctx.beginPath();
+            ctx.roundRect(badgeX, badgeY, badgeW, badgeH, badgeH / 2);
+            ctx.fill();
 
-        // Objek puzzle di perangkat tanpa controller: sebutkan alasannya, jangan biarkan
-        // buntu diam-diam. Kedipannya sengaja tidak dimatikan — objeknya memang tetap
-        // interaktif di HP (nama, deskripsi, audio), yang tidak tersedia hanya pemasangan.
-        if (info.posisi_awal && !this.bisaGenggam) {
-            ctx.font = "italic 26px Inter, sans-serif";
-            ctx.fillStyle = "#fbbf24";
-            ctx.fillText("Objek ini bisa dilepas dan dipasang kembali di headset VR.", 40, 578);
+            ctx.font = "600 22px Inter, sans-serif";
+            ctx.fillStyle = "#ffffff";
+            ctx.textAlign = "center";
+            ctx.fillText(
+                `${this.currentPage + 1} / ${this.totalPages}`,
+                badgeX + badgeW / 2,
+                badgeY + 28,
+            );
         }
 
-        ctx.font = "28px Inter, sans-serif";
-        ctx.fillStyle = "#9ca3af";
-        ctx.fillText("Ketuk / tekan trigger untuk menutup", 40, height - 36);
+        // Tombol Close (✕) di header
+        const closeBtnX = width - 44 - 44;
+        const closeBtnY = 33;
+        ctx.fillStyle = "rgba(0, 0, 0, 0.28)";
+        ctx.beginPath();
+        ctx.roundRect(closeBtnX, closeBtnY, 44, 44, 22);
+        ctx.fill();
+        ctx.font = "bold 24px Inter, sans-serif";
+        ctx.fillStyle = "#ffffff";
+        ctx.textAlign = "center";
+        ctx.fillText("✕", closeBtnX + 22, closeBtnY + 30);
+        ctx.textAlign = "left";
+
+        // Teks deskripsi halaman aktif
+        ctx.font = "34px Inter, sans-serif";
+        ctx.fillStyle = "#f3f4f6";
+        const currentLines = this.pages[this.currentPage] || [];
+        let textY = 175;
+        for (const line of currentLines) {
+            ctx.fillText(line, 44, textY);
+            textY += 48;
+        }
+
+        // Chip nilai karakter dan catatan puzzle hanya pada halaman terakhir
+        const isLastPage = this.currentPage === this.totalPages - 1;
+        if (isLastPage) {
+            const chipsY = Math.max(450, textY + 14);
+            this.drawChips(
+                ctx,
+                this.info.nilai_karakter,
+                44,
+                chipsY,
+                width - 88,
+            );
+
+            if (this.info.posisi_awal && !this.bisaGenggam) {
+                ctx.font = "italic 24px Inter, sans-serif";
+                ctx.fillStyle = "#fbbf24";
+                ctx.fillText(
+                    "Objek ini bisa dilepas dan dipasang kembali di headset VR.",
+                    44,
+                    528,
+                );
+            }
+        }
+
+        // Garis pemisah footer
+        ctx.strokeStyle = "rgba(255, 255, 255, 0.08)";
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(40, 545);
+        ctx.lineTo(width - 40, 545);
+        ctx.stroke();
+
+        // Tombol dan petunjuk footer
+        if (this.totalPages > 1) {
+            // Tombol "← Kembali" di kiri jika bukan halaman pertama
+            if (this.currentPage > 0) {
+                ctx.fillStyle = "rgba(255, 255, 255, 0.12)";
+                ctx.beginPath();
+                ctx.roundRect(44, 560, 165, 52, 26);
+                ctx.fill();
+
+                ctx.font = "600 22px Inter, sans-serif";
+                ctx.fillStyle = "#e5e7eb";
+                ctx.textAlign = "center";
+                ctx.fillText("← Kembali", 44 + 82, 593);
+                ctx.textAlign = "left";
+            }
+
+            // Teks petunjuk tengah
+            ctx.font = "24px Inter, sans-serif";
+            ctx.fillStyle = "#9ca3af";
+            ctx.textAlign = "center";
+            const hintText = isLastPage
+                ? "Ketuk / tekan trigger untuk menutup"
+                : "Ketuk / tekan trigger untuk lanjut →";
+            ctx.fillText(hintText, width / 2, 593);
+            ctx.textAlign = "left";
+
+            // Tombol aksi kanan: "Lanjut →" atau "Tutup ✕"
+            const rightBtnX = width - 44 - 165;
+            ctx.fillStyle = isLastPage
+                ? "rgba(255, 255, 255, 0.15)"
+                : "#7c3aed";
+            ctx.beginPath();
+            ctx.roundRect(rightBtnX, 560, 165, 52, 26);
+            ctx.fill();
+
+            ctx.font = "600 22px Inter, sans-serif";
+            ctx.fillStyle = "#ffffff";
+            ctx.textAlign = "center";
+            ctx.fillText(
+                isLastPage ? "Tutup ✕" : "Lanjut →",
+                rightBtnX + 82,
+                593,
+            );
+            ctx.textAlign = "left";
+        } else {
+            // Halaman tunggal
+            ctx.font = "28px Inter, sans-serif";
+            ctx.fillStyle = "#9ca3af";
+            ctx.fillText(
+                "Ketuk / tekan trigger untuk menutup",
+                44,
+                height - 36,
+            );
+
+            const rightBtnX = width - 44 - 150;
+            ctx.fillStyle = "rgba(255, 255, 255, 0.12)";
+            ctx.beginPath();
+            ctx.roundRect(rightBtnX, 560, 150, 52, 26);
+            ctx.fill();
+
+            ctx.font = "600 22px Inter, sans-serif";
+            ctx.fillStyle = "#e5e7eb";
+            ctx.textAlign = "center";
+            ctx.fillText("Tutup ✕", rightBtnX + 75, 593);
+            ctx.textAlign = "left";
+        }
 
         this.texture.needsUpdate = true;
     }
@@ -215,7 +503,9 @@ export class PhasePanel {
             this.draw(deskripsi);
         }
         this.mesh.material.opacity =
-            performance.now() < this.sorotSampai ? 1 : PhasePanel.OPASITAS_REDUP;
+            performance.now() < this.sorotSampai
+                ? 1
+                : PhasePanel.OPASITAS_REDUP;
     }
 
     draw({ judul, instruksi }) {
@@ -320,7 +610,8 @@ export class ExitButton {
             this.terakhirBersenjata = this.bersenjata;
             this.draw();
         }
-        this.mesh.material.opacity = ditunjuk || this.bersenjata ? 1 : ExitButton.OPASITAS_REDUP;
+        this.mesh.material.opacity =
+            ditunjuk || this.bersenjata ? 1 : ExitButton.OPASITAS_REDUP;
     }
 
     draw() {
@@ -328,7 +619,9 @@ export class ExitButton {
         const { width, height } = this.canvas;
         ctx.clearRect(0, 0, width, height);
 
-        ctx.fillStyle = this.bersenjata ? "rgba(185, 28, 28, 0.92)" : "rgba(17, 24, 39, 0.85)";
+        ctx.fillStyle = this.bersenjata
+            ? "rgba(185, 28, 28, 0.92)"
+            : "rgba(17, 24, 39, 0.85)";
         ctx.beginPath();
         ctx.roundRect(0, 0, width, height, height / 2);
         ctx.fill();
@@ -419,7 +712,10 @@ export class ControllerHints {
     update() {
         if (!this.sprite) return;
         const axes = this.controller.userData.gamepad?.axes;
-        if (axes && Math.hypot(axes[2] ?? axes[0] ?? 0, axes[3] ?? axes[1] ?? 0) > 0.5) {
+        if (
+            axes &&
+            Math.hypot(axes[2] ?? axes[0] ?? 0, axes[3] ?? axes[1] ?? 0) > 0.5
+        ) {
             this.tandai("dorong");
         }
         // Yang tidak pernah dipakai hilang sendiri; label permanen jadi sampah visual.
@@ -447,7 +743,9 @@ export class ControllerHints {
         ctx.font = "600 30px Inter, sans-serif";
         ctx.textAlign = "center";
         const y0 = height / 2 - (this.sisa.length - 1) * 20 + 10;
-        this.sisa.forEach((p, i) => ctx.fillText(p.teks, width / 2, y0 + i * 40));
+        this.sisa.forEach((p, i) =>
+            ctx.fillText(p.teks, width / 2, y0 + i * 40),
+        );
         ctx.textAlign = "left";
 
         this.texture.needsUpdate = true;

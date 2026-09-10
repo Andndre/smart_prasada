@@ -6,7 +6,10 @@ import { petunjukLayar, targetTerdekat } from "vr-petunjuk";
 
 /** Short vibration on the controller that triggered the action; no-op without haptics. */
 export function pulse(controller, intensity, milliseconds) {
-    controller?.userData.gamepad?.hapticActuators?.[0]?.pulse(intensity, milliseconds);
+    controller?.userData.gamepad?.hapticActuators?.[0]?.pulse(
+        intensity,
+        milliseconds,
+    );
 }
 
 let audioCtx = null;
@@ -150,11 +153,20 @@ export class TeleportControls {
         this.cursor.visible = !this.controller?.userData.connected;
 
         if (this.controller?.userData.connected) {
-            TeleportControls.tempMatrix.identity().extractRotation(this.controller.matrixWorld);
-            this.raycaster.ray.origin.setFromMatrixPosition(this.controller.matrixWorld);
-            this.raycaster.ray.direction.set(0, 0, -1).applyMatrix4(TeleportControls.tempMatrix);
+            TeleportControls.tempMatrix
+                .identity()
+                .extractRotation(this.controller.matrixWorld);
+            this.raycaster.ray.origin.setFromMatrixPosition(
+                this.controller.matrixWorld,
+            );
+            this.raycaster.ray.direction
+                .set(0, 0, -1)
+                .applyMatrix4(TeleportControls.tempMatrix);
         } else {
-            this.raycaster.setFromCamera(TeleportControls.SCREEN_CENTER, this.camera);
+            this.raycaster.setFromCamera(
+                TeleportControls.SCREEN_CENTER,
+                this.camera,
+            );
         }
 
         // Tombol keluar dites lebih dulu dan mematikan hover museum selama ditunjuk —
@@ -162,12 +174,28 @@ export class TeleportControls {
         this.menunjukKeluar = this.exitButton?.raycast(this.raycaster) ?? false;
         this.exitButton?.update(this.menunjukKeluar);
 
+        const menunjukPanel = Boolean(
+            this.panel?.mesh.visible &&
+            this.raycaster.intersectObject(this.panel.mesh, false).length > 0,
+        );
+        if (menunjukPanel) {
+            this.cursor.material.color.setHex(0xfbbf24);
+            this.reticle.visible = false;
+            this.hoverInfo = null;
+            this.hoverPoint = null;
+            return;
+        }
+
         const hits = this.menunjukKeluar
             ? []
-            : this.raycaster.intersectObjects(this.targets, true).filter((h) => h.object.visible);
+            : this.raycaster
+                  .intersectObjects(this.targets, true)
+                  .filter((h) => h.object.visible);
 
         const first = hits[0];
-        this.hoverNode = first ? TeleportControls.findVrNode(first.object) : null;
+        this.hoverNode = first
+            ? TeleportControls.findVrNode(first.object)
+            : null;
         this.hoverInfo = this.hoverNode?.userData.vrObject ?? null;
         this.hoverPoint = this.hoverInfo ? first.point : null;
 
@@ -255,14 +283,24 @@ export class TeleportControls {
             return { nama: node.name, x: posisi.x, y: posisi.y, z: posisi.z };
         });
         const kepala = this.camera.getWorldPosition(new THREE.Vector3());
-        const target = targetTerdekat(kandidat, kepala, this.phases.objekDiamati);
+        const target = targetTerdekat(
+            kandidat,
+            kepala,
+            this.phases.objekDiamati,
+        );
         if (!target) return;
 
-        const lokal = this.camera.worldToLocal(new THREE.Vector3(target.x, target.y, target.z));
+        const lokal = this.camera.worldToLocal(
+            new THREE.Vector3(target.x, target.y, target.z),
+        );
         const { sudut, tampil } = petunjukLayar(lokal.x, lokal.y, lokal.z);
         if (!tampil) return;
 
-        this.petunjuk.position.set(Math.cos(sudut) * 0.07, Math.sin(sudut) * 0.07, -1);
+        this.petunjuk.position.set(
+            Math.cos(sudut) * 0.07,
+            Math.sin(sudut) * 0.07,
+            -1,
+        );
         this.petunjuk.rotation.z = sudut - Math.PI / 2;
         this.petunjuk.visible = true;
     }
@@ -276,7 +314,10 @@ export class TeleportControls {
      * tampak seperti model kembar berwarna, bukan garis tepi.
      */
     pulseHovered() {
-        const aktif = this.hoverInfo && !this.hoverNode.userData.solved ? this.hoverNode : null;
+        const aktif =
+            this.hoverInfo && !this.hoverNode.userData.solved
+                ? this.hoverNode
+                : null;
         const now = performance.now();
         const pulse = 0.35 + 0.25 * Math.sin(now / 300);
         for (const { node, materials } of this.interactiveMeshes) {
@@ -285,8 +326,13 @@ export class TeleportControls {
             // padam sendiri tanpa perlu timer atau pembersihan.
             const sisa = (node.userData.kilauSampai ?? 0) - now;
             const intensity =
-                sisa > 0 ? (sisa / TeleportControls.DURASI_KILAU) * 1.5 : node === aktif ? pulse : 0;
-            for (const material of materials) material.emissiveIntensity = intensity;
+                sisa > 0
+                    ? (sisa / TeleportControls.DURASI_KILAU) * 1.5
+                    : node === aktif
+                      ? pulse
+                      : 0;
+            for (const material of materials)
+                material.emissiveIntensity = intensity;
         }
     }
 
@@ -296,14 +342,16 @@ export class TeleportControls {
         node.traverse((child) => {
             if (!child.isMesh) return;
             const wasArray = Array.isArray(child.material);
-            const cloned = (wasArray ? child.material : [child.material]).map((m) => {
-                if (!("emissive" in m)) return m;
-                const clone = m.clone();
-                clone.emissive = new THREE.Color(0xfbbf24);
-                clone.emissiveIntensity = 0;
-                materials.push(clone);
-                return clone;
-            });
+            const cloned = (wasArray ? child.material : [child.material]).map(
+                (m) => {
+                    if (!("emissive" in m)) return m;
+                    const clone = m.clone();
+                    clone.emissive = new THREE.Color(0xfbbf24);
+                    clone.emissiveIntensity = 0;
+                    materials.push(clone);
+                    return clone;
+                },
+            );
             child.material = wasArray ? cloned : cloned[0];
         });
         if (materials.length) this.interactiveMeshes.push({ node, materials });
@@ -330,11 +378,13 @@ export class TeleportControls {
      */
     grabStart(controller) {
         if (!this.hoverNode?.userData.slotParent) return;
-        if (this.hoverNode.userData.solved || controller.userData.grabbedNode) return;
+        if (this.hoverNode.userData.solved || controller.userData.grabbedNode)
+            return;
         controller.userData.grabbedNode = this.hoverNode;
         controller.userData.grabbedParent = this.hoverNode.parent;
         controller.attach(this.hoverNode);
-        if (this.hoverNode.userData.ghost) this.hoverNode.userData.ghost.visible = true;
+        if (this.hoverNode.userData.ghost)
+            this.hoverNode.userData.ghost.visible = true;
         pulse(controller, 0.4, 40);
         this.logger?.log("objek_digenggam", this.hoverNode.name);
     }
@@ -414,7 +464,9 @@ export class TeleportControls {
         const nodePos = node.getWorldPosition(new THREE.Vector3());
         // Jarak diukur di ruang dunia supaya 0,5 m tetap berarti 0,5 m walau rantai
         // parent-nya berskala.
-        const slotPos = slotParent.localToWorld(node.userData.slotPosition.clone());
+        const slotPos = slotParent.localToWorld(
+            node.userData.slotPosition.clone(),
+        );
         // ponytail: 0.5m snap radius, single knob; make per-object if pieces vary wildly in size.
         if (nodePos.distanceTo(slotPos) > 0.5) return false;
 
@@ -425,17 +477,23 @@ export class TeleportControls {
         this.solvedCount++;
         pulse(controller, 1, 120);
         bunyiSnap();
-        node.userData.kilauSampai = performance.now() + TeleportControls.DURASI_KILAU;
-        this.logger?.log("puzzle_benar", node.name, { urutan: this.solvedCount });
+        node.userData.kilauSampai =
+            performance.now() + TeleportControls.DURASI_KILAU;
+        this.logger?.log("puzzle_benar", node.name, {
+            urutan: this.solvedCount,
+        });
         this.phases?.catatPemasangan(this.solvedCount);
 
         const done = this.solvedCount >= this.totalPuzzle;
-        this.panel?.show({
-            nama: done ? "Puzzle Selesai! 🎉" : "Tepat!",
-            deskripsi: done
-                ? "Semua objek sudah kembali ke tempat yang benar. Kerja bagus!"
-                : `${node.userData.vrObject.nama} sudah di tempat yang benar. (${this.solvedCount}/${this.totalPuzzle})`,
-        }, slotPos);
+        this.panel?.show(
+            {
+                nama: done ? "Puzzle Selesai! 🎉" : "Tepat!",
+                deskripsi: done
+                    ? "Semua objek sudah kembali ke tempat yang benar. Kerja bagus!"
+                    : `${node.userData.vrObject.nama} sudah di tempat yang benar. (${this.solvedCount}/${this.totalPuzzle})`,
+            },
+            slotPos,
+        );
 
         return true;
     }
@@ -447,12 +505,14 @@ export class TeleportControls {
             return;
         }
         if (this.panel?.mesh.visible) {
-            this.panel.hide();
-            // Only pair a close with an open the student actually made — the puzzle
-            // success panel opens by itself and would otherwise skew reading time.
-            if (this.panelDibukaUntuk) {
-                this.logger?.log("panel_ditutup", this.panelDibukaUntuk);
-                this.panelDibukaUntuk = null;
+            const masihTerbuka = this.panel.handleTrigger(this.raycaster);
+            if (!masihTerbuka) {
+                // Only pair a close with an open the student actually made — the puzzle
+                // success panel opens by itself and would otherwise skew reading time.
+                if (this.panelDibukaUntuk) {
+                    this.logger?.log("panel_ditutup", this.panelDibukaUntuk);
+                    this.panelDibukaUntuk = null;
+                }
             }
             return;
         }
@@ -468,7 +528,9 @@ export class TeleportControls {
 
     teleport() {
         if (!this.reticle.visible || this.hoverInfo) return;
-        const cameraWorld = this.camera.getWorldPosition(TeleportControls.tempVector);
+        const cameraWorld = this.camera.getWorldPosition(
+            TeleportControls.tempVector,
+        );
         this.rig.position.x += this.reticle.position.x - cameraWorld.x;
         this.rig.position.z += this.reticle.position.z - cameraWorld.z;
         this.rig.position.y = this.reticle.position.y - 0.01;
@@ -494,7 +556,9 @@ export class TeleportControls {
      */
     gerakBebas(delta) {
         for (const controller of this.controllers) {
-            const axes = controller.userData.connected && controller.userData.gamepad?.axes;
+            const axes =
+                controller.userData.connected &&
+                controller.userData.gamepad?.axes;
             if (!axes) continue;
             // axes[0..1] = touchpad, axes[2..3] = thumbstick pada profil Quest/Touch.
             const x = axes[2] ?? axes[0] ?? 0;
@@ -507,18 +571,29 @@ export class TeleportControls {
                 }
                 if (!this.putarSiap) continue;
                 this.putarSiap = false;
+                if (this.panel?.mesh.visible && this.panel.totalPages > 1) {
+                    if (x > 0.7) {
+                        this.panel.nextPage();
+                    } else if (x < -0.7) {
+                        this.panel.prevPage();
+                    }
+                    continue;
+                }
                 this.putarRig(-Math.sign(x) * TeleportControls.SUDUT_PUTAR);
                 continue;
             }
 
             if (Math.hypot(x, y) < 0.15) continue;
-            const arah = new THREE.Vector3(x, 0, y)
-                .applyQuaternion(this.camera.getWorldQuaternion(new THREE.Quaternion()));
+            const arah = new THREE.Vector3(x, 0, y).applyQuaternion(
+                this.camera.getWorldQuaternion(new THREE.Quaternion()),
+            );
             arah.y = 0;
             if (arah.lengthSq() < 1e-6) continue;
             this.rig.position.addScaledVector(
                 arah.normalize(),
-                TeleportControls.KECEPATAN_JALAN * delta * Math.min(1, Math.hypot(x, y)),
+                TeleportControls.KECEPATAN_JALAN *
+                    delta *
+                    Math.min(1, Math.hypot(x, y)),
             );
         }
     }
@@ -526,7 +601,10 @@ export class TeleportControls {
     /** Putar rig mengelilingi kepala, bukan titik asalnya — kalau tidak, siswa terlempar menyamping. */
     putarRig(sudut) {
         const kepala = this.camera.getWorldPosition(new THREE.Vector3());
-        this.rig.position.sub(kepala).applyAxisAngle(TeleportControls.UP, sudut).add(kepala);
+        this.rig.position
+            .sub(kepala)
+            .applyAxisAngle(TeleportControls.UP, sudut)
+            .add(kepala);
         this.rig.rotation.y += sudut;
     }
 }
