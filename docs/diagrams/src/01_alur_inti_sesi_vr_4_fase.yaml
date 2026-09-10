@@ -1,0 +1,160 @@
+meta:
+  profile: default
+  theme: tech-blue
+  layout: hierarchical
+  direction: TB
+  title: "Alur Inti Sesi Virtual Living Museum (4 Fase)"
+  description: "State machine 4 fase non-blocking berorientasi portrait untuk dokumen A4"
+
+modules:
+  - id: mod_phase1
+    label: "Fase 1: Orientasi (Di dalam Scene)"
+  - id: mod_phase2
+    label: "Fase 2: Eksplorasi Lingkungan"
+  - id: mod_phase3
+    label: "Fase 3: Interaksi (Manipulasi Artefak)"
+  - id: mod_phase4
+    label: "Fase 4: Refleksi Nilai (Layar Biasa)"
+
+nodes:
+  - id: start_sesi
+    label: "Mulai Sesi VR\n(Spawn 4m di depan situs)"
+    type: terminal
+    style:
+      fontSize: 18
+
+  # Fase 1
+  - id: orientasi_action
+    label: "Orientasi Ruang\n• Adaptasi controller\n• Baca petunjuk floating"
+    type: process
+    module: mod_phase1
+    style:
+      fontSize: 17
+
+  - id: trigger_teleport
+    label: "Pemicu Transisi:\nTeleport Pertama Berhasil"
+    type: decision
+    module: mod_phase1
+    style:
+      fontSize: 17
+
+  # Fase 2
+  - id: eksplorasi_nav
+    label: "Navigasi & Eksplorasi\n• Bergerak bebas thumbstick\n• Ikuti penanda arah objek"
+    type: process
+    module: mod_phase2
+    style:
+      fontSize: 17
+
+  - id: panel_info
+    label: "Buka Panel Informasi\n• Dengar narasi audio objek\n• Pahami nilai karakter"
+    type: process
+    module: mod_phase2
+    style:
+      fontSize: 17
+
+  - id: check_100
+    label: "Pemicu Transisi:\n100% Objek Diamati"
+    type: decision
+    module: mod_phase2
+    style:
+      fontSize: 17
+
+  # Evaluasi Perangkat
+  - id: eval_device
+    label: "Cek Perangkat:\nHeadset Controller 6DoF\n& Ada Slot Puzzle?"
+    type: decision
+    style:
+      fontSize: 17
+
+  # Fase 3
+  - id: interaksi_puzzle
+    label: "Manipulasi Artefak\n• Genggam pecahan lepas\n• Arahkan ke siluet target"
+    type: process
+    module: mod_phase3
+    style:
+      fontSize: 17
+
+  - id: snap_feedback
+    label: "Snap Otomatis (0.5m)\n• Bunyi & kilau visual\n• Getaran haptic controller"
+    type: process
+    module: mod_phase3
+    style:
+      fontSize: 17
+
+  - id: check_all_assembled
+    label: "Pemicu Transisi:\nSemua Potongan Terpasang"
+    type: decision
+    module: mod_phase3
+    style:
+      fontSize: 17
+
+  # Fase 4
+  - id: exit_vr
+    label: "Penutup Sesi VR\n• Lepas headset / viewer\n• Catat event penutup sesi"
+    type: process
+    module: mod_phase4
+    style:
+      fontSize: 17
+
+  - id: refleksi_form
+    label: "Modul Refleksi Siswa\n• Jawab pertanyaan terbuka\n• 1 pertanyaan per nilai"
+    type: process
+    module: mod_phase4
+    style:
+      fontSize: 17
+
+  - id: end_sesi
+    label: "Selesai Sesi\nData tersimpan ke basis data"
+    type: terminal
+    module: mod_phase4
+    style:
+      fontSize: 18
+
+edges:
+  - from: start_sesi
+    to: orientasi_action
+
+  - from: orientasi_action
+    to: trigger_teleport
+
+  - from: trigger_teleport
+    to: eksplorasi_nav
+    label: "Pindah Posisi"
+
+  - from: eksplorasi_nav
+    to: panel_info
+    label: "Pilih Objek"
+
+  - from: panel_info
+    to: check_100
+
+  - from: check_100
+    to: eval_device
+    label: "Objek Tuntas"
+
+  - from: eval_device
+    to: interaksi_puzzle
+    label: "Ya (Headset VR)"
+
+  - from: eval_device
+    to: exit_vr
+    label: "Tidak (Bypass Otomatis)"
+
+  - from: interaksi_puzzle
+    to: snap_feedback
+
+  - from: snap_feedback
+    to: check_all_assembled
+
+  - from: check_all_assembled
+    to: exit_vr
+    label: "Puzzle Selesai"
+
+  - from: exit_vr
+    to: refleksi_form
+    label: "Buka Web"
+
+  - from: refleksi_form
+    to: end_sesi
+    label: "Simpan Jawaban"

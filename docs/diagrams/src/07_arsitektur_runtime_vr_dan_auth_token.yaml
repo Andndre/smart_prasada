@@ -1,0 +1,164 @@
+meta:
+  profile: default
+  theme: tech-blue
+  layout: hierarchical
+  direction: TB
+  title: "Arsitektur Runtime VR & Autentikasi Token"
+  description: "Pemisahan modularitas JavaScript runtime dan alur autentikasi stateless HMAC"
+
+modules:
+  - id: mod_auth
+    label: "Lapisan 1: Autentikasi Stateless HMAC"
+  - id: mod_threejs
+    label: "Lapisan 2: Modul Runtime VR (Three.js & WebXR)"
+  - id: mod_purejs
+    label: "Lapisan 3: Modul Logika Murni (Pure JS - Node Testable)"
+
+nodes:
+  # Auth Flow
+  - id: fasilitator_actor
+    label: "Fasilitator Login\n(Web Browser Laptop)"
+    type: user
+    module: mod_auth
+    style:
+      fontSize: 17
+
+  - id: token_generator
+    label: "HMAC-SHA256 Generator\nPayload + Secret Key (30m)\n+ Kode Responden & Kiosk"
+    type: service
+    module: mod_auth
+    style:
+      fontSize: 17
+
+  - id: qr_delivery
+    label: "Pengiriman via QR Code\n(Scan dari Headset VR)"
+    type: process
+    module: mod_auth
+    style:
+      fontSize: 17
+
+  - id: middleware_ar_token
+    label: "Middleware: ar.token\nValidasi Signature Stateless\nTanpa Sesi Login Headset"
+    type: service
+    module: mod_auth
+    style:
+      fontSize: 17
+
+  # Three.js Modul (Alur Eksekusi Scene)
+  - id: vr_museum
+    label: "vr-museum.js\n• Inisialisasi Scene 3D\n• Draco GLB Loader & Cahaya"
+    type: service
+    module: mod_threejs
+    style:
+      fontSize: 17
+
+  - id: vr_controls
+    label: "vr-controls.js\n• Teleport & Locomotion\n• Grab & Snap Puzzle 0.5m"
+    type: service
+    module: mod_threejs
+    style:
+      fontSize: 17
+
+  - id: vr_panels
+    label: "vr-panels.js\n• In-Scene 3D Spatial UI\n• Panel Info, Fase & Exit"
+    type: service
+    module: mod_threejs
+    style:
+      fontSize: 17
+
+  - id: vr_hp
+    label: "vr-hp.js\n• Mode Stereo Ponsel\n• DeviceOrientation Controls"
+    type: service
+    module: mod_threejs
+    style:
+      fontSize: 17
+
+  # Pure JS Modul (Logika Terisolasi)
+  - id: vr_events
+    label: "vr-events.js\nBuffer & Batch sendBeacon"
+    type: service
+    module: mod_purejs
+    style:
+      fontSize: 17
+
+  - id: vr_phases
+    label: "vr-phases.js\nState Machine 4 Fase"
+    type: service
+    module: mod_purejs
+    style:
+      fontSize: 17
+
+  - id: vr_responden
+    label: "vr-responden.js\nDeret Kode Responden R-xxx"
+    type: service
+    module: mod_purejs
+    style:
+      fontSize: 17
+
+  - id: vr_petunjuk
+    label: "vr-petunjuk.js\nKalkulasi Sudut Arah Objek"
+    type: service
+    module: mod_purejs
+    style:
+      fontSize: 17
+
+  - id: vr_sesi
+    label: "vr-sesi.js\nPenguncian Sesi Kiosk"
+    type: service
+    module: mod_purejs
+    style:
+      fontSize: 17
+
+  - id: vr_pandangan
+    label: "vr-pandangan.js\nSpawn Point & Bounding Box"
+    type: service
+    module: mod_purejs
+    style:
+      fontSize: 17
+
+edges:
+  - from: fasilitator_actor
+    to: token_generator
+
+  - from: token_generator
+    to: qr_delivery
+
+  - from: qr_delivery
+    to: middleware_ar_token
+    label: "Scan Kamera"
+
+  - from: middleware_ar_token
+    to: vr_museum
+    label: "Akses Valid"
+
+  - from: vr_museum
+    to: vr_controls
+    label: "Pasang Kontrol"
+
+  - from: vr_controls
+    to: vr_panels
+    label: "Tautkan UI"
+
+  - from: vr_panels
+    to: vr_hp
+    label: "Fallback Stereo"
+
+  # Transisi ke Pure JS Logika
+  - from: vr_hp
+    to: vr_phases
+    label: "Koneksi Logika"
+
+  - from: vr_phases
+    to: vr_events
+
+  - from: vr_events
+    to: vr_responden
+
+  - from: vr_responden
+    to: vr_petunjuk
+
+  - from: vr_petunjuk
+    to: vr_sesi
+
+  - from: vr_sesi
+    to: vr_pandangan

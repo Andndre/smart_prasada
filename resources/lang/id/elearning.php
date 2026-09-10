@@ -16,7 +16,7 @@ return [
     'progress' => 'Progres',
     'bab' => 'Bab',
     'era' => 'Era',
-    'materi' => 'Materi',
+    'label_materi' => 'Materi',
     'selesai' => 'Selesai',
     'terkunci' => 'Terkunci',
     'tersedia' => 'Tersedia',

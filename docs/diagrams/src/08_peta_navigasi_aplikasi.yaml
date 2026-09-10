@@ -1,0 +1,163 @@
+meta:
+  profile: default
+  theme: tech-blue
+  layout: hierarchical
+  direction: TB
+  title: "Peta Navigasi & Sitemap SmartPrasada"
+  description: "Struktur navigasi portrait bertingkat: Siswa, Fasilitator, dan Administrator"
+
+modules:
+  - id: mod_siswa
+    label: "Bagian 1: Portal Siswa (E-Learning & Eksplorasi)"
+  - id: mod_fasilitator
+    label: "Bagian 2: Portal Fasilitator (Sesi Kiosk)"
+  - id: mod_admin
+    label: "Bagian 3: Portal Administrator (Kelola & Ekspor)"
+
+nodes:
+  - id: root_portal
+    label: "Portal Masuk SmartPrasada\n(Halaman Autentikasi / Login)"
+    type: terminal
+    style:
+      fontSize: 18
+
+  # Siswa (Bagian 1)
+  - id: siswa_home
+    label: "Beranda Siswa (/home)\nMenu Utama Pembelajaran"
+    type: service
+    module: mod_siswa
+    style:
+      fontSize: 17
+
+  - id: nav_elearning
+    label: "Kunjungi Peninggalan\n• Pilih Era Sejarah\n• Pilih Modul Materi"
+    type: process
+    module: mod_siswa
+    style:
+      fontSize: 17
+
+  - id: nav_tab_materi
+    label: "Siklus 4 Tahap Belajar:\n[Pretest → E-book → VR → Posttest]"
+    type: process
+    module: mod_siswa
+    style:
+      fontSize: 17
+
+  - id: nav_peta_situs
+    label: "Peta Situs Peninggalan\n• Lokasi GPS & Detail\n• Tur Panorama 360°"
+    type: process
+    module: mod_siswa
+    style:
+      fontSize: 17
+
+  - id: nav_rapor_panduan
+    label: "Evaluasi & Bantuan\n• Statistik & Rapor Siswa\n• Kritik & Saran (Usability)"
+    type: process
+    module: mod_siswa
+    style:
+      fontSize: 17
+
+  # Fasilitator (Bagian 2)
+  - id: fasilitator_peluncur
+    label: "Peluncur Sesi Kiosk (/vr/peluncur)\n• Input rentang responden (R-xxx)\n• Generate QR & Token HMAC"
+    type: service
+    module: mod_fasilitator
+    style:
+      fontSize: 17
+
+  - id: vr_kiosk_scene
+    label: "Sesi VR Imersif\n• Scan QR dari Headset\n• Navigasi disembunyikan"
+    type: process
+    module: mod_fasilitator
+    style:
+      fontSize: 17
+
+  - id: vr_panel_selesai
+    label: "Penutup Sesi & Refleksi\n• Panel penutup terkunci\n• Tombol Responden Berikutnya"
+    type: process
+    module: mod_fasilitator
+    style:
+      fontSize: 17
+
+  # Admin (Bagian 3)
+  - id: admin_dashboard
+    label: "Dashboard Admin (/admin)\nPusat Kontrol Konten & Sistem"
+    type: service
+    module: mod_admin
+    style:
+      fontSize: 17
+
+  - id: admin_kurikulum
+    label: "Kurikulum & Soal\n• Kelola Era & Materi\n• PDF E-Book & Pre/Post-Test"
+    type: process
+    module: mod_admin
+    style:
+      fontSize: 17
+
+  - id: admin_situs_museum
+    label: "Situs & Virtual Museum\n• Registrasi koordinat GPS\n• Upload GLB & Marker AR"
+    type: process
+    module: mod_admin
+    style:
+      fontSize: 17
+
+  - id: admin_editor_3d
+    label: "Editor Visual 3D Spatial\n• Tautkan node mesh GLB\n• Set posisi puzzle delta"
+    type: process
+    module: mod_admin
+    style:
+      fontSize: 17
+
+  - id: admin_ekspor_csv
+    label: "Instrumen & Ekspor CSV\n• CSV Runtime Event Log\n• CSV Jawaban Refleksi Nilai"
+    type: database
+    module: mod_admin
+    style:
+      fontSize: 17
+
+edges:
+  - from: root_portal
+    to: siswa_home
+    label: "Login Siswa"
+
+  - from: siswa_home
+    to: nav_elearning
+
+  - from: nav_elearning
+    to: nav_tab_materi
+
+  - from: nav_tab_materi
+    to: nav_peta_situs
+
+  - from: nav_peta_situs
+    to: nav_rapor_panduan
+
+  # Transisi vertikal ke Bagian 2
+  - from: nav_rapor_panduan
+    to: fasilitator_peluncur
+    label: "Akses Guru / Fasilitator"
+
+  - from: fasilitator_peluncur
+    to: vr_kiosk_scene
+    label: "Scan QR"
+
+  - from: vr_kiosk_scene
+    to: vr_panel_selesai
+    label: "Selesai"
+
+  # Transisi vertikal ke Bagian 3
+  - from: vr_panel_selesai
+    to: admin_dashboard
+    label: "Akses Administrator"
+
+  - from: admin_dashboard
+    to: admin_kurikulum
+
+  - from: admin_kurikulum
+    to: admin_situs_museum
+
+  - from: admin_situs_museum
+    to: admin_editor_3d
+
+  - from: admin_editor_3d
+    to: admin_ekspor_csv

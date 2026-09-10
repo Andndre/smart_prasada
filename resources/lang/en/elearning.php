@@ -16,7 +16,7 @@ return [
     'progress' => 'Progress',
     'bab' => 'Chapter',
     'era' => 'Era',
-    'materi' => 'Material',
+    'label_materi' => 'Material',
     'selesai' => 'Completed',
     'terkunci' => 'Locked',
     'tersedia' => 'Available',

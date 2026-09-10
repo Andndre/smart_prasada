@@ -101,6 +101,8 @@ return [
 
     'token_secret' => env('APP_TOKEN_SECRET'),
 
+    'demo_mode' => (bool) env('APP_DEMO_MODE', false),
+
     'previous_keys' => [
         ...array_filter(
             explode(',', env('APP_PREVIOUS_KEYS', ''))
